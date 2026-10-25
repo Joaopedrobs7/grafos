@@ -1,0 +1,16 @@
+[Unit]
+Description=Labirinto com Chaves (Flask + gunicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=labirinto
+Group=labirinto
+WorkingDirectory=/opt/labirinto
+Environment=APP_VERSAO=entrega1
+ExecStart=/opt/labirinto/.venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 --timeout 120 --access-logfile - src.web.app:app
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
