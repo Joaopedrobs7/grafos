@@ -1,0 +1,9 @@
+; Mapa do grupo 1 - "Fabrica": 3 chaves, esteiras e bonus.
+; Ordem obrigatoria a -> b -> c. A volta passa pelo bonus e a esteira leva ate c.
+#################
+#S..a..+..A..b..#
+#.###############
+#.B>>>>>>>>..c..#
+#.#############C#
+#.+~~~~~~~~~~##G#
+#################
