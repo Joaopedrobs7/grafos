@@ -1,0 +1,23 @@
+{
+  "G_pos": {
+    "ciclo_negativo": [
+      [
+        3,
+        2
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        2
+      ]
+    ],
+    "custo_ciclo": -3.0
+  },
+  "G_est": {
+    "ciclo_negativo": null,
+    "custo_ate_ALVO": 5
+  }
+}

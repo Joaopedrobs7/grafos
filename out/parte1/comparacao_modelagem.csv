@@ -1,0 +1,10 @@
+mapa,abordagem,passos,caminho_valido,observacao
+m02_uma_chave,G_pos_porta_chao,10,False,atravessa porta sem a chave
+m02_uma_chave,G_pos_porta_parede,,False,G inalcançável: porta nunca abre
+m02_uma_chave,G_est,34,True,coleta a chave antes de passar pela porta
+m03_tres_chaves,G_pos_porta_chao,21,False,atravessa porta sem a chave
+m03_tres_chaves,G_pos_porta_parede,,False,G inalcançável: porta nunca abre
+m03_tres_chaves,G_est,87,True,coleta a chave antes de passar pela porta
+m04_esteiras,G_pos_porta_chao,14,False,atravessa porta sem a chave
+m04_esteiras,G_pos_porta_parede,,False,G inalcançável: porta nunca abre
+m04_esteiras,G_est,20,True,coleta a chave antes de passar pela porta

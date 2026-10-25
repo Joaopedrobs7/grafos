@@ -1,0 +1,11 @@
+mapa,arvore,retorno,avanco,cruzamento,tem_ciclo
+m01_terreno,23,22,0,1,True
+m02_uma_chave,38,36,0,0,True
+m03_tres_chaves,212,231,23,0,True
+m04_esteiras,36,30,0,0,True
+m05_bonus,214,208,5,11,True
+m06_fonte,23,22,0,1,True
+m07_impossivel,15,19,4,0,True
+m08_grande,2918,3178,265,3,True
+g01_fabrica,185,158,0,3,True
+g02_armadilha,93,98,18,3,True
