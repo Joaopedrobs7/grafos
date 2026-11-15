@@ -1,7 +1,7 @@
 #!/bin/bash
 # Atualiza a aplicação numa instância já provisionada (rodar com sudo).
 set -euo pipefail
-BRANCH="${BRANCH:-entrega1-parcial}"
+BRANCH="${BRANCH:-ex05-rds}"
 cd /opt/labirinto
 sudo -u labirinto git fetch origin "$BRANCH"
 sudo -u labirinto git checkout -B "$BRANCH" "origin/$BRANCH"

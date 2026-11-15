@@ -37,6 +37,20 @@ pytest -q
 python -m src.web.app
 ```
 
+### Histórico de consultas no banco (Cloud, Exercício 05)
+
+Detalhe periférico da aplicação web: cada mapa aberto na página grava uma linha por algoritmo
+num MySQL (Amazon RDS), e o painel "Últimas consultas (RDS)" mostra as mais recentes, com a
+instância do Auto Scaling Group que atendeu. Mapas e algoritmos não dependem do banco; sem
+`DB_HOST` o painel simplesmente não aparece.
+
+```bash
+DB_HOST=<endpoint do RDS> DB_USER=labirinto_app DB_PASSWORD=<senha> DB_NAME=labirinto python -m src.web.app
+```
+
+- `deploy/db/schema.sql`: tabelas `algoritmo` e `execucao`, carga inicial e usuário `labirinto_app`.
+- Na EC2, as variáveis ficam em `/etc/labirinto/db.env` (lido pelo `deploy/labirinto.service`).
+
 ## Estrutura
 
 ```

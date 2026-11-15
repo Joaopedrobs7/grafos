@@ -8,10 +8,12 @@ Rotas:
   /api/mapas           lista de mapas
   /api/mapa/<nome>     grade, caminhos (BFS/Dijkstra/Bellman-Ford), armadilhas e camadas
   /api/resolver        ?mapa=m03_tres_chaves&alg=DIJKSTRA  -> resultado resumido
+  /api/historico       últimas consultas gravadas no RDS (desligado sem DB_HOST)
   /api/carga           ?n=500 resolve o m08 n vezes (máx 2000) (gera CPU para testar o Auto Scaling)
 """
 from __future__ import annotations
 
+import logging
 import os
 import socket
 import time
@@ -25,12 +27,14 @@ from ..graphs.estados import grafo_estados
 from ..graphs.io import ler_mapa, listar_mapas
 from ..solve import resolver
 from ..viz import dados_mapa
+from . import db
 
 RAIZ = Path(__file__).resolve().parents[2]
 PASTAS = [RAIZ / "data" / "mapas", RAIZ / "data" / "mapas_grupo"]
 TEMPLATES = Path(__file__).parent / "templates"
 
 app = Flask(__name__)
+log = logging.getLogger(__name__)
 
 
 def _imds(caminho: str, token: str | None) -> str | None:
@@ -100,7 +104,13 @@ def api_mapa(nome: str):
     mapas = _mapas()
     if nome not in mapas:
         abort(404, f"mapa {nome!r} não existe")
-    return jsonify(dados_mapa(ler_mapa(mapas[nome])) | {"servidor": info_servidor()})
+    dados = dados_mapa(ler_mapa(mapas[nome]))
+    if db.habilitado():
+        try:
+            db.registrar(nome, dados["algoritmos"], info_servidor()["instancia"])
+        except Exception as e:  # o histórico é opcional: falha no banco não afeta a resposta
+            log.warning("não foi possível gravar no RDS: %s", e)
+    return jsonify(dados | {"servidor": info_servidor()})
 
 
 @app.get("/api/resolver")
@@ -114,6 +124,17 @@ def api_resolver():
     r = resolver(grafo_estados(ler_mapa(mapas[nome])), alg)
     r.pop("percurso")
     return jsonify(r | {"tempo_ms": round((time.perf_counter() - t) * 1000, 2), "servidor": info_servidor()})
+
+
+@app.get("/api/historico")
+def api_historico():
+    if not db.habilitado():
+        abort(404, "histórico desligado (sem banco configurado)")
+    try:
+        return jsonify(consultas=db.ultimas())
+    except Exception as e:
+        log.warning("RDS indisponível: %s", e)
+        abort(503, "banco indisponível")
 
 
 @app.get("/api/carga")
