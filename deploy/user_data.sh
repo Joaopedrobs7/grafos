@@ -5,7 +5,7 @@
 set -euxo pipefail
 
 REPO_URL="${REPO_URL:-https://github.com/Joaopedrobs7/grafos.git}"
-BRANCH="${BRANCH:-ex05-rds}"
+BRANCH="${BRANCH:-main}"
 APP_DIR=/opt/labirinto
 
 dnf install -y git httpd python3.11 python3.11-pip

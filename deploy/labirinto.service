@@ -7,7 +7,9 @@ Wants=network-online.target
 User=labirinto
 Group=labirinto
 WorkingDirectory=/opt/labirinto
-Environment=APP_VERSAO=ex05-rds
+Environment=APP_VERSAO=main
+# versão exata (branch@commit) escrita no boot por deploy/boot.sh
+EnvironmentFile=-/etc/labirinto/versao.env
 # credenciais do RDS (DB_HOST, DB_USER, DB_PASSWORD, DB_NAME); o '-' torna o arquivo opcional
 EnvironmentFile=-/etc/labirinto/db.env
 ExecStart=/opt/labirinto/.venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 --timeout 120 --access-logfile - src.web.app:app

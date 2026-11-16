@@ -51,6 +51,13 @@ DB_HOST=<endpoint do RDS> DB_USER=labirinto_app DB_PASSWORD=<senha> DB_NAME=labi
 - `deploy/db/schema.sql`: tabelas `algoritmo` e `execucao`, carga inicial e usuário `labirinto_app`.
 - Na EC2, as variáveis ficam em `/etc/labirinto/db.env` (lido pelo `deploy/labirinto.service`).
 
+### Deploy na AWS
+
+As instâncias do Auto Scaling Group sobem da AMI e, no boot, o user data do launch template
+(`deploy/boot.sh`) baixa a `main` do GitHub e reinicia a aplicação. Para publicar uma mudança:
+push na `main` e, no console, **Auto Scaling Group → Atualização da instância → Iniciar**.
+`/api/info` mostra a versão em execução (`main@<commit>`).
+
 ## Estrutura
 
 ```
