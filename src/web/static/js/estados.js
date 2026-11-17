@@ -3,6 +3,9 @@
    src/traco.py; LAB.traco (grafo.js) só os reproduz. Duas áreas, montadas nos contêineres que o app.js entrega:
    (1) mapaEl  → o grafo de estados desenhado em camadas (uma por conjunto de chaves), com o aluno por cima;
    (2) tabelaEl → abas BFS / DFS / Dijkstra / Bellman-Ford com replay e as tabelas na orientação da Profª Laura.
+   [IA] Claude – rodada 3 (enxuto): sem moldura própria (o papel é do contêiner), zoom pela roda/pinça, legenda num
+   "?", replay da tabela segue o aluno por padrão e só mostra controles quando a sincronia é desligada; a velocidade é
+   a do player (setVelocidade). Contador, frase e caminho numa linha só embaixo da tabela.
    API: new LAB.EstadosView({ mapaEl, tabelaEl, fetchTraco: async (alg, fonte) => json, reducedMotion })
         .load(mapa) .setAlgoritmo(key) .setPasso(percurso, idx) .setVelocidade(mult) .on('alg', fn) .dispose() */
 (function (raiz) {
@@ -15,16 +18,17 @@
     { key: 'DFS', nome: 'DFS', alg: 'DFS', fonte: false },
     { key: 'DIJKSTRA', nome: 'Dijkstra', alg: 'DIJKSTRA', fonte: false },
     { key: 'BELLMAN_FORD', nome: 'Bellman-Ford', alg: 'BELLMAN_FORD', fonte: false },
-    { key: 'BELLMAN_FORD_FONTE_CONSUMIVEL', nome: 'Bellman-Ford, fonte consumível', curto: 'BF fonte', alg: 'BELLMAN_FORD', fonte: true }
+    { key: 'BELLMAN_FORD_FONTE_CONSUMIVEL', nome: 'Bellman-Ford, fonte consumível', curto: 'Fonte consumível', alg: 'BELLMAN_FORD', fonte: true }
   ];
   var VELOCIDADES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
   var EVENTOS_POR_S = 3; // 1× = 3 eventos por segundo
+  // [IA] Claude – rodada 4: o mapa fica no mesmo chão escuro da página (sem papel); tinta clara, nós em tons de pedra
   var COR = {
-    naoVisitado: '#D9DCE8', visitado: '#8C90A8', encerrado: '#1C1B29',
-    tinta: '#1C1B29', tintaFraca: '#5B5F7A', arco: '#B7BDD0', arcoForte: '#1C1B29', papel: '#F3F5FA',
-    quadricula: '#DCE3F0', cesar: '#FF6002', erro: '#E0334F', ok: '#2E9E6B',
-    arvore: '#1C1B29', retorno: '#D64560', avanco: '#1F9C8A', cruzamento: '#7B61D9',
-    chave: { a: '#FFC23A', b: '#35C8F0', c: '#F45BC8', d: '#7DDB45' }, semChave: '#6E7391'
+    naoVisitado: '#2A241E', visitado: '#7A6650', encerrado: '#EFE6D8',
+    tinta: '#EFE6D8', tintaFraca: '#B5A895', apagada: '#8A7660', arco: '#4A3E33', arcoForte: '#EFE6D8', papel: '#1F1B17',
+    quadricula: '#2A241E', cesar: '#FF6002', erro: '#FF5470', ok: '#3FCF8E',
+    arvore: '#EFE6D8', retorno: '#FF6B86', avanco: '#3CC8B4', cruzamento: '#A08CF0',
+    chave: { a: '#FFC23A', b: '#35C8F0', c: '#F45BC8', d: '#7DDB45' }, semChave: '#8A7660'
   };
   var NOME_ESTADO = { BFS: ['não visitado', 'visitado (na fila)', 'encerrado'], DFS: ['não visitado', 'visitado (na pilha)', 'encerrado'],
     DIJKSTRA: ['não visitado', 'aberto', 'fechado'], BELLMAN_FORD: ['não visitado', 'com estimativa', 'final'] };
@@ -32,13 +36,11 @@
   // ------------------------------------------------------------------ utilidades
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  var ZOOM_W = 44; // largura reservada para os botões de zoom no canto do palco
   function num(x) {
     if (x === Infinity || x === null || x === undefined) return '∞';
     if (x === -Infinity) return '−∞';
     return Number(x).toLocaleString('pt-BR', { maximumFractionDigits: 2 }).replace('-', '−');
   }
-  function mult(m) { return m === 1 ? 'Normal' : String(m).replace('.', ',') + '×'; }
   function lerp(a, b, t) { return a + (b - a) * t; }
   function hexRgb(h) { var n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
   function mistura(h1, h2, t) { var a = hexRgb(h1), b = hexRgb(h2); return 'rgb(' + Math.round(lerp(a[0], b[0], t)) + ',' + Math.round(lerp(a[1], b[1], t)) + ',' + Math.round(lerp(a[2], b[2], t)) + ')'; }
@@ -56,14 +58,12 @@
   }
   function svgIco(p) { return '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">' + p + '</svg>'; }
   var ICO = {
-    inicio: svgIco('<rect x="2" y="3" width="2" height="10"/><path d="M14 3 6 8l8 5z"/>'),
     voltar: svgIco('<path d="M12 3 4 8l8 5z"/>'),
+    elo: svgIco('<rect x="1.5" y="5" width="8" height="6" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="6.5" y="5" width="8" height="6" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>'),
     play: svgIco('<path d="M4 2.5 13.5 8 4 13.5z"/>'),
     pausa: svgIco('<rect x="3.5" y="3" width="3" height="10"/><rect x="9.5" y="3" width="3" height="10"/>'),
     avancar: svgIco('<path d="M4 3l8 5-8 5z"/>'),
     fim: svgIco('<path d="M2 3l8 5-8 5z"/><rect x="12" y="3" width="2" height="10"/>'),
-    mais: svgIco('<rect x="7" y="3" width="2" height="10"/><rect x="3" y="7" width="10" height="2"/>'),
-    menos: svgIco('<rect x="3" y="7" width="10" height="2"/>'),
     tudo: svgIco('<path d="M2 2h5v2H4v3H2zM14 2v5h-2V4H9V2zM2 14V9h2v3h3v2zM14 14H9v-2h3V9h2z"/>'),
     alvo: svgIco('<path d="M7 1h2v3H7zM7 12h2v3H7zM1 7h3v2H1zM12 7h3v2h-3z"/><path d="M8 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>')
   };
@@ -102,33 +102,45 @@
     m.innerHTML = '';
     var card = this.cardMapa = el('div', 'ev-card ev-mapa');
     card.innerHTML =
-      '<div class="ev-cab"><h3 class="ev-titulo">Mapa de estados</h3><p class="ev-sub" data-r="sub">Carregando…</p></div>' +
-      '<div class="ev-palco" data-r="palco" tabindex="0" role="img" aria-label="Grafo de estados">' +
+      '<div class="ev-ferr">' +
+        '<button type="button" class="ev-ico" data-a="seguir" aria-pressed="true" aria-label="Seguir o aluno" title="Seguir o aluno (tecla C centraliza)">' + ICO.alvo + '</button>' +
+        '<button type="button" class="ev-ico" data-a="tudo" aria-label="Ver o grafo inteiro" title="Ver o grafo inteiro (tecla 0)">' + ICO.tudo + '</button>' +
+        '<span class="ev-ajuda"><button type="button" class="ev-ico ev-ico--txt" data-a="legenda" aria-expanded="false" aria-label="Legenda do mapa de estados">?</button>' +
+          '<ul class="ev-legenda" data-r="legenda" role="tooltip" hidden></ul></span>' +
+      '</div>' +
+      '<div class="ev-palco" data-r="palco" tabindex="0" role="img" aria-label="Grafo de estados. Roda do mouse ou pinça aproximam; arraste para mover.">' +
         '<canvas class="ev-cv" data-r="cv"></canvas><canvas class="ev-cv ev-cv--sobre" data-r="cv2"></canvas>' +
         '<div class="ev-dica" data-r="dica" role="tooltip" hidden></div>' +
-        '<div class="ev-zoom"><button type="button" class="ev-bt ev-bt--ico" data-a="mais" aria-label="Aproximar">' + ICO.mais + '</button>' +
-        '<button type="button" class="ev-bt ev-bt--ico" data-a="menos" aria-label="Afastar">' + ICO.menos + '</button>' +
-        '<button type="button" class="ev-bt ev-bt--ico" data-a="tudo" aria-label="Ver o mapa inteiro">' + ICO.tudo + '</button></div>' +
         '<div class="ev-aviso" data-r="aviso" hidden></div>' +
-      '</div>' +
-      '<div class="ev-mapa-pe">' +
-        '<div class="ev-acoes"><button type="button" class="ev-bt" data-a="centralizar" aria-label="Centralizar no aluno">' + ICO.alvo + '<span>Centralizar no aluno</span></button>' +
-        '<label class="ev-chk"><input type="checkbox" data-r="seguir" checked> Seguir o aluno</label></div>' +
-        '<ul class="ev-legenda" data-r="legenda"></ul>' +
       '</div>';
     m.appendChild(card);
     this.r = {};
     card.querySelectorAll('[data-r]').forEach(function (e) { self.r[e.getAttribute('data-r')] = e; });
     this.cv = this.r.cv; this.cv2 = this.r.cv2;
     this.ctx = this.cv.getContext('2d'); this.ctx2 = this.cv2.getContext('2d');
+    var btSeguir = card.querySelector('[data-a="seguir"]'), btLeg = card.querySelector('[data-a="legenda"]'), ajuda = card.querySelector('.ev-ajuda');
+    // [IA] Claude – fix: o hover (só mouse) abre a legenda sem fixar; o clique/toque fixa ou fecha. Antes o clique logo
+    // depois do hover fechava o que o hover tinha acabado de abrir, e no toque a legenda nunca aparecia.
+    var legFixa = false, legHover = false;
+    var legenda = function (abre) { self.r.legenda.hidden = !abre; btLeg.setAttribute('aria-expanded', String(!!abre)); if (!abre) { legFixa = false; legHover = false; } };
     this._escuta(card, 'click', function (e) {
       var b = e.target.closest('[data-a]'); if (!b) return;
       var a = b.getAttribute('data-a');
-      if (a === 'mais') self._zoomEm(1.4); else if (a === 'menos') self._zoomEm(1 / 1.4);
-      else if (a === 'tudo') { self._usuarioMexeu = false; self._ajusta(true); }
-      else if (a === 'centralizar') self._centraAluno(true, true);
+      if (a === 'tudo') { self._usuarioMexeu = false; self._ajusta(true); }
+      else if (a === 'seguir') {
+        self.seguir = !self.seguir;
+        btSeguir.setAttribute('aria-pressed', String(self.seguir));
+        if (self.seguir) self._centraAluno(true, true);
+      } else if (a === 'legenda') {
+        if (legHover && !legFixa) { legenda(true); legFixa = true; legHover = false; }
+        else if (self.r.legenda.hidden) { legenda(true); legFixa = true; }
+        else legenda(false);
+      }
     });
-    this._escuta(this.r.seguir, 'change', function () { self.seguir = self.r.seguir.checked; if (self.seguir) self._centraAluno(false, true); });
+    this._escuta(ajuda, 'pointerenter', function (e) { if (e.pointerType === 'mouse' && self.r.legenda.hidden) { legenda(true); legHover = true; } });
+    this._escuta(ajuda, 'pointerleave', function (e) { if (e.pointerType === 'mouse' && legHover && !legFixa) legenda(false); });
+    this._escuta(ajuda, 'focusout', function () { legenda(false); });
+    this._escuta(ajuda, 'keydown', function (e) { if (e.key === 'Escape' && !self.r.legenda.hidden) { e.stopPropagation(); legenda(false); } });
     this._interacaoCanvas();
 
     // ---- tabela
@@ -136,65 +148,49 @@
     t.classList.add('ev-raiz');
     t.innerHTML = '';
     var ct = this.cardTab = el('div', 'ev-card ev-tab');
+    // [IA] Claude – rodada 4: sem abas (a tabela segue o algoritmo da barra de cima); a DFS das armadilhas é um link na
+    // linha de baixo, que também guarda o replay (só quando a sincronia está desligada) e o ícone de sincronia.
     ct.innerHTML =
-      '<div class="ev-abas" role="tablist" aria-label="Algoritmo da tabela" data-t="abas"></div>' +
-      '<div class="ev-ctl" data-t="ctl">' +
-        '<div class="ev-botoes" role="group" aria-label="Replay do algoritmo">' +
-          '<button type="button" class="ev-bt ev-bt--ico" data-c="inicio" aria-label="Voltar ao início">' + ICO.inicio + '</button>' +
-          '<button type="button" class="ev-bt ev-bt--ico" data-c="voltar" aria-label="Passo anterior">' + ICO.voltar + '</button>' +
-          '<button type="button" class="ev-bt ev-bt--ico ev-bt--play" data-c="play" aria-label="Reproduzir">' + ICO.play + '</button>' +
-          '<button type="button" class="ev-bt ev-bt--ico" data-c="avancar" aria-label="Próximo passo">' + ICO.avancar + '</button>' +
-          '<button type="button" class="ev-bt" data-c="fim" aria-label="Ir para o fim">' + ICO.fim + '<span>Ir para o fim</span></button>' +
-        '</div>' +
-        '<div class="ev-vel"><button type="button" class="ev-bt" data-c="vel" aria-haspopup="listbox" aria-expanded="false">Velocidade: <b data-t="velrot">Normal</b></button>' +
-          '<ul class="ev-menu" role="listbox" tabindex="-1" aria-label="Velocidade do replay" data-t="menu" hidden></ul></div>' +
-        '<label class="ev-chk"><input type="checkbox" data-t="sinc" checked> Sincronizar com o aluno</label>' +
-        '<div class="ev-linha-tempo"><input type="range" min="0" max="0" value="0" step="1" data-t="scrub" aria-label="Evento do traço">' +
-          '<span class="ev-cont" data-t="cont" aria-live="off">Evento 0 de 0</span></div>' +
-        '<p class="ev-frase" data-t="frase" aria-live="polite"></p>' +
-      '</div>' +
+      '<p class="sr-only" data-t="abas" aria-live="polite"></p>' +
       '<div class="ev-corpo" data-t="corpo"></div>' +
-      '<div class="ev-pe" data-t="pe"></div>';
+      '<div class="ev-pe" data-t="ctl"><p class="ev-frase" data-t="frase" aria-live="polite"></p>' +
+        '<button type="button" class="ev-link ev-pe-bt" data-x="detalhes" data-t="btdet" aria-expanded="false">Caminho</button>' +
+        '<button type="button" class="ev-link ev-pe-bt" data-x="dfs" data-t="btdfs" aria-pressed="false">DFS</button>' +
+        '<div class="ev-botoes" data-t="botoes" role="group" aria-label="Replay da tabela" hidden>' +
+          '<button type="button" class="ev-ico" data-c="voltar" aria-label="Evento anterior" title="Evento anterior">' + ICO.voltar + '</button>' +
+          '<button type="button" class="ev-ico" data-c="play" aria-label="Reproduzir" title="Reproduzir">' + ICO.play + '</button>' +
+          '<button type="button" class="ev-ico" data-c="avancar" aria-label="Próximo evento" title="Próximo evento">' + ICO.avancar + '</button>' +
+          '<button type="button" class="ev-ico" data-c="fim" aria-label="Ir para o fim" title="Ir para o fim">' + ICO.fim + '</button>' +
+          '<span class="ev-cont" data-t="cont"></span>' +
+        '</div>' +
+        '<button type="button" class="ev-ico ev-sinc" data-c="sinc" data-t="sinc" aria-pressed="true" aria-label="Seguir o aluno" title="Seguir o aluno: a tabela acompanha o passo do player">' + ICO.elo + '</button>' +
+      '</div>' +
+      '<div class="ev-detalhes" data-t="pe" hidden></div>';
     t.appendChild(ct);
     this.t = {};
     ct.querySelectorAll('[data-t]').forEach(function (e) { self.t[e.getAttribute('data-t')] = e; });
-    // menu de velocidade (tipo YouTube)
-    this.t.menu.innerHTML = VELOCIDADES.map(function (v) {
-      return '<li role="option" data-v="' + v + '" aria-selected="' + (v === 1) + '">' + mult(v) + '</li>';
-    }).join('');
     this._escuta(ct, 'click', function (e) {
       var ab = e.target.closest('[data-aba]');
       if (ab) { self._trocaAba(ab.getAttribute('data-aba'), true); return; }
-      var op = e.target.closest('[data-v]');
-      if (op) { self.setVelocidade(+op.getAttribute('data-v')); self._menu(false); self.t.ctl.querySelector('[data-c="vel"]').focus(); return; }
       var b = e.target.closest('[data-c]');
       if (b) { self._controle(b.getAttribute('data-c')); return; }
       var x = e.target.closest('[data-x]');
       if (x) { self._acaoExtra(x.getAttribute('data-x'), x); }
     });
     this._escuta(ct, 'keydown', function (e) { self._teclado(e); });
-    this._escuta(this.t.menu, 'keydown', function (e) {
-      var i = VELOCIDADES.indexOf(self.vel);
-      if (e.key === 'ArrowDown') { e.preventDefault(); self.setVelocidade(VELOCIDADES[Math.min(VELOCIDADES.length - 1, i + 1)]); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); self.setVelocidade(VELOCIDADES[Math.max(0, i - 1)]); }
-      else if (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') { e.preventDefault(); self._menu(false); self.t.ctl.querySelector('[data-c="vel"]').focus(); }
-    });
-    this._escuta(document, 'pointerdown', function (e) { if (!self.t.menu.hidden && !e.target.closest('.ev-vel')) self._menu(false); });
-    this._escuta(this.t.sinc, 'change', function () { self.sincronizar = self.t.sinc.checked; if (self.sincronizar) { self._pausa(); self._sincroniza(); } });
-    var scrubRaf = 0;
-    this._escuta(this.t.scrub, 'input', function () {
-      var v = +self.t.scrub.value;
-      self._largaSinc();
-      if (scrubRaf) return;
-      scrubRaf = requestAnimationFrame(function () { scrubRaf = 0; self._vaiPara(+self.t.scrub.value); });
-      void v;
-    });
     this._escuta(this.t.corpo, 'scroll', function () { if (self._virtual) self._virtual(); }, { passive: true, capture: true });
 
     // redimensionamento
     if (typeof ResizeObserver === 'function') {
       this._ro = new ResizeObserver(function () { self._redimensiona(); });
       this._ro.observe(this.r.palco);
+      // largura da tabela mudou: recalcula quantas colunas cabem inteiras
+      var larg = 0;
+      this._roTab = new ResizeObserver(function () {
+        var w = self.t.corpo.clientWidth; if (Math.abs(w - larg) < 2) return; larg = w;
+        self._jcMax = null; self._renderTabela();
+      });
+      this._roTab.observe(this.t.corpo);
     } else this._escuta(raiz, 'resize', function () { self._redimensiona(); });
     this._redimensiona();
     this._abas();
@@ -213,6 +209,7 @@
   P.setAlgoritmo = function (key) {
     key = String(key || '').toUpperCase();
     if (!ALGS.some(function (a) { return a.key === key; })) return Promise.resolve();
+    if (key !== 'DFS') this.algPlayer = key;
     if (key === this.key && this.T) return Promise.resolve();
     return this._trocaAba(key, false);
   };
@@ -229,15 +226,13 @@
     m = +m;
     if (VELOCIDADES.indexOf(m) < 0) m = VELOCIDADES.reduce(function (a, b) { return Math.abs(b - m) < Math.abs(a - m) ? b : a; }, 1);
     this.vel = m;
-    this.t.velrot.textContent = mult(m);
-    var self = this;
-    this.t.menu.querySelectorAll('[data-v]').forEach(function (li) { li.setAttribute('aria-selected', String(+li.getAttribute('data-v') === self.vel)); });
     if (this.tocando) { this._pausa(); this._toca(); }
   };
   P.dispose = function () {
     this._pausa();
     cancelAnimationFrame(this._raf); cancelAnimationFrame(this._rafOverlay); cancelAnimationFrame(this._rafPan);
     if (this._ro) this._ro.disconnect();
+    if (this._roTab) this._roTab.disconnect();
     this._dispose.forEach(function (f) { f(); });
     this._dispose = [];
     this.mapaEl.innerHTML = ''; this.tabelaEl.innerHTML = '';
@@ -250,13 +245,15 @@
     if (key !== 'BELLMAN_FORD_FONTE_CONSUMIVEL') return true;
     return !!(this.mapa && this.mapa.algoritmos && this.mapa.algoritmos.BELLMAN_FORD_FONTE_CONSUMIVEL);
   };
+  // sem abas: só o nome (para leitores de tela) e o link da DFS, que alterna com o algoritmo do player
   P._abas = function () {
-    var self = this;
-    this.t.abas.innerHTML = ALGS.filter(function (a) { return self._temAlg(a.key); }).map(function (a) {
-      var sel = a.key === self.key;
-      return '<button type="button" role="tab" class="ev-aba" data-aba="' + a.key + '" aria-selected="' + sel + '" tabindex="' + (sel ? 0 : -1) + '"' +
-        (a.curto ? ' title="' + a.nome + '"' : '') + '>' + (a.curto ? '<span class="ev-so-largo">' + a.nome + '</span><span class="ev-so-estreito">' + a.curto + '</span>' : a.nome) + '</button>';
-    }).join('');
+    var nome = function (k) { var d = ALGS.filter(function (a) { return a.key === k; })[0]; return d ? d.nome : k; };
+    var dfs = this.key === 'DFS', volta = this.algPlayer && this.algPlayer !== 'DFS' ? this.algPlayer : 'BFS';
+    this.t.abas.textContent = 'Tabela: ' + nome(this.key);
+    var b = this.t.btdfs;
+    b.textContent = dfs ? 'Voltar ao ' + nome(volta) : 'DFS';
+    b.setAttribute('aria-pressed', String(dfs));
+    b.title = dfs ? 'Voltar à tabela do ' + nome(volta) : 'Ver a DFS: classifica os arcos e acha os ciclos (não tem percurso para o aluno)';
   };
   P._trocaAba = function (key, doUsuario) {
     if (!this._temAlg(key)) key = 'BFS';
@@ -264,13 +261,13 @@
     this.key = key;
     this._abas();
     if (doUsuario && key !== antes) this._emite('alg', key);
-    if (doUsuario) { var b = this.t.abas.querySelector('[aria-selected="true"]'); if (b) b.focus(); }
     return this._carregaAlg(key);
   };
   P._carregaAlg = function (key) {
     var self = this, def = ALGS.filter(function (a) { return a.key === key; })[0];
     if (!this.mapa) return Promise.resolve();
     this._pausa();
+    this._jcMax = null;
     var ck = (this.mapa.nome || '') + '|' + key;
     if (!this.cache[ck]) {
       if (!this.fetchTraco || !LAB.traco) {
@@ -292,7 +289,6 @@
       self._calculaAluno();
       self.anim = null;
       self.k = -1;
-      self.t.scrub.max = String(T.eventos.length);
       if (self.sincronizar && self.percurso) self._sincroniza(true);
       else self._vaiPara(T.eventos.length, true);
       self._legenda();
@@ -315,15 +311,12 @@
     this.r.aviso.hidden = false; this.r.aviso.innerHTML = msg;
     this.t.corpo.innerHTML = '<p class="ev-nota ev-nota--erro">' + msg + '</p>';
   };
+  // as contagens (estados, arcos) ficam na gaveta de Métricas; aqui só o rótulo acessível do palco
   P._sub = function () {
     var T = this.T; if (!T) return;
-    var def = ALGS.filter(function (a) { return a.key === this.key; }, this)[0];
-    // [IA] Claude – curto para caber numa linha (mapa e algoritmo já aparecem na janela e nas abas); o completo vai no title
     var nCam = this.layout ? this.layout.camadas.length : 0;
-    this.r.sub.textContent = T.nEstados.toLocaleString('pt-BR') + ' estados, ' + T.nArcos.toLocaleString('pt-BR') + ' arcos' +
-      (nCam > 1 ? ', ' + nCam + ' camadas' : '');
-    this.r.sub.title = def.nome + ' em ' + (this.mapa.nome || 'mapa') + ': ' + this.r.sub.textContent;
-    this.r.palco.setAttribute('aria-label', 'Grafo de estados de ' + (this.mapa.nome || 'mapa') + ' com ' + T.nEstados + ' estados, desenhado em camadas por conjunto de chaves.');
+    this.r.palco.setAttribute('aria-label', 'Grafo de estados de ' + (this.mapa.nome || 'mapa') + ' com ' + T.nEstados + ' estados' +
+      (nCam > 1 ? ' em ' + nCam + ' camadas, uma por conjunto de chaves' : '') + '. Roda do mouse ou pinça aproximam; arraste para mover.');
   };
 
   // ------------------------------------------------------------------ replay
@@ -345,15 +338,16 @@
         this.anim = { t0: t0, de: de, dur: Math.min(260, 900 / (EVENTOS_POR_S * this.vel)) };
       } else this.anim = null;
     } else this.anim = null;
-    this.t.scrub.value = String(k);
-    this.t.cont.textContent = 'Evento ' + k.toLocaleString('pt-BR') + ' de ' + T.eventos.length.toLocaleString('pt-BR');
-    this.t.frase.textContent = T.eventos.length ? LAB.traco.fraseEvento(T, this.st.evento) : 'O traço não tem eventos: veja o resultado abaixo.';
+    this.t.cont.textContent = k.toLocaleString('pt-BR') + ' de ' + T.eventos.length.toLocaleString('pt-BR');
+    this.t.cont.title = 'Evento ' + this.t.cont.textContent + ' do traço';
+    this.t.frase.textContent = T.eventos.length ? LAB.traco.fraseEvento(T, this.st.evento) : 'Este traço não tem eventos.';
     this._renderTabela();
     this._pede();
   };
   P._controle = function (c) {
-    var T = this.T; if (!T && c !== 'vel') return;
-    if (c === 'vel') { this._menu(this.t.menu.hidden); return; }
+    var T = this.T;
+    if (c === 'sinc') { this._defineSinc(!this.sincronizar); return; }
+    if (!T) return;
     if (c === 'play') { if (this.tocando) this._pausa(); else { this._largaSinc(); if (this.k >= T.eventos.length) this._vaiPara(0); this._toca(); } return; }
     this._largaSinc(); this._pausa();
     if (c === 'inicio') this._vaiPara(0);
@@ -365,11 +359,6 @@
   P._proximo = function (dir) {
     var tab = this.T ? LAB.traco.tabela(this.T) : null;
     return tab && tab.salto ? tab.salto(this.k, dir) : this.k + dir;
-  };
-  P._menu = function (abre) {
-    var b = this.t.ctl.querySelector('[data-c="vel"]');
-    this.t.menu.hidden = !abre; b.setAttribute('aria-expanded', String(!!abre));
-    if (abre) this.t.menu.focus();
   };
   P._toca = function () {
     var self = this;
@@ -389,9 +378,16 @@
     var b = this.t && this.t.ctl.querySelector('[data-c="play"]'); if (!b) return;
     b.innerHTML = this.tocando ? ICO.pausa : ICO.play;
     b.setAttribute('aria-label', this.tocando ? 'Pausar' : 'Reproduzir');
-    b.classList.toggle('ev-bt--ativo', this.tocando);
+    b.classList.toggle('ev-ico--ativo', this.tocando);
   };
-  P._largaSinc = function () { if (this.sincronizar) { this.sincronizar = false; this.t.sinc.checked = false; } };
+  P._largaSinc = function () { if (this.sincronizar) this._defineSinc(false); };
+  // sincronia com o aluno: ligada, a tabela segue o passo do player e os controles próprios somem
+  P._defineSinc = function (sim) {
+    this.sincronizar = !!sim;
+    this.t.sinc.setAttribute('aria-pressed', String(this.sincronizar));
+    this.t.botoes.hidden = this.sincronizar;
+    if (this.sincronizar) { this._pausa(); this._sincroniza(); }
+  };
   // sincronizar: o replay vai até o evento em que o algoritmo fixou o estado onde o aluno está
   P._sincroniza = function (forca) {
     var T = this.T; if (!T) return;
@@ -406,19 +402,9 @@
   };
   P._teclado = function (e) {
     if (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== 'range' && e.target.type !== 'checkbox') return;
-    if (e.target.closest && e.target.closest('.ev-menu')) return;
-    var i = VELOCIDADES.indexOf(this.vel);
-    if (e.target.getAttribute && e.target.getAttribute('role') === 'tab' && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
-      var abas = Array.prototype.slice.call(this.t.abas.querySelectorAll('[role="tab"]'));
-      var j = abas.indexOf(e.target) + (e.key === 'ArrowRight' ? 1 : -1);
-      j = (j + abas.length) % abas.length;
-      e.preventDefault(); this._trocaAba(abas[j].getAttribute('data-aba'), true); return;
-    }
     if (e.key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); this._controle('play'); }
     else if (e.key === 'ArrowRight' && e.target.type !== 'range') { e.preventDefault(); this._controle('avancar'); }
     else if (e.key === 'ArrowLeft' && e.target.type !== 'range') { e.preventDefault(); this._controle('voltar'); }
-    else if (e.key === '+' || e.key === '=') { e.preventDefault(); this.setVelocidade(VELOCIDADES[Math.min(VELOCIDADES.length - 1, i + 1)]); }
-    else if (e.key === '-' || e.key === '_') { e.preventDefault(); this.setVelocidade(VELOCIDADES[Math.max(0, i - 1)]); }
     else if (e.key === 'End') { e.preventDefault(); this._controle('fim'); }
     else if (e.key === 'Home') { e.preventDefault(); this._controle('inicio'); }
   };
@@ -477,7 +463,7 @@
       var nr = Math.ceil(nL / nc), gy = cel * 1.9, topo = cel * 1.2, s = 1;
       for (var it = 0; it < 3; it++) {
         var tw = nc * pw + (nc - 1) * gapX + cel * 3.2, th = nr * ph + (nr - 1) * gy + topo + cel * 0.3;
-        s = Math.min((W - 28 - ZOOM_W) / tw, (H - 28) / th);
+        s = Math.min((W - 28) / tw, (H - 28) / th);
         gy = Math.max(cel * 1.9, 24 / s); topo = Math.max(cel * 1.2, 20 / s);
       }
       if (s > melhorS * 1.02) { melhorS = s; melhor = nc; melhorGY = gy; melhorTopo = topo; }
@@ -528,9 +514,8 @@
   };
   P._ajusta = function (anima) {
     var L = this.layout; if (!L) return;
-    // [IA] Claude – a barra de zoom (canto direito) não cobre o grafo: o "ajustar" desconta a largura dela
-    var m = L.mundo, pad = 14, zw = ZOOM_W, s = Math.min((this.W - pad * 2 - zw) / (m.x1 - m.x0), (this.H - pad * 2) / (m.y1 - m.y0));
-    var alvo = { s: s, x: (this.W - zw) / 2 - s * (m.x0 + m.x1) / 2, y: this.H / 2 - s * (m.y0 + m.y1) / 2 };
+    var m = L.mundo, pad = 12, s = Math.min((this.W - pad * 2) / (m.x1 - m.x0), (this.H - pad * 2) / (m.y1 - m.y0));
+    var alvo = { s: s, x: this.W / 2 - s * (m.x0 + m.x1) / 2, y: this.H / 2 - s * (m.y0 + m.y1) / 2 };
     this._panPara(alvo, anima);
     this.sFit = s;
   };
@@ -824,7 +809,7 @@
         var cp = curva(u, n, n === T.alvo ? 0.08 : (L.cam[u] !== L.cam[n] ? 0.22 : 0.14));
         var mx = 0.25 * cp[0] + 0.5 * cp[2] + 0.25 * cp[4], my = 0.25 * cp[1] + 0.5 * cp[3] + 0.25 * cp[5];
         var txt = num(aa.peso), tw = ctx.measureText(txt).width + 4 * Math.max(px, 0.45);
-        ctx.fillStyle = 'rgba(243,245,250,0.92)'; ctx.fillRect(mx - tw / 2, my - 6.5 * Math.max(px, 0.45), tw, 13 * Math.max(px, 0.45));
+        ctx.fillStyle = 'rgba(31,27,23,0.92)'; ctx.fillRect(mx - tw / 2, my - 6.5 * Math.max(px, 0.45), tw, 13 * Math.max(px, 0.45));
         ctx.fillStyle = aa.peso < 0 ? COR.erro : COR.tintaFraca; ctx.fillText(txt, mx, my);
       }
     }
@@ -843,7 +828,7 @@
       if (!lotes[e].length) continue;
       ctx.beginPath(); lotes[e].forEach(bolinha);
       ctx.fillStyle = this._corDoEstado(e); ctx.fill();
-      ctx.strokeStyle = e === 0 ? '#AEB3C6' : COR.tinta; ctx.lineWidth = borda; ctx.stroke();
+      ctx.strokeStyle = e === 0 ? '#4A3E33' : e === 1 ? COR.tintaFraca : COR.encerrado; ctx.lineWidth = borda; ctx.stroke();
     }
     if (soltos.length) {
       animando = true;
@@ -878,7 +863,7 @@
       else txtIn = num(st.d[n]);
       if (n === T.alvo && rt < 14) txtIn = '';
       ctx.font = '600 ' + Math.min(L.raio[n] * 0.95, (txtIn.length > 3 ? 0.62 : 0.85) * L.raio[n]) + 'px ' + fPix;
-      ctx.fillStyle = est === 0 ? COR.tintaFraca : '#FFFFFF';
+      ctx.fillStyle = est === 0 ? COR.apagada : est === 2 ? '#1A1612' : COR.tinta;
       if (txtIn) ctx.fillText(txtIn, L.x[n], L.y[n] + L.raio[n] * 0.04);
       // DFS: d/f ao lado (acima) do nó, como no slide
       if (a === 'DFS' && est > 0 && rt >= 15) {
@@ -900,8 +885,8 @@
     }
     // ALVO: rótulo sempre que couber
     if (T.alvo >= 0 && dentro(T.alvo)) {
-      ctx.font = '700 ' + Math.max(11 * px, L.cel * 0.34) + 'px ' + fPix; ctx.fillStyle = COR.tinta;
-      ctx.fillText('ALVO', L.x[T.alvo], L.y[T.alvo] + L.raio[T.alvo] + Math.max(10 * px, L.cel * 0.3));
+      ctx.font = '500 ' + Math.max(11 * px, L.cel * 0.34) + 'px ' + this._fonte('texto'); ctx.fillStyle = COR.tintaFraca;
+      ctx.fillText('baú', L.x[T.alvo], L.y[T.alvo] + L.raio[T.alvo] + Math.max(10 * px, L.cel * 0.3));
     }
     ctx.restore();
     if (animando) this._pede();
@@ -943,19 +928,19 @@
       var o = L.origem[q], ox = o[0], oy = o[1];
       if (ox > vis.x1 || oy > vis.y1 || ox + L.painel.w < vis.x0 || oy + L.painel.h < vis.y0) continue;
       // folha
-      ctx.fillStyle = 'rgba(255,255,255,0.72)';
+      ctx.fillStyle = 'rgba(239,230,216,0.035)';
       ctx.fillRect(ox, oy, L.painel.w, L.painel.h);
       var existe = camCasas[L.camadas[q]] || {};
       for (var r = 0; r < L.R; r++) {
         var y = oy + r * cel; if (y > vis.y1 || y + cel < vis.y0) continue;
         for (var c = 0; c < L.C; c++) {
           var x = ox + c * cel, ch = grade[r][c];
-          if (ch === '#') { ctx.fillStyle = 'rgba(28,27,41,0.10)'; ctx.fillRect(x, y, cel, cel); continue; }
+          if (ch === '#') { ctx.fillStyle = 'rgba(239,230,216,0.10)'; ctx.fillRect(x, y, cel, cel); continue; }
           var tint = null;
-          if (ch === '~') tint = 'rgba(53,150,240,0.13)';
-          else if (ch === ',') tint = 'rgba(140,95,60,0.13)';
-          else if ('^>v<'.indexOf(ch) >= 0) tint = 'rgba(28,27,41,0.05)';
-          if (!existe[r * L.C + c]) tint = 'rgba(28,27,41,0.035)';
+          if (ch === '~') tint = 'rgba(53,150,240,0.2)';
+          else if (ch === ',') tint = 'rgba(170,115,70,0.22)';
+          else if ('^>v<'.indexOf(ch) >= 0) tint = 'rgba(239,230,216,0.05)';
+          if (!existe[r * L.C + c]) tint = 'rgba(0,0,0,0.28)';
           if (tint) { ctx.fillStyle = tint; ctx.fillRect(x, y, cel, cel); }
           if (s * cel < 6) continue;
           if ('ABCD'.indexOf(ch) >= 0) { ctx.fillStyle = COR.chave[ch.toLowerCase()]; ctx.globalAlpha = 0.55; ctx.fillRect(x + cel * 0.08, y + cel * 0.08, cel * 0.84, cel * 0.84); ctx.globalAlpha = 1; }
@@ -965,13 +950,13 @@
           else if (ch === '+' || ch === '*') { ctx.fillStyle = ch === '+' ? 'rgba(46,158,107,0.28)' : 'rgba(233,174,60,0.32)'; ctx.fillRect(x + cel * 0.12, y + cel * 0.12, cel * 0.76, cel * 0.76); }
         }
       }
-      ctx.strokeStyle = 'rgba(28,27,41,0.28)'; ctx.lineWidth = px; ctx.strokeRect(ox, oy, L.painel.w, L.painel.h);
+      ctx.strokeStyle = 'rgba(239,230,216,0.16)'; ctx.lineWidth = px; ctx.strokeRect(ox, oy, L.painel.w, L.painel.h);
       // etiqueta da camada
       var fs = Math.max(11 * px, Math.min(cel * 0.62, 15 * px));
       ctx.font = '600 ' + fs + 'px ' + this._fonte('texto'); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
       var k = L.camadas[q], cor = k === '-' ? COR.tintaFraca : COR.chave[k[k.length - 1]];
       ctx.fillStyle = cor; ctx.fillRect(ox, oy - fs * 1.15, fs * 0.6, fs * 0.6);
-      ctx.fillStyle = COR.tinta; ctx.fillText(nomeCamada(k), ox + fs * 0.95, oy - fs * 0.55);
+      ctx.fillStyle = COR.tintaFraca; ctx.fillText(nomeCamada(k), ox + fs * 0.95, oy - fs * 0.55);
     }
   };
   P._casasPorCamada = function () {
@@ -1021,7 +1006,7 @@
     if (this._cabeca !== 'nada') {
       ctx.imageSmoothingEnabled = false;
       var img = this._cabeca, w = hs, hh = hs * img.height / img.width;
-      ctx.fillStyle = 'rgba(28,27,41,0.18)'; ctx.fillRect(hx + 1, hy + 2, w, hh);
+      ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(hx + 1, hy + 2, w, hh);
       ctx.drawImage(img, hx, hy, w, hh);
     } else {
       ctx.beginPath(); ctx.arc(p[0], hy + hs / 2, hs / 2.4, 0, Math.PI * 2); ctx.fillStyle = COR.cesar; ctx.fill();
@@ -1042,7 +1027,7 @@
     var a = this.T ? this.T.algoritmo : 'BFS', nomes = NOME_ESTADO[a] || NOME_ESTADO.BFS, itens = [];
     var bola = function (cor, borda) { return '<i class="ev-bola" style="background:' + cor + (borda ? ';box-shadow:inset 0 0 0 1px ' + borda : '') + '"></i>'; };
     var linha = function (cor, trac) { return '<i class="ev-traco' + (trac ? ' ev-traco--trac' : '') + '" style="--c:' + cor + '"></i>'; };
-    itens.push(bola(COR.naoVisitado, '#AEB3C6') + nomes[0]);
+    itens.push(bola(COR.naoVisitado, '#4A3E33') + nomes[0]);
     itens.push(bola(COR.visitado) + nomes[1]);
     itens.push(bola(COR.encerrado) + nomes[2]);
     if (a === 'DFS') {
@@ -1117,8 +1102,8 @@
     }
     if (ln < 0) linhas = '<tr><td colspan="4" class="ev-vazio">A tabela começa quando a origem entra na fila.</td></tr>';
     var visitados = T.res.ordem.slice(0, nD);
-    h += '<section class="ev-bloco"><h4 class="ev-h4">Passo a passo</h4>' + this._ocultas(j0) +
-      '<div class="ev-rola" data-auto="fim"><table class="ev-t ev-t--passos"><thead><tr><th>Passo</th><th>Sai da fila</th><th>Entra na fila</th><th>Fila (início → fim)</th></tr></thead><tbody>' + linhas + '</tbody></table></div>' +
+    h += '<section class="ev-bloco"><h4 class="ev-h4">Iterações</h4>' + this._ocultas(j0) +
+      '<div class="ev-rola" data-auto="fim"><table class="ev-t ev-t--passos"><thead><tr><th title="Iteração">It.</th><th>Sai da fila</th><th>Entra na fila</th><th>Fila (início → fim)</th></tr></thead><tbody>' + linhas + '</tbody></table></div>' +
       '<p class="ev-ordem"><b>Ordem de visita:</b> ' + this._condensa(visitados, 8, 3) + '</p></section>';
     this._depois = function () { self._rolaFim(); self._rolaColunaAtual(); };
     return h;
@@ -1170,7 +1155,7 @@
     }
     if (ln < 0) linhas = '<tr><td colspan="5" class="ev-vazio">A tabela começa quando a origem é descoberta (tempo −1 → d = 0).</td></tr>';
     h += '<section class="ev-bloco"><h4 class="ev-h4">Exercício guiado</h4>' + this._ocultas(j0) +
-      '<div class="ev-rola" data-auto="fim"><table class="ev-t ev-t--passos"><thead><tr><th>Passo</th><th>Em</th><th>Olha</th><th>O que acontece</th><th>Pilha de chamadas</th></tr></thead><tbody>' + linhas + '</tbody></table></div></section>';
+      '<div class="ev-rola" data-auto="fim"><table class="ev-t ev-t--passos"><thead><tr><th title="Iteração">It.</th><th>Em</th><th>Olha</th><th>O que acontece</th><th>Pilha de chamadas</th></tr></thead><tbody>' + linhas + '</tbody></table></div></section>';
     // resolução (slide 31)
     var seq = T.res.ordem.slice(0, this._nDescAte(st.k));
     var arestas = function (tipo) {
@@ -1220,33 +1205,28 @@
   // Dijkstra / Bellman-Ford: linhas = vértices, colunas = Passo 1…k, células (d, p) / * / –
   P._tabColunas = function () {
     var T = this.T, st = this.st, tab = this.tab, dij = T.algoritmo === 'DIJKSTRA', self = this;
-    var col = st.coluna || 0, nLin = tab.linhasAte(col, st.k), JC = dij ? 6 : 4;
+    // [IA] Claude – rodada 4: quantas colunas cabem inteiras (medido no último desenho; zera ao redimensionar)
+    var col = st.coluna || 0, nLin = tab.linhasAte(col, st.k), JC = Math.min(dij ? 6 : 4, this._jcMax || 99);
     // colunas = blocos da tabela (Bellman-Ford: passadas seguidas sem mudança numa coluna só, cortada no passo atual)
     var bAgora = tab.blocoDaColuna(col), b1 = tab.blocos.indexOf(bAgora), b0 = Math.max(0, b1 - JC + 1), cols = [];
     for (var q = b0; q <= b1; q++) {
       var bl = tab.blocos[q], fimV = Math.min(bl.fim, col);
-      cols.push({ j: fimV, rot: bl.ini === 0 ? 'Início' : bl.vazio ? (fimV > bl.ini ? 'Passos ' + bl.ini + '–' + fimV : 'Passo ' + bl.ini) + '<span class="ev-th-nota">nada mudou</span>' : 'Passo ' + bl.ini,
+      // cabeçalho = só o número da iteração (o "passo" da tela é o do aluno, no HUD)
+      cols.push({ j: fimV, rot: bl.ini === 0 ? 'início' : bl.vazio && fimV > bl.ini ? bl.ini + '–' + fimV : String(bl.ini),
+        dica: bl.ini === 0 ? 'Antes da primeira ' + (dij ? 'iteração' : 'passada') : (dij ? 'Iteração ' : (bl.vazio && fimV > bl.ini ? 'Passadas ' : 'Passada ')) + (bl.vazio && fimV > bl.ini ? bl.ini + ' a ' + fimV : bl.ini) + (bl.vazio ? ': nada mudou' : ''),
         vazio: bl.vazio });
     }
     var c0 = b0;
     var foco = st.olhando ? st.olhando[1] : st.atual;
-    var cab = '<th scope="col" class="ev-canto">v</th>' + cols.map(function (c, i) {
+    var cab = '<th scope="col" class="ev-canto" title="' + (dij ? 'Linhas: vértices. Colunas: iterações.' : 'Linhas: vértices. Colunas: passadas.') + '">' + (dij ? 'v \\ it.' : 'v \\ pass.') + '</th>' + cols.map(function (c, i) {
       var cls = (i === cols.length - 1 ? 'ev-col-agora' : '') + (c.vazio ? ' ev-col-vazia' : '');
-      return '<th scope="col"' + (cls ? ' class="' + cls.trim() + '"' : '') + '>' + c.rot + '</th>';
+      return '<th scope="col"' + (cls ? ' class="' + cls.trim() + '"' : '') + ' title="' + esc(c.dica) + '">' + c.rot + '</th>';
     }).join('');
-    // [IA] Claude – cabeçalho de uma linha (título + onde estamos); a regra da tabela fica no title/aria do título
-    var regra = dij ? 'Cada coluna é um passo: o vértice aberto de menor d é fechado (*) e seus arcos são relaxados.'
+    var regra = dij ? 'Cada coluna é uma iteração: o vértice aberto de menor d é fechado (*) e seus arcos são relaxados.'
       : 'Cada coluna é uma passada completa por todos os arcos. O código do grupo faz sempre as |V|−1 = ' + (T.n - 1).toLocaleString('pt-BR') +
         ' passadas; passadas seguidas em que nada mudou aparecem juntas numa coluna só, e o replay as pula de uma vez.';
-    var onde;
-    if (dij) onde = col ? 'Passo ' + col + (tab.colunas ? ' de ' + tab.colunas.toLocaleString('pt-BR') : '') : 'Antes do primeiro passo';
-    else if (st.fim) onde = T.res.cicloNegativo ? 'Depois de ' + T.res.passadas.toLocaleString('pt-BR') + ' passadas, a passada extra ainda relaxou: ciclo negativo'
-      : T.res.passadas.toLocaleString('pt-BR') + ' passadas (|V|−1); a última mudança foi na passada ' + tab.ultimaMudanca.toLocaleString('pt-BR');
-    else onde = 'Passada ' + (st.passada || 0).toLocaleString('pt-BR') + ' de ' + T.res.passadas.toLocaleString('pt-BR') +
-      (bAgora.vazio && col > bAgora.ini ? ', nada mudou desde a passada ' + (bAgora.ini - 1).toLocaleString('pt-BR') : ', ' + (st.relaxadosNaPassada || 0) + ' relaxamento(s)');
-    if (c0 > 0) onde += '; mostrando os últimos ' + cols.length;
-    var h = '<section class="ev-bloco"><h4 class="ev-h4 ev-h4--linha" title="' + esc(regra) + '">' + (dij ? 'Tabela do Dijkstra' : 'Tabela do Bellman-Ford') +
-      '<span class="ev-h4-nota">' + esc(onde) + '.</span></h4><p class="sr-only">' + esc(regra) + '</p>' +
+    // [IA] Claude – rodada 4: sem legenda visível acima da tabela (a coluna destacada já diz onde estamos); a regra fica para leitores de tela
+    var h = '<section class="ev-bloco"><h4 class="sr-only">' + (dij ? 'Tabela do Dijkstra' : 'Tabela do Bellman-Ford') + '</h4><p class="sr-only">' + esc(regra) + '</p>' +
       '<div class="ev-rola ev-rola--xy" data-virtual="1"><table class="ev-t ev-t--dp"><thead><tr>' + cab + '</tr></thead><tbody data-vbody></tbody></table></div></section>';
     var celHTML = function (v, cc) {
       var j = cc.j, c = tab.celula(v, j, st.k);
@@ -1259,6 +1239,12 @@
     var ROW = 26; // = altura da linha em estados.css (.ev-t--dp tbody tr)
     this._depois = function () {
       var box = self.t.corpo.querySelector('[data-virtual]'), tb = box.querySelector('[data-vbody]');
+      // altura = cabeçalho + linhas inteiras (quando a coluna tem altura fixa): nem a primeira nem a última linha ficam cortadas
+      var bloco = box.parentNode;
+      if (bloco && raiz.matchMedia && raiz.matchMedia('(min-width: 960px)').matches) {
+        var disp = bloco.clientHeight - (box.offsetTop - bloco.offsetTop);
+        if (disp > 32 + ROW) { box.style.flex = 'none'; box.style.height = (32 + Math.floor((disp - 32) / ROW) * ROW) + 'px'; }
+      } else box.style.height = box.style.flex = '';
       var desenha = function () {
         var topo = box.scrollTop, alt = Math.max(box.clientHeight, 420), cabH = 32;
         var i0 = Math.max(0, Math.floor((topo - cabH) / ROW) - 6), i1 = Math.min(nLin, Math.ceil((topo + alt) / ROW) + 6);
@@ -1278,48 +1264,46 @@
       var alvoV = self.sincronizar && self.alunoNo >= 0 ? self.alunoNo : foco, pos = alvoV >= 0 ? tab.vertices.indexOf(alvoV) : -1;
       if (pos >= 0 && pos < nLin) {
         var y = 32 + pos * ROW;
-        if (y < box.scrollTop + 32 || y > box.scrollTop + box.clientHeight - ROW) box.scrollTop = Math.max(0, y - box.clientHeight / 2);
+        // rola em múltiplos da altura da linha: nenhuma linha fica cortada embaixo do cabeçalho
+        if (y < box.scrollTop + 32 || y > box.scrollTop + box.clientHeight - ROW) box.scrollTop = Math.max(0, Math.round((y - box.clientHeight / 2) / ROW) * ROW);
       }
       box.scrollLeft = box.scrollWidth;
       desenha();
+      // colunas inteiras: se a última não coube, mostra uma a menos (até caber; volta a crescer ao redimensionar)
+      if (box.scrollWidth > box.clientWidth + 1 && cols.length > 1) { self._jcMax = cols.length - 1; self._renderTabela(); }
     };
     return h;
   };
 
-  // ------------------------------------------------------------------ rodapé: caminho, custo, Python
+  // ------------------------------------------------------------------ rodapé: caminho e conferência com o Python
+  // fica recolhido atrás de um botão na linha de baixo; só é montado quando está aberto
   P._rodape = function () {
-    var T = this.T, f = T.final, pe = this.t.pe, self = this, h = '';
+    var T = this.T, f = T.final, pe = this.t.pe, h = '';
+    this.t.btdet.textContent = T.algoritmo !== 'DFS' && f.status === 'OK' ? 'Caminho' : T.algoritmo !== 'DFS' && f.status === 'CICLO_NEGATIVO' ? 'Ciclo' : 'Resultado';
+    if (pe.hidden) return;
     var py = this.mapa && this.mapa.algoritmos ? this.mapa.algoritmos[this.key] : null;
     if (T.algoritmo === 'DFS') {
-      var cl = T.res.classes;
-      h += '<p class="ev-pe-l"><b>Tem ciclo:</b> ' + (T.res.temCiclo ? 'sim, ' + cl.retorno.toLocaleString('pt-BR') + ' arco(s) de retorno' : 'não') +
-        '. Árvore ' + cl.arvore.toLocaleString('pt-BR') + ', retorno ' + cl.retorno.toLocaleString('pt-BR') + ', avanço ' + cl.avanco.toLocaleString('pt-BR') +
-        ', cruzamento ' + cl.cruzamento.toLocaleString('pt-BR') + '.</p>';
-    } else if (f.status === 'RECUSA') {
-      h += '<p class="ev-pe-l ev-erro"><b>Recusa:</b> ' + esc(f.mensagem || 'há arcos de peso negativo.') + '</p>';
+      h += '<p class="ev-pe-l">DFS sobre o grafo sem o ALVO: ' + T.nEstados.toLocaleString('pt-BR') + ' estados e ' + T.nArcos.toLocaleString('pt-BR') + ' arcos' +
+        (T.res.temCiclo ? ', com ciclo.' : ', sem ciclo.') + '</p>';
     } else if (f.status === 'CICLO_NEGATIVO') {
       h += '<p class="ev-pe-l ev-erro"><b>Ciclo negativo</b> de custo ' + num(f.custo) + ' (' + (f.caminho.length - 1) + ' arcos): ' + this._caminhoHTML(f.caminho) + '</p>';
     } else if (f.status === 'SEM_SOLUCAO') {
-      h += '<p class="ev-pe-l"><b>Sem solução:</b> o ALVO não tem predecessor; nenhum caminho leva até a saída.</p>';
-    } else {
-      h += '<p class="ev-pe-l ev-caminho"><b>Caminho pelos predecessores:</b> ' + this._caminhoHTML(f.caminho) + '</p>' +
-        '<p class="ev-pe-l"><b>' + f.passos.toLocaleString('pt-BR') + '</b> passos, custo <b>' + num(f.custo) + '</b>' + (T.algoritmo === 'BFS' ? ' (BFS minimiza passos, não custo)' : '') + '.</p>';
+      h += '<p class="ev-pe-l">O ALVO não tem predecessor: nenhum caminho leva até a saída.</p>';
+    } else if (f.status === 'OK') {
+      h += '<p class="ev-pe-l ev-caminho">' + this._caminhoHTML(f.caminho) + '</p>';
     }
     // concordância: o resultado final do traço × mapa.algoritmos (os dois vêm do Python)
-    if (T.algoritmo === 'DFS') h += '<p class="ev-py">Resultado do Python: DFS sobre o grafo sem o ALVO, ' + T.nEstados.toLocaleString('pt-BR') + ' estados e ' + T.nArcos.toLocaleString('pt-BR') + ' arcos.</p>';
-    else if (py) {
+    if (T.algoritmo !== 'DFS' && py) {
       var dif = [];
       if (py.status !== f.status) dif.push('status ' + f.status + ' no traço × ' + py.status + ' no resultado');
       if (f.status === 'OK' && py.passos !== f.passos) dif.push('passos ' + f.passos + ' × ' + py.passos);
       if ((f.status === 'OK' || f.status === 'CICLO_NEGATIVO') && py.custo !== f.custo) dif.push('custo ' + num(f.custo) + ' × ' + num(py.custo));
       if (this.mapa.estados !== undefined && T.nEstados !== this.mapa.estados && !T.fonteConsumivel) dif.push('estados ' + T.nEstados + ' × ' + this.mapa.estados);
-      var desc = py.status === 'OK' ? 'OK, ' + py.passos + ' passos, custo ' + num(py.custo) : py.status === 'CICLO_NEGATIVO' ? 'ciclo negativo, custo ' + num(py.custo) : py.status === 'RECUSA' ? 'recusa' : 'sem solução';
-      h += dif.length ? '<p class="ev-py ev-py--difere"><b>Resultado do Python:</b> ' + desc + '. Não confere com o traço: ' + esc(dif.join('; ')) + '.</p>'
-        : '<p class="ev-py ev-py--ok"><b>Resultado do Python:</b> ' + desc + '. Confere com o traço.</p>';
+      h += dif.length ? '<p class="ev-py ev-py--difere">Não confere com o resultado do Python: ' + esc(dif.join('; ')) + '.</p>'
+        : '<p class="ev-py ev-py--ok">Confere com o resultado do Python.</p>';
     }
     h += '<p class="ev-origem">Os eventos vêm do código Python do grupo (src/graphs/algorithms.py); esta tela só os reproduz.</p>';
     pe.innerHTML = h;
-    void self;
   };
   P._caminhoHTML = function (ids) {
     var self = this, sep = ' <span class="ev-seta">→</span> ';
@@ -1332,6 +1316,15 @@
   };
   P._acaoExtra = function (x, b) {
     if (x === 'caminho') { this.expandeCaminho = !this.expandeCaminho; this._rodape(); }
+    else if (x === 'dfs') {
+      this._trocaAba(this.key === 'DFS' ? (this.algPlayer && this._temAlg(this.algPlayer) ? this.algPlayer : 'BFS') : 'DFS', false);
+      if (this.t.btdfs) this.t.btdfs.focus();
+    }
+    else if (x === 'detalhes') {
+      this.t.pe.hidden = !this.t.pe.hidden;
+      b.setAttribute('aria-expanded', String(!this.t.pe.hidden));
+      this._rodape();
+    }
     else if (x === 'foca') {
       var u = +b.getAttribute('data-u'), L = this.layout; if (!L) return;
       var s = Math.max(this.view.s, 11 / (L.raio[u] || 10));

@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- [IA] Claude – página do Labirinto com Chaves: navbar, hero com diorama 3D emoldurado, área de trabalho do player
-     (janela 3D + coluna de informações com mapa de estados, tabela e métricas), manual, CTA e rodapé. Tema masmorra. -->
+     (janela 3D + coluna com o estado, o mapa de estados e a tabela; métricas numa gaveta), manual, CTA e rodapé. -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -13,7 +13,9 @@
    manual em papel quadriculado), tokens de cor/tipo, UI em pixel, player, HUD, manual, CTA e rodapé.
    [IA] Claude – rodada 2: tema masmorra (pedra quente + âmbar de tocha), hero com diorama emoldurado,
    player como área de trabalho (janela 3D + coluna de informações), menu de velocidade, métricas, diálogo
-   de mapa surpresa. Os nomes das variáveis continuam os mesmos (--noite = fundo de pedra escura). */
+   de mapa surpresa. Os nomes das variáveis continuam os mesmos (--noite = fundo de pedra escura).
+   [IA] Claude – rodada 3: player enxuto (barra fina, popovers, doca de uma linha, gaveta de métricas) e manual com
+   menos caixas. */
 
 /* ================================================================ fontes (vendorizadas, sem CDN) */
 @font-face {
@@ -240,7 +242,7 @@ h2 { font-size: 48px; line-height: 1; }
   padding-inline: 12px 12px;
   transition: none;
 }
-.nav.is-solida .nav__barra { --px-borda: var(--noite-3); --px-fundo: rgba(26, 22, 18, 0.94); }
+.nav.is-solida .nav__barra { --px-borda: transparent; --px-fundo: rgba(26, 22, 18, 0.94); }
 .nav__marca {
   display: inline-flex; align-items: center; gap: 12px;
   text-decoration: none;
@@ -337,18 +339,7 @@ h2 { font-size: 48px; line-height: 1; }
   padding-bottom: 72px;
 }
 .hero__conteudo { position: relative; z-index: 2; min-width: 0; }
-.hero__selo {
-  --px-borda: var(--noite-3);
-  --px-fundo: rgba(38, 32, 26, 0.8);
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 6px 14px 6px 8px;
-  font: 500 15px/1.2 var(--f-texto);
-  color: var(--luar-fraco);
-}
-.hero__selo-aluno { display: block; width: 24px; height: 24px; overflow: hidden; }
-.hero__selo-aluno canvas { width: 24px; height: auto; }
 .hero__titulo {
-  margin-top: 28px;
   font-size: clamp(48px, 5.4vw, 88px);
   line-height: 0.92;
   font-weight: 700;
@@ -362,38 +353,12 @@ h2 { font-size: 48px; line-height: 1; }
   color: var(--luar-fraco);
 }
 .hero__acoes { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 40px; }
-/* janela do diorama */
+/* diorama: sem moldura nem barra de título (rodada 4), direto no chão da página com uma vinheta suave */
 .hero__janela { margin: 0; min-width: 0; }
 .hero__palco { position: relative; aspect-ratio: 4 / 3; max-height: calc(100svh - var(--nav-h) - 160px); width: 100%; overflow: hidden; }
+.hero__palco::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 58%, var(--noite) 100%); }
 .hero__palco > canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
 .hero__palco.is-2d { background: var(--fundo-fundo); }
-
-/* ---------------------------------------------------------------- janela (moldura de pedra com barra de título) */
-.janela {
-  --px-borda: var(--noite-4);
-  --px-fundo: var(--fundo-fundo);
-  --step: 6px;
-  display: flex; flex-direction: column;
-  padding: 2px;
-}
-.janela__barra {
-  display: flex; align-items: center; gap: 10px;
-  min-height: 44px;
-  padding: 6px 12px 6px 14px;
-  background: var(--noite-2);
-  box-shadow: inset 0 -2px 0 var(--noite-3);
-  /* cantos de cima acompanham o degrau da moldura */
-  clip-path: polygon(0 calc(var(--step) * 2 - 2px), calc(var(--step) - 2px) calc(var(--step) * 2 - 2px), calc(var(--step) - 2px) calc(var(--step) - 2px),
-    calc(var(--step) * 2 - 2px) calc(var(--step) - 2px), calc(var(--step) * 2 - 2px) 0, calc(100% - var(--step) * 2 + 2px) 0,
-    calc(100% - var(--step) * 2 + 2px) calc(var(--step) - 2px), calc(100% - var(--step) + 2px) calc(var(--step) - 2px),
-    calc(100% - var(--step) + 2px) calc(var(--step) * 2 - 2px), 100% calc(var(--step) * 2 - 2px), 100% 100%, 0 100%);
-  min-width: 0;
-}
-.janela__icone { flex: none; width: 22px; height: 18px; }
-.janela__icone svg { width: 22px; height: 18px; }
-.janela__titulo { font: 700 16px/1.1 var(--f-pixel); white-space: nowrap; }
-.janela__sub { min-width: 0; font: 400 14px/1.2 var(--f-texto); color: var(--luar-fraco); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
-.janela__barra .chip { margin-left: auto; flex: none; }
 
 /* carregamento: aluno andando no lugar + texto */
 .carregando {
@@ -406,50 +371,58 @@ h2 { font-size: 48px; line-height: 1; }
 .carregando__aluno canvas { width: 48px; height: auto; }
 
 /* ================================================================ player: área de trabalho
-   [IA] Claude – rodada 2: esquerda ≈ 56% (níveis, algoritmos, janela 3D, linha do tempo, doca);
-   direita ≈ 44% coluna de informações fixa (sticky) com rolagem própria. */
-.jogar { border-top: 2px solid var(--noite-2); --sec-pad-topo: clamp(72px, 7vw, 104px); }
-.jogar__cabeca { margin-bottom: 28px; }
-.wrap--larga { max-width: calc(1600px + 2 * var(--gutter)); }
+   [IA] Claude – rodada 3 (enxuto): uma barra fina (mapa, algoritmo, Métricas) e, embaixo, a janela 3D (≈ 60%) com
+   a doca de uma linha e a coluna do estado + mapa/tabela (≈ 40%). Desktop: tudo cabe na altura da tela, sem
+   molduras em volta de cada bloco; o que é secundário fica atrás de um clique.
+   [IA] Claude – rodada 4: mesma largura da navbar e do hero; moldura em pixel só na janela 3D e no play;
+   mapa e tabela no mesmo chão escuro (sem papel); Pixelify só para o que é de exibição. */
+.jogar { --sec-pad-topo: 0px; --sec-pad: 72px; }
 .area {
   display: grid;
-  grid-template-columns: minmax(0, 56fr) minmax(0, 44fr);
-  gap: 28px;
-  align-items: start;
+  grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "barra barra" "esq info";
+  gap: 12px 28px;
+  height: calc(100vh - var(--nav-h) - 40px);
+  height: calc(100svh - var(--nav-h) - 40px);
+  min-height: 600px;
 }
-.area__esq { min-width: 0; }
 
-/* faixa de níveis: cartões compactos em duas linhas + "Carregar mapa" */
-.faixa {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 96px;
-  gap: 8px;
-  margin-bottom: 10px;
+/* ---------------------------------------------------------------- barra: mapa, algoritmo, Métricas */
+.barra { grid-area: barra; display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pop { position: relative; }
+.pop__painel {
+  --px-borda: var(--noite-4);
+  --px-fundo: var(--noite-2);
+  position: absolute; z-index: 30; top: calc(100% + 6px); left: 0;
+  padding: 10px;
 }
-.niveis {
-  display: grid; grid-template-rows: auto auto; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
-  gap: 6px; min-width: 0;
-}
-/* [IA] Claude – cartão compacto em linha: miniatura (grade vinda de api/mapas) + código + título visível */
-.nivel {
-  --px-borda: var(--noite-3);
-  --px-fundo: var(--noite);
-  --px-labio: 2px;
-  display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 8px;
-  padding: 5px 8px 7px 5px;
-  text-align: left;
+.mapa-sel {
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 40px; padding: 0 10px 0 6px; margin-left: -6px;
   color: var(--luar);
+  white-space: nowrap;
+}
+.mapa-sel:hover, .mapa-sel[aria-expanded="true"] { background: var(--noite-2); }
+.mapa-sel__mini { display: grid; place-items: center; width: 32px; height: 24px; overflow: hidden; }
+.mapa-sel__codigo { font: 600 15px/1 var(--f-texto); color: var(--tocha); font-variant-numeric: tabular-nums; }
+.mapa-sel__titulo { font: 500 15px/1 var(--f-texto); }
+.mapa-sel__seta { width: 10px; height: 6px; margin-left: 6px; color: var(--luar-fraco); }
+.pop__painel--mapas { width: 440px; }
+.niveis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; }
+.nivel {
+  display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 10px;
+  padding: 6px 8px 6px 6px;
+  text-align: left; color: var(--luar-fraco);
   min-width: 0;
 }
-.nivel:hover { --px-fundo: var(--noite-2); }
-.nivel:active { transform: translateY(2px); --px-labio: 0px; }
-.nivel[aria-checked="true"] { --px-borda: var(--cesar); --px-fundo: var(--noite-2); }
+.nivel:hover { background: var(--noite-3); color: var(--luar); }
+.nivel[aria-checked="true"] { background: var(--noite-3); color: var(--luar); box-shadow: inset 2px 0 0 var(--cesar); }
 .nivel__mini {
   position: relative;
   display: grid; place-items: center;
-  width: 44px; aspect-ratio: 16 / 10;
+  width: 48px; aspect-ratio: 16 / 10;
   background: var(--fundo-fundo);
-  box-shadow: inset 0 0 0 1px var(--noite-2);
   overflow: hidden;
 }
 .nivel__mini canvas { max-width: 100%; max-height: 100%; }
@@ -458,77 +431,56 @@ h2 { font-size: 48px; line-height: 1; }
 /* mapa ainda não carregado (no servidor só baixamos o mapa quando ele é escolhido) */
 .nivel__nevoa {
   position: absolute; inset: 0;
-  display: grid; place-items: center;
   background-image:
     linear-gradient(45deg, rgba(58,48,40,.65) 25%, transparent 25%, transparent 75%, rgba(58,48,40,.65) 75%),
     linear-gradient(45deg, rgba(58,48,40,.65) 25%, transparent 25%, transparent 75%, rgba(58,48,40,.65) 75%);
   background-size: 8px 8px;
   background-position: 0 0, 4px 4px;
 }
-.nivel__txt { display: grid; gap: 3px; min-width: 0; }
-.nivel__codigo { font: 600 13px/1 var(--f-pixel); color: var(--luar-fraco); }
-.nivel__titulo { font: 400 12px/1.15 var(--f-texto); color: var(--luar-fraco); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nivel[aria-checked="true"] .nivel__titulo { color: var(--luar); }
+.nivel__txt { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.nivel__codigo { flex: none; font: 600 14px/1 var(--f-texto); font-variant-numeric: tabular-nums; }
+.nivel__titulo { font: 400 14px/1.2 var(--f-texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nivel[aria-checked="true"] .nivel__codigo { color: var(--cesar); }
 .nivel--seu .nivel__codigo { color: var(--tocha); }
 .carregar {
-  --px-borda: var(--tocha-escura);
-  --px-fundo: #2A2016;
-  --px-labio: 2px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-  min-height: 52px; padding: 8px 10px 10px;
-  font: 600 14px/1.15 var(--f-pixel); color: var(--tocha); text-align: center;
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; margin-top: 8px; padding: 10px 8px 8px;
+  border-top: 1px solid var(--noite-3);
+  font: 500 14px/1 var(--f-texto); color: var(--tocha);
 }
-.carregar svg { width: 18px; height: 18px; flex: none; }
-.carregar:hover { --px-fundo: #3A2A18; color: #FFC67A; }
-.carregar:active { transform: translateY(2px); --px-labio: 0px; }
+.carregar svg { width: 14px; height: 14px; flex: none; }
+.carregar:hover { color: #FFC67A; }
 
-/* controle segmentado dos algoritmos */
+/* controle segmentado dos algoritmos: só o nome; o resultado fica na dica */
 .algs {
-  --px-borda: var(--noite-3);
-  --px-fundo: var(--noite-2);
-  display: grid;
-  grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
-  gap: 4px;
-  margin-bottom: 10px;
-  padding: 4px;
+  display: flex; gap: 2px;
+  min-width: 0;
 }
 .alg {
-  --px-borda: transparent;
-  --px-fundo: transparent;
-  display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 1px 8px; align-content: start;
-  padding: 6px 10px 7px;
-  text-align: left;
-  color: var(--luar);
+  height: 34px; padding: 0 14px;
+  font: 500 14px/1 var(--f-texto); color: var(--luar-fraco);
+  white-space: nowrap;
 }
-.alg:hover { --px-fundo: var(--noite-3); }
-.alg[aria-checked="true"] { --px-fundo: var(--luar); --px-borda: var(--luar); color: var(--noite); }
-.alg__nome { font: 700 16px/1.1 var(--f-pixel); }
-.alg__sub { font: 400 13px/1.3 var(--f-texto); color: var(--luar-fraco); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.alg__res { grid-column: 1 / -1; }
-.alg[aria-checked="true"] .alg__sub { color: #5C4E3E; }
-.alg__res {
-  display: inline-flex; align-items: center; gap: 6px; margin-top: 3px;
-  font: 500 13px/1.2 var(--f-pixel); color: var(--luar-fraco);
+.alg:hover { color: var(--luar); background: var(--noite-2); }
+.alg[aria-checked="true"] { background: var(--luar); color: var(--noite); }
+.barra__metricas {
+  margin-left: auto; height: 36px; padding: 0 10px; margin-right: -10px;
+  font: 500 14px/1 var(--f-texto); color: var(--luar-fraco);
 }
-.alg[aria-checked="true"] .alg__res { color: var(--noite); }
-.alg__res::before { content: ""; width: 6px; height: 6px; background: var(--ok); flex: none; }
-.alg__res[data-status="RECUSA"]::before, .alg__res[data-status="SEM_SOLUCAO"]::before,
-.alg__res[data-status="CICLO_NEGATIVO"]::before { background: var(--erro); }
+.barra__metricas:hover { color: var(--luar); background: var(--noite-2); }
 
-/* janela 3D do player */
-.tela3d { width: 100%; }
-.janela__vista {
+/* ---------------------------------------------------------------- janela 3D */
+.area__esq { grid-area: esq; display: flex; flex-direction: column; gap: 10px; min-width: 0; min-height: 0; }
+.tela3d {
+  --px-borda: var(--noite-3);
+  --px-fundo: var(--fundo-fundo);
+  --step: 6px;
   position: relative;
-  aspect-ratio: 16 / 11;
-  max-height: 70vh;
-  min-height: 320px;
-  width: 100%;
-  overflow: hidden;
-  background: var(--fundo-fundo);
+  flex: 1 1 auto; min-height: 0;
+  padding: 2px;
 }
 .tela3d__render {
-  position: absolute; inset: 0;
+  position: absolute; inset: 2px;
   overflow: hidden;
   cursor: grab;
   touch-action: none;
@@ -539,65 +491,74 @@ h2 { font-size: 48px; line-height: 1; }
 .tela3d__render > canvas { width: 100% !important; height: 100% !important; }
 .tela3d.is-2d .tela3d__render { cursor: default; }
 
-/* HUD sobre o viewport */
-.hud { position: absolute; inset: 0; pointer-events: none; }
+/* HUD sobre o viewport: passo/custo, chaves, Visualização e os avisos de fim */
+.hud { position: absolute; inset: 2px; pointer-events: none; }
 .hud > * { position: absolute; }
 .hud__stats {
-  --px-borda: rgba(58, 48, 40, 0.95);
-  --px-fundo: rgba(26, 22, 18, 0.84);
-  top: 14px; left: 14px;
+  top: 0; left: 0;
   display: flex; gap: 22px;
-  padding: 10px 16px 12px;
+  padding: 14px 40px 26px 16px;
+  background: radial-gradient(ellipse at 0 0, rgba(12, 10, 8, 0.78), rgba(12, 10, 8, 0.5) 45%, transparent 72%);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
 }
-.hud__stat { display: grid; gap: 2px; }
+.hud__stat { display: grid; gap: 3px; }
 .hud__rotulo { font: 500 12px/1 var(--f-texto); color: var(--luar-fraco); }
-.hud__num { font: 600 26px/1 var(--f-pixel); font-variant-numeric: tabular-nums; }
-.hud__num b { font-weight: 700; }
-.hud__de { margin-left: 6px; font-size: 15px; color: var(--luar-fraco); }
-.hud__topo-dir { top: 14px; right: 14px; display: grid; justify-items: end; gap: 8px; }
+.hud__num { font: 700 24px/1 var(--f-pixel); font-variant-numeric: tabular-nums; }
+.hud__de { margin-left: 6px; font-size: 14px; font-weight: 500; color: var(--luar-fraco); }
 .chip {
   --px-borda: rgba(58, 48, 40, 0.95);
-  --px-fundo: rgba(26, 22, 18, 0.84);
+  --px-fundo: rgba(18, 15, 12, 0.86);
+  top: 12px; left: 50%; transform: translateX(-50%);
   display: inline-flex; align-items: center; gap: 8px;
   padding: 8px 12px 9px;
   font: 600 14px/1 var(--f-pixel);
+  white-space: nowrap;
 }
 .chip__ponto { width: 8px; height: 8px; background: var(--luar-fraco); }
-.chip[data-status="andando"] .chip__ponto { background: var(--chave-a); }
 .chip[data-status="OK"] .chip__ponto { background: var(--ok); }
 .chip[data-status="RECUSA"] .chip__ponto, .chip[data-status="SEM_SOLUCAO"] .chip__ponto,
 .chip[data-status="CICLO_NEGATIVO"] .chip__ponto { background: var(--erro); }
-.hud__cam {
-  --px-borda: rgba(58, 48, 40, 0.95);
-  --px-fundo: rgba(26, 22, 18, 0.84);
-  display: flex; gap: 2px; padding: 4px;
-  pointer-events: auto;
+.hud__vis { top: 12px; right: 12px; pointer-events: auto; }
+.hud__btn {
+  display: grid; place-items: center;
+  width: 36px; height: 36px;
+  color: var(--luar);
+  background: rgba(12, 10, 8, 0.55);
 }
-.hud__cam button {
-  padding: 7px 10px 8px;
-  font: 500 13px/1 var(--f-pixel);
-  color: var(--luar-fraco);
+.hud__btn svg { width: 16px; height: 16px; }
+.hud__btn:hover, .hud__btn[aria-expanded="true"] { background: rgba(58, 48, 40, 0.9); }
+/* algo fora do padrão (outra câmera ou uma camada isolada): o ícone fica âmbar */
+.hud__btn.is-marcado { color: var(--tocha); }
+.pop__painel--vis { left: auto; right: 0; width: 280px; padding: 14px; display: grid; gap: 14px; }
+.vis__grupo { display: grid; gap: 6px; }
+.vis__rotulo { font: 500 13px/1 var(--f-texto); color: var(--luar-fraco); }
+.seg { display: flex; gap: 2px; padding: 2px; box-shadow: inset 0 0 0 2px var(--noite-3); }
+.seg button { flex: 1; padding: 7px 8px 8px; font: 500 14px/1 var(--f-texto); color: var(--luar-fraco); }
+.seg button:hover { color: var(--luar); background: var(--noite-3); }
+.seg button[aria-pressed="true"] { color: var(--noite); background: var(--luar); }
+.vis__select {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; padding: 8px 28px 9px 10px; border: 0; border-radius: 0; cursor: pointer;
+  font: 500 14px/1 var(--f-texto); color: var(--luar);
+  background: var(--noite) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4' shape-rendering='crispEdges'%3E%3Cpath fill='%23B5A895' d='M0 0h7v1H0zM1 1h5v1H1zM2 2h3v1H2zM3 3h1v1H3z'/%3E%3C/svg%3E") right 10px center / 10px 6px no-repeat;
+  box-shadow: inset 0 0 0 2px var(--noite-3);
 }
-.hud__cam button:hover { color: var(--luar); background: var(--noite-3); }
-.hud__cam button[aria-pressed="true"] { color: var(--noite); background: var(--luar); }
-.tela3d.is-2d .hud__cam, .tela3d.is-2d .hud__mini { display: none; }
+.vis__select option { background: var(--noite-2); color: var(--luar); }
+.vis__toggles { display: flex; flex-wrap: wrap; gap: 6px 14px; padding-top: 2px; }
 
 .hud__inv {
-  --px-borda: rgba(58, 48, 40, 0.95);
-  --px-fundo: rgba(26, 22, 18, 0.84);
-  left: 14px; bottom: 14px;
-  display: flex; gap: 6px; padding: 8px;
+  left: 12px; bottom: 12px;
+  display: flex; gap: 4px;
 }
 .slot {
   display: grid; place-items: center;
-  width: 46px; height: 34px;
+  width: 42px; height: 30px;
   background: rgba(58, 48, 40, 0.5);
-  box-shadow: inset 0 0 0 2px var(--noite-3);
 }
 .slot canvas { grid-area: 1 / 1; }
 .slot .slot__cheio, .slot.is-cheio .slot__vazio { visibility: hidden; }
 .slot.is-cheio .slot__cheio { visibility: visible; }
-.slot.is-cheio { background: rgba(58, 48, 40, 0.9); box-shadow: inset 0 0 0 2px var(--cor-chave, var(--luar-fraco)); }
+.slot.is-cheio { background: rgba(58, 48, 40, 0.9); box-shadow: inset 0 -2px 0 var(--cor-chave, var(--luar-fraco)); }
 .slot.is-pop { animation: pop 420ms steps(6) both; }
 @keyframes pop {
   0% { transform: scale(1); }
@@ -605,16 +566,14 @@ h2 { font-size: 48px; line-height: 1; }
   70% { transform: scale(0.92); }
   100% { transform: scale(1); }
 }
-
 .hud__mini {
   --px-borda: rgba(58, 48, 40, 0.95);
-  --px-fundo: rgba(20, 16, 13, 0.88);
-  right: 14px; bottom: 14px;
-  padding: 8px;
+  --px-fundo: rgba(18, 15, 12, 0.86);
+  right: 12px; bottom: 12px;
+  padding: 6px;
   pointer-events: auto;
 }
 .hud__mini canvas { cursor: pointer; }
-
 .hud__dialogo {
   --px-borda: var(--noite-3);
   --px-fundo: rgba(26, 22, 18, 0.94);
@@ -624,7 +583,7 @@ h2 { font-size: 48px; line-height: 1; }
   padding: 22px 24px 24px;
   pointer-events: auto;
 }
-.hud__dialogo.is-faixa { top: auto; bottom: 14px; transform: translateX(-50%); width: min(400px, calc(100% - 380px)); padding: 12px 16px 14px; }
+.hud__dialogo.is-faixa { top: auto; bottom: 12px; transform: translateX(-50%); width: min(460px, calc(100% - 220px)); padding: 12px 16px 14px; }
 .hud__dialogo-titulo { font: 700 22px/1.15 var(--f-pixel); }
 .hud__dialogo.is-faixa .hud__dialogo-titulo { font-size: 16px; }
 .hud__dialogo[data-status="RECUSA"] .hud__dialogo-titulo,
@@ -632,349 +591,204 @@ h2 { font-size: 48px; line-height: 1; }
 .hud__dialogo[data-status="CICLO_NEGATIVO"] .hud__dialogo-titulo { color: #FF8A9C; }
 .hud__dialogo-texto { margin-top: 8px; font-size: 15px; line-height: 1.5; color: var(--luar-fraco); }
 .hud__dialogo.is-faixa .hud__dialogo-texto { margin-top: 4px; font-size: 14px; }
-.hud__dialogo-acoes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.hud__dialogo-acoes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
 .hud__dialogo-acoes:empty { display: none; }
 .hud__carregando { background: rgba(20, 16, 13, 0.72); pointer-events: auto; }
 
-/* linha do tempo */
-.tempo {
-  position: relative;
-  margin-top: 14px;
-  padding-top: 16px;
-  --thumb: 16px;
+/* ---------------------------------------------------------------- doca: transporte, linha do tempo, velocidade */
+.doca { flex: none; display: flex; align-items: center; gap: 16px; min-width: 0; }
+.doca__transporte { flex: none; display: flex; align-items: center; gap: 2px; }
+.btn-ico {
+  display: inline-grid; place-items: center;
+  width: 36px; height: 36px;
+  color: var(--luar-fraco);
 }
+.btn-ico svg { width: 14px; height: 14px; }
+.btn-ico:hover { color: var(--luar); background: var(--noite-2); }
+.btn-ico:disabled { color: var(--noite-4); background: none; cursor: default; }
+.btn-ico--play {
+  --px-borda: var(--cesar-escuro);
+  --px-fundo: var(--cesar);
+  --px-labio: 2px;
+  width: 48px; height: 38px; margin-inline: 4px;
+  color: var(--noite);
+}
+.btn-ico--play:hover { --px-fundo: #FF7A26; color: var(--noite); background: none; }
+.btn-ico--play:active { transform: translateY(2px); --px-labio: 0px; }
+.btn-ico--play:disabled { --px-fundo: var(--noite-3); --px-borda: var(--noite-3); color: var(--noite-4); }
+.btn-ico--play svg { width: 16px; height: 16px; }
+.btn-ico--play .ico-pausa, .btn-ico--play.is-tocando .ico-play { display: none; }
+.btn-ico--play.is-tocando .ico-pausa { display: block; }
+
+.tempo { position: relative; flex: 1 1 auto; min-width: 120px; padding-top: 12px; --thumb: 12px; }
 .tempo__marcas {
-  position: absolute; top: 0; height: 12px;
+  position: absolute; top: 0; height: 10px;
   left: calc(var(--thumb) / 2); right: calc(var(--thumb) / 2);
 }
 .marca {
   position: absolute; top: 2px;
-  width: 8px; height: 8px;
+  width: 6px; height: 6px;
   transform: translateX(-50%);
   background: var(--cor, var(--luar));
 }
-.marca--chave { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); width: 10px; height: 10px; top: 1px; }
-.marca--porta { background: transparent; box-shadow: inset 0 0 0 2px var(--cor); }
-.marca--bonus { clip-path: polygon(35% 0, 65% 0, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0 65%, 0 35%, 35% 35%); }
-.marca--saida { background: var(--cesar); width: 4px; height: 12px; top: 0; }
+.marca--chave { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); width: 8px; height: 8px; top: 1px; }
+.marca--porta { background: transparent; box-shadow: inset 0 0 0 2px var(--cor); width: 8px; height: 8px; top: 1px; }
+.marca--bonus { clip-path: polygon(35% 0, 65% 0, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0 65%, 0 35%, 35% 35%); width: 8px; height: 8px; top: 1px; }
+.marca--saida { background: var(--cesar); width: 3px; height: 10px; top: 0; }
 .tempo__range {
   -webkit-appearance: none; appearance: none;
-  display: block; width: 100%; height: 26px; margin: 0;
+  display: block; width: 100%; height: 22px; margin: 0;
   background: transparent; cursor: pointer;
   --pct: 0%;
   --trilho: var(--noite-3);
 }
 .tempo__range:focus-visible { outline-offset: 4px; }
 .tempo__range::-webkit-slider-runnable-track {
-  height: 12px;
-  background: linear-gradient(90deg, transparent var(--pct), rgba(20, 16, 13, 0.72) var(--pct)), var(--trilho);
-  box-shadow: inset 0 0 0 2px rgba(20, 16, 13, 0.5);
+  height: 8px;
+  background: linear-gradient(90deg, transparent var(--pct), rgba(20, 16, 13, 0.74) var(--pct)), var(--trilho);
 }
 .tempo__range::-moz-range-track {
-  height: 12px;
-  background: linear-gradient(90deg, transparent var(--pct), rgba(20, 16, 13, 0.72) var(--pct)), var(--trilho);
+  height: 8px;
+  background: linear-gradient(90deg, transparent var(--pct), rgba(20, 16, 13, 0.74) var(--pct)), var(--trilho);
 }
 .tempo__range::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
-  width: var(--thumb); height: 26px; margin-top: -7px;
+  width: var(--thumb); height: 22px; margin-top: -7px;
   background: var(--luar);
-  box-shadow: inset 0 0 0 2px var(--noite), inset 0 -4px 0 2px #CDBFA8;
+  box-shadow: inset 0 0 0 2px var(--noite);
   border: 0; border-radius: 0;
 }
 .tempo__range::-moz-range-thumb {
-  width: var(--thumb); height: 26px;
+  width: var(--thumb); height: 22px;
   background: var(--luar);
-  box-shadow: inset 0 0 0 2px var(--noite), inset 0 -4px 0 2px #CDBFA8;
+  box-shadow: inset 0 0 0 2px var(--noite);
   border: 0; border-radius: 0;
 }
 
-/* doca de controles */
-.doca {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px;
-  margin-top: 16px;
-}
-.doca__transporte { display: flex; gap: 8px; }
-.doca__toggles { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-left: auto; }
-/* [IA] Claude – troca de camada dentro da janela 3D (canto de cima, abaixo das câmeras) */
-.hud__camada {
-  --px-borda: rgba(58, 48, 40, 0.95);
-  --px-fundo: rgba(26, 22, 18, 0.84);
-  display: flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px;
-  pointer-events: auto;
-  font: 500 13px/1 var(--f-pixel); color: var(--luar-fraco);
-}
-.hud__camada label { cursor: pointer; }
-.hud__camada select {
-  -webkit-appearance: none; appearance: none;
-  padding: 6px 26px 7px 8px; border: 0; border-radius: 0; cursor: pointer;
-  font: 600 13px/1 var(--f-pixel); color: var(--luar);
-  background: var(--noite-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4' shape-rendering='crispEdges'%3E%3Cpath fill='%23B5A48C' d='M0 0h7v1H0zM1 1h5v1H1zM2 2h3v1H2zM3 3h1v1H3z'/%3E%3C/svg%3E") right 9px center / 10px 6px no-repeat;
-}
-.hud__camada select option { background: var(--noite-2); color: var(--luar); }
-.hud__camada select:focus-visible { outline: 2px solid var(--cesar); outline-offset: 2px; }
-
-/* [IA] Claude – velocidade estilo YouTube: botão "Velocidade: 1×" + menu de multiplicadores */
-.vel { position: relative; display: flex; align-items: center; gap: 12px; }
+/* velocidade estilo YouTube: botão "1×" + menu de multiplicadores (abre para cima) */
+.vel { position: relative; flex: none; }
 .vel__botao {
-  --px-borda: var(--noite-3);
-  --px-fundo: var(--noite-2);
-  --px-labio: 2px;
-  display: inline-flex; align-items: center; gap: 10px;
-  min-height: 48px; padding: 10px 14px 12px;
-  font: 500 15px/1 var(--f-texto); color: var(--luar);
-  white-space: nowrap;
+  min-width: 44px; height: 36px; padding: 0 8px;
+  font: 600 14px/1 var(--f-texto); font-variant-numeric: tabular-nums; color: var(--luar-fraco);
 }
-.vel__botao svg { width: 16px; height: 16px; color: var(--tocha); }
-.vel__botao b { font: 700 16px/1 var(--f-pixel); font-variant-numeric: tabular-nums; }
-.vel__botao:hover, .vel__botao[aria-expanded="true"] { --px-fundo: var(--noite-3); }
-.vel__botao:active { transform: translateY(2px); --px-labio: 0px; }
-.vel__nota { font-size: 14px; color: var(--luar-fraco); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.vel__botao:hover, .vel__botao[aria-expanded="true"] { color: var(--luar); background: var(--noite-2); }
 .vel__menu {
   --px-borda: var(--noite-4);
   --px-fundo: var(--noite-2);
-  position: absolute; z-index: 20; left: 0; bottom: calc(100% + 8px);
-  display: grid; min-width: 180px;
-  padding: 8px 6px;
+  position: absolute; z-index: 20; right: 0; bottom: calc(100% + 8px);
+  display: grid; min-width: 150px;
+  padding: 6px;
 }
 .vel__menu:focus { outline: none; }
 .vel__menu:focus-visible { outline: 2px solid var(--cesar); outline-offset: 2px; }
 .vel__opcao {
-  display: grid; grid-template-columns: 18px auto; align-items: center; gap: 8px;
-  padding: 8px 12px 8px 8px;
-  font: 500 15px/1.1 var(--f-pixel); font-variant-numeric: tabular-nums;
+  display: grid; grid-template-columns: 16px auto; align-items: center; gap: 6px;
+  padding: 7px 10px 7px 6px;
+  font: 500 14px/1.1 var(--f-texto); font-variant-numeric: tabular-nums;
   color: var(--luar); cursor: pointer;
 }
 .vel__opcao.is-ativo { background: var(--noite-3); }
-.vel__check { width: 10px; height: 6px; margin-left: 4px; }
+.vel__check { width: 8px; height: 8px; margin-left: 4px; }
 .vel__opcao[aria-selected="true"] { color: var(--tocha); }
-.vel__opcao[aria-selected="true"] .vel__check { width: 8px; height: 8px; background: currentColor; }
+.vel__opcao[aria-selected="true"] .vel__check { background: currentColor; }
 
-/* range simples (velocidade) */
-input[type="range"]:not(.tempo__range) {
-  -webkit-appearance: none; appearance: none;
-  height: 24px; background: transparent; cursor: pointer;
-}
-input[type="range"]:not(.tempo__range)::-webkit-slider-runnable-track { height: 6px; background: var(--noite-3); }
-input[type="range"]:not(.tempo__range)::-moz-range-track { height: 6px; background: var(--noite-3); }
-input[type="range"]:not(.tempo__range)::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 12px; height: 20px; margin-top: -7px;
-  background: var(--luar); box-shadow: inset 0 0 0 2px var(--noite); border: 0; border-radius: 0;
-}
-input[type="range"]:not(.tempo__range)::-moz-range-thumb {
-  width: 12px; height: 20px; background: var(--luar); box-shadow: inset 0 0 0 2px var(--noite); border: 0; border-radius: 0;
-}
+/* caixinhas compactas (Visualização): uma linha só */
+.chk { position: relative; display: inline-flex; align-items: center; gap: 7px; font-size: 14px; color: var(--luar-fraco); cursor: pointer; }
+.chk:hover { color: var(--luar); }
+.chk input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.chk__caixa { flex: none; width: 14px; height: 14px; box-shadow: inset 0 0 0 2px var(--noite-4); }
+.chk input:checked + .chk__caixa { background: var(--tocha); box-shadow: none; }
+.chk input:checked ~ span:last-child { color: var(--luar); }
+.chk input:focus-visible + .chk__caixa { outline: 2px solid var(--cesar); outline-offset: 2px; }
 
-/* interruptores */
-.toggle { position: relative; display: inline-flex; align-items: center; gap: 10px; font-size: 15px; cursor: pointer; }
-.toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.toggle__caixa {
-  display: block; width: 40px; height: 22px;
-  background: var(--noite) linear-gradient(var(--noite-3), var(--noite-3)) 5px 5px / 12px 12px no-repeat;
-  box-shadow: inset 0 0 0 2px var(--noite-3);
+/* ---------------------------------------------------------------- coluna da direita: estado + mapa e tabela */
+.info { grid-area: info; display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; }
+.estado { flex: none; }
+.estado__linha { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 16px; min-width: 0; min-height: 34px; }
+.rotulo-estado {
+  flex: 0 0 auto; max-width: 100%;
+  font: 600 28px/1.1 var(--f-pixel);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.toggle input:checked + .toggle__caixa {
-  background-color: #2C5A4E;
-  background-image: linear-gradient(var(--luar), var(--luar));
-  background-position: 23px 5px;
-  box-shadow: inset 0 0 0 2px var(--ok);
-}
-.toggle input:focus-visible + .toggle__caixa { outline: 2px solid var(--cesar); outline-offset: 2px; }
+.rotulo-estado__sep { margin-inline: 0.18em; color: #8A7660; }
+.resultado { flex: 0 1 auto; min-width: 0; overflow: hidden; display: flex; flex-wrap: nowrap; align-items: center; gap: 4px 14px; white-space: nowrap; font: 400 14px/1.3 var(--f-texto); color: var(--luar-fraco); font-variant-numeric: tabular-nums; }
+.resultado::before { content: ""; flex: none; width: 8px; height: 8px; margin-right: -8px; background: var(--luar-fraco); }
+.resultado__status { color: var(--luar); font-weight: 500; }
+.resultado[data-status="OK"]::before { background: var(--ok); }
+.resultado[data-status="RECUSA"]::before, .resultado[data-status="SEM_SOLUCAO"]::before,
+.resultado[data-status="CICLO_NEGATIVO"]::before { background: var(--erro); }
 
-/* legenda compacta */
-.legenda { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 22px; }
-.legenda li { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--luar-fraco); }
-.legenda canvas, .legenda .legenda__trap { width: 16px; height: 16px; }
-.legenda .legenda__trap { background: var(--erro); box-shadow: inset 0 0 0 4px #7A1E33; }
-.legenda b { font: 500 13px/1 var(--f-pixel); color: var(--luar); }
-
-/* [IA] Claude – coluna de informações: fixa ao lado da janela, com rolagem própria */
-/* [IA] Claude – fix rodada 2: a coluna tem a altura da tela e não rola; mapa e tabela dividem o que sobra
-   abaixo do resumo (só a tabela rola por dentro). Métricas e histórico ficam embaixo da janela 3D. */
-.info {
-  position: sticky; top: calc(var(--nav-h) + 28px);
-  display: flex; flex-direction: column; gap: 10px;
-  height: calc(100vh - var(--nav-h) - 40px);
-  min-height: 600px;
-  min-width: 0;
-}
-.info > .resumo { flex: none; }
-.resumo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
-.painel--compacto { padding: 14px 16px 16px; }
-.painel--compacto .painel__titulo { font-size: 16px; margin-bottom: 10px; }
-.painel--compacto .rotulo-estado { font-size: 17px; padding: 7px 10px; margin-bottom: 10px; }
-.painel--compacto .dados { gap: 5px; }
-.painel--compacto .dados dt { font-size: 13px; }
-.painel--compacto .dados dd { font-size: 14px; }
-.painel--compacto .resultado { font-size: 16px; }
-.painel--compacto .dados--duplo { margin-top: 10px; padding-top: 10px; column-gap: 14px; }
-.resultado__python {
-  margin-top: 6px; padding: 5px 8px;
-  font: 500 13px/1.35 var(--f-texto); font-variant-numeric: tabular-nums;
-  color: var(--luar);
-  background: var(--noite);
-  box-shadow: inset 2px 0 0 var(--tocha);
-}
-
-/* mapa de estados + tabela: divisão vertical ajustável (o conteúdo é da LAB.EstadosView) */
+/* mapa de estados + tabela no mesmo chão escuro da página (um degrau acima), com um divisor ajustável entre os dois.
+   O papel quadriculado fica só no manual. */
 .estados {
-  --mapa-pct: 38%;
+  --mapa-pct: 42%;
+  flex: 1 1 auto; min-height: 0; min-width: 0;
   display: grid;
-  grid-template-rows: minmax(0, var(--mapa-pct)) 12px minmax(0, 1fr);
-  flex: 1 1 auto; min-height: 0;
-  min-width: 0;
+  grid-template-rows: minmax(0, var(--mapa-pct)) 9px minmax(0, 1fr);
+  color: var(--luar);
+  background: #1F1B17;
 }
-/* os cartões da EstadosView preenchem os dois blocos do divisor (palco e corpo da tabela crescem) */
-.estados__mapa.ev-raiz, .estados__tabela.ev-raiz { display: flex; flex-direction: column; }
-.estados__mapa > .ev-card, .estados__tabela > .ev-card { flex: 1 1 auto; min-height: 0; gap: 6px; padding: 8px 12px 10px; }
-.estados__mapa .ev-palco { flex: 1 1 auto; height: auto; min-height: 90px; }
-.estados__mapa .ev-cab, .estados__mapa .ev-mapa-pe, .estados__tabela .ev-abas, .estados__tabela .ev-ctl, .estados__tabela .ev-pe { flex-shrink: 0; }
+.estados__bloco { position: relative; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.estados__mapa, .estados__tabela { position: relative; flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.estados__vazio { padding: 16px; font-size: 14px; color: var(--luar-fraco); }
+.estados__mapa > .ev-card, .estados__tabela > .ev-card { flex: 1 1 auto; min-height: 0; }
+.estados__divisor { position: relative; display: grid; place-items: center; cursor: row-resize; touch-action: none; }
+.estados__divisor::before { content: ""; position: absolute; left: 0; right: 0; top: 4px; height: 1px; background: transparent; }
+.estados__divisor:hover::before, .estados__divisor.is-arrastando::before, .estados__divisor:focus-visible::before { background: var(--tocha-escura); }
+.estados__divisor:focus-visible { outline: 2px solid var(--cesar); outline-offset: -2px; }
+/* a tabela grande ocupa o corpo inteiro e só ela rola por dentro */
 .estados__tabela > .ev-card { overflow: hidden; }
-.estados__tabela .ev-corpo { flex: 1 1 auto; min-height: 120px; height: 0; max-height: none; }
-/* a tabela grande ocupa o corpo inteiro (sem a altura fixa de 300/360 px) */
+.estados__tabela .ev-corpo { height: 0; }
 .estados__tabela .ev-corpo > .ev-bloco:only-child { flex: 1 1 auto; min-height: 0; }
 .estados__tabela .ev-corpo > .ev-bloco:only-child > .ev-rola--xy { flex: 1 1 auto; min-height: 0; max-height: none; }
-.estados__tabela .ev-ctl { gap: 6px 10px; }
-.estados__tabela .ev-bt[data-c="fim"] { width: 32px; padding: 0; }
-.estados__tabela .ev-bt[data-c="fim"] span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.estados__tabela .ev-pe { flex: none; max-height: 3.4em; overflow: auto; padding: 4px 0 2px; font-size: 12.5px; }
-.estados__tabela .ev-pe-l { line-height: 1.5; }
-.estados__bloco {
-  position: relative;
-  display: flex; flex-direction: column;
-  min-height: 0; min-width: 0;
-  color: var(--grafite);
-  background-color: var(--papel);
-  background-image:
-    linear-gradient(var(--quadricula) 1px, transparent 1px),
-    linear-gradient(90deg, var(--quadricula) 1px, transparent 1px);
-  background-size: 16px 16px;
-  box-shadow: inset 0 0 0 2px var(--noite-4);
-}
-/* a EstadosView desenha os próprios títulos e abas: o título do bloco fica só para leitores de tela */
-.estados__titulo {
-  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
-  flex: none;
-  padding: 8px 12px 7px;
-  font: 700 15px/1.1 var(--f-pixel);
-  color: var(--grafite);
-  background: rgba(255, 255, 255, 0.86);
-  border-bottom: 1px solid var(--quadricula-forte);
-  box-shadow: inset 2px 2px 0 var(--noite-4), inset -2px 0 0 var(--noite-4);
-}
-.estados__mapa, .estados__tabela { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; padding: 2px; }
-.estados__vazio { padding: 16px; font-size: 14px; color: var(--grafite-fraco); }
-.estados__divisor {
-  display: grid; place-items: center;
-  cursor: row-resize; touch-action: none;
-}
-.estados__divisor span { width: 40px; height: 4px; background: var(--noite-4); box-shadow: 0 -4px 0 -2px transparent; }
-.estados__divisor:hover span, .estados__divisor.is-arrastando span { background: var(--tocha); }
-.estados__divisor:focus-visible { outline: 2px solid var(--cesar); outline-offset: -2px; }
 
-/* métricas (solve.metricas no Python) */
-.metricas .painel__titulo { margin-bottom: 10px; }
+/* ---------------------------------------------------------------- gaveta de métricas (e histórico do RDS) */
+.gaveta {
+  position: fixed; inset: 0 0 0 auto;
+  width: min(480px, 100vw); height: 100%; max-height: none; max-width: none;
+  margin: 0; padding: 22px 24px 32px;
+  border: 0; box-shadow: inset 2px 0 0 var(--noite-3);
+  color: var(--luar); background: var(--noite-2);
+  overflow: auto;
+}
+.gaveta[open] { animation: gaveta 180ms steps(4) both; }
+@keyframes gaveta { from { transform: translateX(40px); opacity: 0; } }
+.gaveta::backdrop { background: rgba(12, 9, 7, 0.6); }
+.gaveta__cabeca { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.gaveta__titulo { font: 700 24px/1.1 var(--f-pixel); }
+.gaveta__fechar { display: grid; place-items: center; width: 36px; height: 36px; color: var(--luar-fraco); }
+.gaveta__fechar:hover { color: var(--luar); background: var(--noite-3); }
+.gaveta__fechar svg { width: 12px; height: 12px; }
+.gaveta__sub { margin: 2px 0 18px; font-size: 14px; color: var(--luar-fraco); }
+.gaveta__vazio { font-size: 14px; color: var(--luar-fraco); }
+.gaveta__bloco { margin-top: 8px; }
 .mtab { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
-.mtab th, .mtab td { padding: 5px 6px; text-align: left; border-bottom: 1px solid var(--noite-3); vertical-align: top; }
+.mtab th, .mtab td { padding: 6px 6px; text-align: left; border-bottom: 1px solid var(--noite-3); vertical-align: top; }
 .mtab thead th { font-weight: 500; color: var(--luar-fraco); }
 .mtab tbody th { font-weight: 500; }
 .mtab .num { text-align: right; }
 .mtab--texto td { font-size: 12.5px; color: var(--luar-fraco); }
 .mtab--texto td:nth-child(2), .mtab--texto td:nth-child(3) { color: var(--luar); white-space: nowrap; }
-.metricas__dados { margin-top: 12px; padding-top: 0 !important; border-top: 0 !important; }
+.dados { display: grid; gap: 6px; }
+.dados > div { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.dados dt { font-size: 13px; color: var(--luar-fraco); }
+.dados dd { font-size: 14px; font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.dados--duplo { grid-template-columns: 1fr 1fr; column-gap: 24px; }
+.metricas__dados { margin-top: 14px; }
 .metricas__dados dd[title] { text-decoration: underline dotted var(--noite-4); text-underline-offset: 3px; cursor: help; }
-.metricas__sub { margin: 16px 0 6px; font: 600 14px/1.2 var(--f-pixel); color: var(--luar); }
+.metricas__sub { margin: 22px 0 8px; font: 600 15px/1.2 var(--f-pixel); color: var(--luar); }
 .metricas__entre { margin-top: 10px; font-size: 13px; color: var(--luar-fraco); }
 .metricas__entre b { font: 700 15px/1 var(--f-pixel); color: var(--luar); margin-right: 2px; }
-.metricas__casas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.metricas__casas li {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 3px 8px; font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--luar-fraco);
-  box-shadow: inset 0 0 0 1px var(--noite-3);
-}
-.metricas__casas b { font: 700 13px/1 var(--f-pixel); color: var(--cor-chave, var(--luar)); }
-
-/* camada + armadilhas */
-.opcoes { padding: 14px 16px 16px; }
-.opcoes__linha { display: flex; align-items: end; gap: 18px; flex-wrap: wrap; }
-.opcoes__camada { flex: 1 1 200px; min-width: 0; }
-.opcoes .painel__titulo { font-size: 16px; margin-bottom: 8px; }
-.opcoes .toggle { min-height: 46px; }
-
-/* histórico do RDS (recolhível) */
-.hist-card { padding: 14px 16px; }
-/* [IA] Claude – métricas e histórico (recolhíveis) ficam embaixo da janela 3D, fora da coluna fixa */
-.extras { display: grid; gap: 12px; margin-top: 18px; }
-.extras:not(:has(> :not([hidden]))) { display: none; }
-.hist-card summary { margin: 0; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; font-size: 16px; }
-.hist-card summary::-webkit-details-marker { display: none; }
-.hist-card summary::before {
-  content: ""; width: 8px; height: 8px; background: var(--luar-fraco);
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
-}
-.hist-card[open] summary::before { transform: rotate(90deg); }
-.hist-card[open] summary { margin-bottom: 10px; }
-.painel {
-  --px-borda: var(--noite-3);
-  --px-fundo: var(--noite-2);
-  padding: 18px 20px 20px;
-  min-width: 0;
-}
-.painel__titulo { font: 700 18px/1.1 var(--f-pixel); margin-bottom: 14px; }
-.painel__titulo label { cursor: pointer; }
-.painel__nota { margin-top: 10px; font-size: 13px; line-height: 1.45; color: var(--luar-fraco); }
-.rotulo-estado {
-  margin-bottom: 14px; padding: 10px 12px;
-  font: 600 22px/1.1 var(--f-pixel);
-  background: var(--noite);
-  box-shadow: inset 0 0 0 2px var(--noite-3);
-  overflow-wrap: anywhere;
-}
-.rotulo-estado__sep { margin-inline: 0.22em; color: #8A7660; }
-.dados { display: grid; gap: 8px; }
-.dados > div { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
-.dados dt { font-size: 14px; color: var(--luar-fraco); }
-.dados dd { font-size: 15px; font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.dados dd .ico-chave { display: inline-block; vertical-align: -1px; margin: 0 4px 0 10px; }
-.dados--duplo { grid-template-columns: 1fr 1fr; column-gap: 20px; }
-.dados--estado { grid-template-columns: 1fr 1fr; column-gap: 16px; }
-.dados--estado .dados__largo { grid-column: 1 / -1; }
-.resultado { display: flex; align-items: center; gap: 10px; font: 600 18px/1.2 var(--f-pixel); }
-.resultado::before { content: ""; flex: none; width: 10px; height: 10px; background: var(--luar-fraco); }
-.resultado[data-status="OK"]::before { background: var(--ok); }
-.resultado[data-status="RECUSA"]::before, .resultado[data-status="SEM_SOLUCAO"]::before,
-.resultado[data-status="CICLO_NEGATIVO"]::before { background: var(--erro); }
-.resultado__msg { margin-top: 8px; font-size: 13px; line-height: 1.45; color: var(--luar-fraco); overflow-wrap: anywhere; }
-.painel .dados--duplo { margin-top: 16px; padding-top: 14px; border-top: 2px solid var(--noite-3); }
-
-.select {
-  --px-borda: var(--noite-3);
-  --px-fundo: var(--noite);
-}
-.select select {
-  -webkit-appearance: none; appearance: none;
-  display: block; width: 100%;
-  padding: 11px 40px 12px 14px;
-  background: transparent; border: 0; border-radius: 0;
-  font: 600 16px/1.2 var(--f-pixel); color: var(--luar);
-  cursor: pointer;
-}
-.select select option { background: var(--noite-2); color: var(--luar); }
-.select select {
-  /* seta em pixel (svg inline, sem arquivo de imagem) */
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4' shape-rendering='crispEdges'%3E%3Cpath fill='%23B5A48C' d='M0 0h7v1H0zM1 1h5v1H1zM2 2h3v1H2zM3 3h1v1H3z'/%3E%3C/svg%3E") right 16px center / 14px 8px no-repeat;
-}
-.select:focus-within { outline: 2px solid var(--cesar); outline-offset: 2px; }
-.select select:focus-visible { outline: none; }
-
-.hist { margin-inline: -4px; }
+.metricas__casas { margin-top: 4px; font-size: 13px; line-height: 1.5; font-variant-numeric: tabular-nums; color: var(--luar-fraco); }
+.metricas__casas b { font-weight: 700; color: var(--luar); }
 .hist table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
 .hist th, .hist td { padding: 6px 4px; text-align: left; border-bottom: 1px solid var(--noite-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hist th { font-weight: 500; color: var(--luar-fraco); }
-.hist th:nth-child(1) { width: 60px; }
-.hist th:nth-child(2) { width: 38px; }
-.hist th:nth-child(4) { width: 52px; }
-.hist th:nth-child(5) { width: 74px; }
+.hist th:nth-child(1) { width: 64px; }
+.hist th:nth-child(2) { width: 40px; }
+.hist th:nth-child(4) { width: 56px; }
+.hist th:nth-child(5) { width: 96px; }
 .hist td:nth-child(5) { color: var(--luar-fraco); }
 
 /* ================================================================ [IA] Claude – diálogo "Carregar mapa" */
@@ -1054,21 +868,8 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
 .manual__texto p + p { margin-top: 16px; }
 .manual__figuras { grid-column: 6 / span 7; display: grid; gap: 48px; }
 
-.fig {
-  position: relative;
-  padding: 36px 28px 28px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid var(--quadricula-forte);
-  border-radius: 2px;
-}
-.fig__legenda {
-  position: absolute; left: 20px; top: -12px;
-  padding: 2px 10px;
-  background: var(--papel);
-  border: 1px solid var(--quadricula-forte);
-  font: 600 14px/1.4 var(--f-texto);
-  color: var(--grafite);
-}
+.fig { position: relative; padding-top: 14px; border-top: 2px solid var(--grafite); }
+.fig__legenda { margin-bottom: 28px; font: 600 15px/1.4 var(--f-texto); color: var(--grafite); }
 .fig__nota { margin-top: 18px; font-size: 14px; line-height: 1.5; color: var(--grafite-fraco); max-width: 60ch; }
 
 /* tupla de estado com linhas de chamada */
@@ -1099,11 +900,8 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
 .casa__nome { display: flex; align-items: baseline; gap: 8px; font-weight: 600; font-size: 16px; line-height: 1.25; }
 .casa__custo { font: 600 16px/1 var(--f-pixel); color: #B83A0A; font-variant-numeric: tabular-nums; } /* [IA] Claude – laranja mais escuro no papel: 5,3:1 (AA) */
 .casa__texto { font-size: 14px; line-height: 1.4; color: var(--grafite-fraco); }
-.casa.is-no-mapa .casa__nome::after {
-  content: "neste mapa"; margin-left: auto;
-  padding: 1px 6px; font-size: 12px; font-weight: 500; color: var(--grafite-fraco);
-  box-shadow: inset 0 0 0 1px var(--quadricula-forte);
-}
+.casa { transition: opacity 160ms; }
+.catalogo:has(.is-no-mapa) .casa:not(.is-no-mapa) { opacity: 0.4; }
 
 /* camadas */
 .camadas { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 32px; align-items: center; }
@@ -1243,21 +1041,30 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
 .mapa2d canvas { max-width: 100%; max-height: 100%; }
 
 /* ================================================================ responsivo */
-@media (max-width: 1199px) {
-  .area { grid-template-columns: minmax(0, 1fr); }
-  .jogar { --sec-pad-topo: 56px; }
-  .jogar__cabeca p { max-width: 64ch; }
-  .info { position: static; height: auto; min-height: 0; }
-  /* [IA] Claude – integração: empilhado, o mapa tem altura própria e a tabela cresce com o conteúdo (sem divisor) */
-  .estados { height: auto; flex: none; grid-template-rows: auto auto; gap: 12px; }
-  .estados__mapa, .estados__tabela { overflow: visible; }
-  .estados__tabela .ev-corpo > .ev-bloco:only-child > .ev-rola--xy { max-height: clamp(300px, 56vh, 560px); }
-  .estados__divisor { display: none; }
-  .estados__mapa { height: clamp(360px, 80vw, 600px); }
-  .estados__tabela > .ev-card { overflow: visible; }
-  .estados__tabela .ev-corpo { flex: none; height: auto; min-height: 0; max-height: clamp(320px, 62vh, 640px); }
+/* 960–1099 px: ainda lado a lado (a janela um pouco mais estreita) */
+@media (max-width: 1099px) {
+  .area { grid-template-columns: minmax(0, 56fr) minmax(0, 44fr); gap: 12px 20px; }
   .manual__texto { grid-column: 1 / span 5; }
   .manual__figuras { grid-column: 6 / span 7; }
+}
+/* abaixo de 960 px a área empilha: barra, janela, doca, estado, mapa e tabela; a altura deixa de ser a da tela,
+   e a janela fica em até 56vh para o estado e o começo do mapa aparecerem na primeira tela */
+@media (max-width: 959px) {
+  .area {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas: "barra" "esq" "info";
+    height: auto; min-height: 0;
+    gap: 14px;
+  }
+  .tela3d { flex: none; aspect-ratio: 16 / 10; max-height: 56vh; max-height: 56svh; }
+  .info { gap: 14px; }
+  .estados { grid-template-rows: auto auto; }
+  .estados__divisor { display: none; }
+  .estados__mapa { height: clamp(300px, 56vw, 480px); flex: none; }
+  .estados__tabela > .ev-card { overflow: visible; }
+  .estados__tabela .ev-corpo { flex: none; height: auto; max-height: clamp(300px, 60vh, 560px); }
+  .estados__tabela .ev-corpo > .ev-bloco:only-child > .ev-rola--xy { max-height: clamp(260px, 52vh, 500px); }
 }
 
 @media (max-width: 900px) {
@@ -1266,7 +1073,7 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
   body { font-size: 16px; }
 
   .nav { inset: 8px 0 auto; padding-inline: 8px; }
-  .nav__barra { --px-borda: var(--noite-3); --px-fundo: rgba(26, 22, 18, 0.94); gap: 12px; padding-inline: 8px; }
+  .nav__barra { --px-borda: transparent; --px-fundo: rgba(26, 22, 18, 0.94); gap: 12px; padding-inline: 8px; }
   .nav__menu { display: inline-flex; }
   .pill--barra { display: none; }
   .nav__links {
@@ -1285,27 +1092,26 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
   .hero__grade { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: calc(var(--nav-h) + 48px); padding-bottom: 48px; }
   .hero__palco { aspect-ratio: 1 / 1; max-height: 560px; }
   .hero__lead { font-size: 17px; }
-  .janela__sub { display: none; }
 
-  .faixa { grid-template-columns: minmax(0, 1fr); }
-  .niveis { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; margin-inline: calc(-1 * var(--gutter)); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); }
-  .nivel { flex: 0 0 148px; scroll-snap-align: start; }
-  .carregar { flex-direction: row; justify-self: start; padding-inline: 16px; }
-  .algs { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .alg { grid-template-columns: minmax(0, 1fr); }
-  .alg__sub { white-space: normal; }
-  .jogar { --sec-pad-topo: 48px; }
-  .janela__vista { aspect-ratio: 4 / 5; max-height: 78vh; }
-  .hud__stats { gap: 14px; padding: 8px 12px 10px; }
-  .hud__num { font-size: 22px; }
-  .hud__mini canvas { max-width: 108px; height: auto !important; }
-  .hud__dialogo.is-faixa { width: calc(100% - 28px); bottom: auto; top: 96px; }
-  .doca { gap: 14px 20px; }
-  .doca__toggles { margin-left: 0; }
+  .barra { flex-wrap: wrap; }
+  #popMapa { flex: 1 1 auto; }
+  .mapa-sel { width: 100%; }
+  .mapa-sel__seta { margin-left: auto; }
+  .barra__metricas { order: 2; }
+  .algs { order: 3; flex: 1 1 100%; overflow-x: auto; }
+  .alg { flex: 1 0 auto; padding: 0 12px; }
+  .pop__painel--mapas { width: calc(100vw - 2 * var(--gutter)); }
+  .tela3d { aspect-ratio: 4 / 5; max-height: 56vh; max-height: 56svh; }
+  .hud__num { font-size: 20px; }
+  .hud__stats { gap: 14px; padding: 6px 10px 8px; }
+  .hud__dialogo.is-faixa { width: calc(100% - 24px); bottom: auto; top: 72px; }
+  .doca { flex-wrap: wrap; gap: 10px 12px; }
+  .tempo { order: -1; flex: 1 1 100%; }
+  .doca__transporte { flex: 1 1 auto; justify-content: space-between; }
+  .rotulo-estado { font-size: 22px; }
 
   .manual__grade { display: block; }
   .manual__texto { position: static; margin-bottom: 48px; }
-  .fig { padding: 32px 18px 20px; }
   .camadas { grid-template-columns: minmax(0, 1fr); }
   .tupla__notas { grid-template-columns: minmax(0, 1fr); margin-top: 40px; gap: 12px; }
   .tupla__guias { display: none; }
@@ -1324,16 +1130,11 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
 @media (max-width: 520px) {
   .nav__nome { font-size: 16px; }
   .nav__menu span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .hero__titulo { margin-top: 22px; }
+  .hero__titulo { margin-top: 0; }
   .hero__acoes .btn { flex: 1 1 100%; }
-  .hud__cam button { padding: 6px 7px 7px; }
-  .hud__inv { padding: 6px; gap: 4px; }
-  .slot { width: 38px; height: 30px; }
-  .doca__transporte { width: 100%; justify-content: space-between; }
-  .doca__transporte .btn-ico { flex: 1; }
-  .doca__toggles { width: 100%; }
-  .resumo { grid-template-columns: minmax(0, 1fr); }
-  .vel { flex-wrap: wrap; }
+  .niveis { grid-template-columns: minmax(0, 1fr); }
+  .slot { width: 36px; height: 28px; }
+  .estado__linha { flex-wrap: wrap; }
   .contagem dd { font-size: 24px; }
   .catalogo { grid-template-columns: minmax(0, 1fr); }
   .camada { gap: 8px; }
@@ -1350,241 +1151,150 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
   }
   .rodape__andarilho { animation: none; transform: translateX(8vw); }
 }
-
-/* [IA] Claude – fix rodada 2 (desktop ≥ 1200 px): o workspace cabe em 1440×900 — título em uma linha, janela 3D
-   com altura pela tela, resumo em duas faixas baixas, mapa de estados e tabela dividindo o resto da coluna. */
-@media (min-width: 1200px) {
-  /* o título fica na coluna da esquerda: ao chegar em #jogar, a coluna da direita já começa no topo da tela */
-  .jogar { --sec-pad-topo: 4px; }
-  .jogar__cabeca { display: flex; align-items: center; gap: 4px 22px; max-width: none; margin-bottom: 10px; }
-  .jogar__cabeca h2 { flex: none; font-size: 38px; }
-  .jogar__cabeca p { margin: 0; font-size: 14px; line-height: 1.4; }
-  .janela__vista { aspect-ratio: auto; height: clamp(300px, calc(100vh - 500px), 70vh); max-height: none; min-height: 0; }
-  .janela__barra { min-height: 38px; padding-block: 4px; }
-  .doca { margin-top: 10px; gap: 10px 16px; }
-  .doca__transporte { gap: 6px; }
-  .doca__transporte .btn-ico { width: 44px; height: 44px; }
-  .doca__toggles { gap: 10px 14px; }
-  .vel__botao { min-height: 44px; padding-block: 8px 10px; }
-  .legenda { margin-top: 16px; }
-  .area__esq { min-height: calc(100vh - var(--nav-h) - 40px); }
-
-  .info .painel--compacto { padding: 8px 12px 10px; }
-  .painel__topo { display: flex; align-items: center; gap: 10px; min-width: 0; margin-bottom: 6px; }
-  .info .painel--compacto .painel__topo .painel__titulo { flex: none; margin: 0; font-size: 15px; }
-  .info .painel--compacto .painel__topo .rotulo-estado { flex: 1 1 auto; min-width: 0; margin: 0; padding: 2px 8px; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .info .painel--compacto .painel__topo .resultado { min-width: 0; font-size: 15px; }
-  .info .painel--compacto .dados { row-gap: 1px; }
-  .info .painel--compacto .dados dt { font-size: 12.5px; }
-  .info .painel--compacto .dados dd { font-size: 13.5px; }
-  .info .resultado__python { margin-top: 0; padding: 3px 8px; font-size: 12.5px; }
-  .info .resultado__msg { margin-top: 4px; font-size: 12.5px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .info .painel--compacto .dados--duplo { margin-top: 5px; padding-top: 5px; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 12px; }
-
-  .estados__mapa .ev-cab { flex-wrap: nowrap; overflow: hidden; }
-  .estados__mapa .ev-titulo { flex: none; white-space: nowrap; font-size: 17px; }
-  .estados__mapa .ev-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; line-height: 1.5; }
-  .estados__mapa .ev-mapa-pe { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 2px 12px; }
-  .estados__mapa .ev-bt[data-a="centralizar"] { width: 32px; padding: 0; }
-  .estados__mapa .ev-bt[data-a="centralizar"] span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  .estados__mapa .ev-legenda { gap: 2px 10px; font-size: 11.5px; }
-  .estados__tabela .ev-aba { padding: 6px 11px 7px; font-size: 14px; }
-  .estados__tabela .ev-nota { font-size: 11.5px; line-height: 1.35; }
-  .estados__tabela .ev-frase { font-size: 12.5px; min-height: 0; }
-  .estados__tabela .ev-corpo { gap: 8px; }
-  .estados__tabela .ev-bloco { gap: 4px; }
-}
-/* em larguras médias a nota "3 passos/s" vira dica do botão (title), para a doca caber numa linha */
-@media (min-width: 1200px) and (max-width: 1559px) {
-  .vel__nota { display: none; }
-}
 </style>
-<style>/* [IA] Claude – estilos do mapa de estados e das tabelas da aula (LAB.EstadosView, estados.js).
-   Cartões de "papel quadriculado" (como slides impressos) dentro da coluna escura do jogo. Tudo prefixado com .ev-.
-   Ajustes de altura pelo shell: --ev-mapa-h (palco do grafo) e --ev-tabela-h (área rolável da tabela). */
+<style>/* [IA] Claude – estilos do mapa de estados e das tabelas da aula (LAB.EstadosView, estados.js). Tudo prefixado com .ev-.
+   [IA] Claude – rodada 3 (enxuto): sem cartão próprio; o papel quadriculado vem do contêiner (.estados no app.css).
+   Botões de ícone pequenos e planos, legenda num "?", contador/frase/caminho numa linha embaixo da tabela.
+   [IA] Claude – rodada 4: no chão escuro da página (sem papel), tabela em DM Sans com números tabulares, sem abas
+   (a tabela segue o algoritmo da barra de cima; a DFS é um link na linha de baixo), ícones do mapa por cima do canvas. */
 
 .ev-raiz {
-  --ev-papel: var(--papel, #F3F5FA);
-  --ev-quad: var(--quadricula, #DCE3F0);
-  --ev-tinta: var(--grafite, #1C1B29);
-  --ev-tinta-2: var(--grafite-fraco, #5B5F7A);
-  --ev-linha: #A9AFC4;
-  --ev-linha-2: #D3D8E6;
-  --ev-faixa: #FBE3C9;          /* a faixa "pêssego" da linha D no slide */
+  --ev-fundo: #1F1B17;         /* um degrau acima do chão da página */
+  --ev-fundo-2: #26201A;
+  --ev-tinta: var(--luar, #EFE6D8);
+  --ev-tinta-2: var(--luar-fraco, #B5A895);
+  --ev-linha: #4A3E33;
+  --ev-linha-2: #312921;
+  --ev-faixa: #3A2C1C;          /* a faixa "pêssego" da linha D no slide, em versão escura */
   --ev-cesar: var(--cesar, #FF6002);
-  --ev-erro: #D42F4A;
-  --ev-ok: #1F8A5B;
-  --ev-moldura: #3A3028;
+  --ev-erro: #FF6B86;
+  --ev-ok: #3FCF8E;
   --ev-pixel: var(--f-pixel, "Pixelify Sans", "DM Sans", sans-serif);
   --ev-texto: var(--f-texto, "DM Sans", system-ui, sans-serif);
   min-width: 0;
 }
 
-/* ---------------------------------------------------------------- cartão de papel */
+/* ---------------------------------------------------------------- bloco (sem moldura: o papel é do contêiner) */
 .ev-card {
   position: relative;
-  display: flex; flex-direction: column; gap: 10px;
-  min-width: 0;
-  padding: 14px 16px 14px;
+  display: flex; flex-direction: column; gap: 6px;
+  min-width: 0; min-height: 0;
+  padding: 8px 12px 10px;
   color: var(--ev-tinta);
   font: 400 14px/1.45 var(--ev-texto);
   font-variant-numeric: tabular-nums;
-  background-color: var(--ev-papel);
-  background-image:
-    linear-gradient(var(--ev-quad) 1px, transparent 1px),
-    linear-gradient(90deg, var(--ev-quad) 1px, transparent 1px);
-  background-size: 24px 24px;
-  background-position: -1px -1px;
-  border-radius: 4px;
-  box-shadow: 0 0 0 2px var(--ev-moldura), 0 10px 0 -4px rgba(0, 0, 0, 0.35);
 }
 .ev-card * { box-sizing: border-box; }
-.ev-cab { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.ev-titulo { margin: 0; font: 700 20px/1.05 var(--ev-pixel); letter-spacing: -0.005em; color: var(--ev-tinta); }
-.ev-sub { margin: 0; font-size: 13px; color: var(--ev-tinta-2); }
+.ev-mapa { padding: 0; }
+/* ícones do mapa flutuando no canto, discretos até o hover */
+.ev-ferr { position: absolute; z-index: 4; top: 6px; right: 6px; display: flex; align-items: center; gap: 2px; opacity: 0.6; transition: opacity 120ms; }
+.ev-ferr:hover, .ev-ferr:focus-within { opacity: 1; }
 
-/* ---------------------------------------------------------------- botões de papel (cantos em degrau) */
-.ev-bt {
-  --ev-bt-fundo: #fff;
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  min-height: 32px; padding: 4px 10px;
-  border: 0; border-radius: 0;
-  font: 600 13px/1 var(--ev-texto); color: var(--ev-tinta);
-  background: var(--ev-tinta);
-  clip-path: polygon(0 3px, 3px 3px, 3px 0, calc(100% - 3px) 0, calc(100% - 3px) 3px, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 3px calc(100% - 3px), 0 calc(100% - 3px));
-  position: relative; isolation: isolate;
-  cursor: pointer;
-  white-space: nowrap;
+/* ---------------------------------------------------------------- botões de ícone (planos, no papel) */
+.ev-ico {
+  display: inline-grid; place-items: center;
+  width: 28px; height: 28px; padding: 0;
+  border: 0; border-radius: 0; background: transparent; cursor: pointer;
+  font: 600 14px/1 var(--ev-texto); color: var(--ev-tinta-2);
 }
-.ev-bt::before {
-  content: ""; position: absolute; inset: 2px; z-index: -1;
-  background: var(--ev-bt-fundo);
-  clip-path: polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px));
-}
-.ev-bt:hover { --ev-bt-fundo: #FFF3E8; }
-.ev-bt:active { transform: translateY(1px); --ev-bt-fundo: var(--ev-quad); }
-.ev-bt:focus-visible { outline: 2px solid var(--ev-cesar); outline-offset: 2px; }
-.ev-bt svg { width: 14px; height: 14px; fill: currentColor; flex: none; }
-.ev-bt--ico { width: 32px; padding: 0; }
-.ev-bt--play, .ev-bt--ativo { --ev-bt-fundo: var(--ev-cesar); color: #fff; }
-.ev-bt--play:hover, .ev-bt--ativo:hover { --ev-bt-fundo: #FF7A26; }
-
-.ev-chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; user-select: none; white-space: nowrap; }
-.ev-chk input { width: 16px; height: 16px; margin: 0; accent-color: var(--ev-cesar); }
-.ev-chk input:focus-visible { outline: 2px solid var(--ev-cesar); outline-offset: 2px; }
+.ev-ico svg { width: 14px; height: 14px; fill: currentColor; }
+.ev-ico:hover { color: var(--ev-tinta); background: rgba(239, 230, 216, 0.08); }
+/* ligado = ícone cheio (não sublinhado: sublinhado é linguagem de aba) */
+.ev-ico[aria-pressed="true"] { color: var(--ev-tinta); background: rgba(239, 230, 216, 0.12); }
+.ev-ico[aria-pressed="true"]:hover { background: rgba(239, 230, 216, 0.2); }
+.ev-ico--ativo { color: var(--noite, #1A1612); background: var(--ev-cesar); }
+.ev-ico--ativo:hover { color: var(--noite, #1A1612); background: #FF7A26; }
+.ev-ico:focus-visible { outline: 2px solid var(--ev-cesar); outline-offset: 1px; }
 .ev-link {
   border: 0; padding: 0; background: none; cursor: pointer;
-  font: inherit; color: var(--ev-tinta); text-decoration: underline; text-decoration-color: var(--ev-cesar); text-underline-offset: 3px;
+  font: inherit; color: var(--ev-tinta-2); text-decoration: underline; text-decoration-color: var(--ev-linha); text-underline-offset: 3px;
 }
+.ev-link:hover { color: var(--ev-tinta); text-decoration-color: var(--ev-cesar); }
 .ev-link:focus-visible { outline: 2px solid var(--ev-cesar); outline-offset: 2px; }
 
 /* ---------------------------------------------------------------- mapa */
 .ev-palco {
   position: relative;
-  height: var(--ev-mapa-h, clamp(280px, 44vh, 520px));
-  min-height: 220px;
+  flex: 1 1 auto; min-height: 120px;
   overflow: hidden;
-  background: #FBFCFE;
-  border: 1px solid var(--ev-linha);
-  border-radius: 3px;
   cursor: grab;
   touch-action: none;
 }
-.ev-palco:focus-visible { outline: 2px solid var(--ev-cesar); outline-offset: 2px; }
+.ev-palco:focus-visible { outline: 2px solid var(--ev-cesar); outline-offset: -2px; }
 .ev-palco.ev-arrastando { cursor: grabbing; }
 .ev-cv { position: absolute; inset: 0; display: block; }
 .ev-cv--sobre { pointer-events: none; }
-.ev-zoom { position: absolute; right: 8px; top: 8px; display: flex; flex-direction: column; gap: 4px; }
 .ev-aviso {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   max-width: 80%; padding: 8px 12px;
-  font-size: 13px; text-align: center; color: var(--ev-tinta);
-  background: #fff; box-shadow: 0 0 0 1px var(--ev-linha);
+  font-size: 13px; text-align: center; color: var(--ev-tinta-2);
+  background: var(--ev-fundo-2);
 }
 .ev-dica {
   position: absolute; z-index: 3; pointer-events: none;
   display: flex; flex-direction: column; gap: 1px;
   min-width: 150px; max-width: 260px; padding: 7px 10px 8px;
-  font-size: 12px; line-height: 1.35; color: #fff;
-  background: var(--ev-tinta);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+  font-size: 12px; line-height: 1.35; color: var(--ev-tinta);
+  background: #2E2620; box-shadow: 0 0 0 1px var(--ev-linha);
 }
-.ev-dica-rot { font: 600 14px/1.2 var(--ev-pixel); margin-bottom: 2px; }
-.ev-dica-cam { color: #C9CCDC; }
-.ev-mapa-pe { display: flex; flex-direction: column; gap: 8px; }
-.ev-acoes { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
-.ev-legenda { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--ev-tinta-2); }
-.ev-legenda li { display: inline-flex; align-items: center; gap: 6px; }
-.ev-bola { display: inline-block; width: 12px; height: 12px; border-radius: 50%; }
-.ev-traco { display: inline-block; width: 18px; height: 0; border-top: 3px solid var(--c); vertical-align: middle; }
+.ev-dica-rot { font: 600 14px/1.2 var(--ev-texto); margin-bottom: 2px; }
+.ev-dica-cam { color: var(--ev-tinta-2); }
+/* legenda: só abre no "?" */
+.ev-ajuda { position: relative; }
+.ev-legenda {
+  position: absolute; z-index: 6; right: 0; top: calc(100% + 4px);
+  width: 210px; margin: 0; padding: 10px 12px;
+  list-style: none;
+  display: grid; gap: 5px;
+  font-size: 12.5px; color: var(--ev-tinta);
+  background: var(--noite-2, #26201A); box-shadow: 0 0 0 1px var(--ev-linha), 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+.ev-legenda li { display: flex; align-items: center; gap: 8px; }
+.ev-bola { display: inline-block; flex: none; width: 12px; height: 12px; border-radius: 50%; }
+.ev-traco { display: inline-block; flex: none; width: 18px; height: 0; border-top: 3px solid var(--c); vertical-align: middle; }
 .ev-traco--trac { border-top-style: dashed; }
-.ev-anel { display: inline-block; width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 2.5px var(--ev-cesar) inset; }
+.ev-anel { display: inline-block; flex: none; width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 2.5px var(--ev-cesar) inset; }
 .ev--carregando .ev-corpo { opacity: 0.5; }
 
-/* ---------------------------------------------------------------- tabela: abas e controles */
-.ev-abas { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 2px solid var(--ev-tinta); margin: -2px 0 0; }
-.ev-aba {
-  position: relative; margin-bottom: -2px;
-  padding: 7px 12px 8px;
-  border: 0; background: transparent; cursor: pointer;
-  font: 600 15px/1 var(--ev-pixel); color: var(--ev-tinta-2);
-  border-bottom: 2px solid transparent;
-}
-.ev-aba:hover { color: var(--ev-tinta); }
-.ev-aba[aria-selected="true"] { color: var(--ev-tinta); background: #fff; box-shadow: inset 0 0 0 2px var(--ev-tinta); border-bottom-color: #fff; }
-.ev-aba[aria-selected="true"]::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 3px; height: 3px; background: var(--ev-cesar); }
-.ev-aba:focus-visible { outline: 2px solid var(--ev-cesar); outline-offset: -4px; }
-.ev-so-estreito { display: none; }
-
-.ev-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-.ev-botoes { display: flex; gap: 4px; }
-.ev-vel { position: relative; }
-.ev-vel b { font-weight: 700; margin-left: 2px; }
-.ev-menu {
-  position: absolute; z-index: 5; left: 0; top: calc(100% + 4px);
-  min-width: 140px; margin: 0; padding: 4px 0; list-style: none;
-  background: #fff; box-shadow: 0 0 0 2px var(--ev-tinta), 4px 4px 0 rgba(28, 27, 41, 0.25);
-}
-.ev-menu:focus-visible { outline: 2px solid var(--ev-cesar); outline-offset: 3px; }
-.ev-menu li { padding: 6px 12px 6px 30px; font-size: 13px; cursor: pointer; position: relative; }
-.ev-menu li:hover { background: #FFF3E8; }
-.ev-menu li[aria-selected="true"] { font-weight: 700; }
-.ev-menu li[aria-selected="true"]::before { content: ""; position: absolute; left: 12px; top: 50%; width: 8px; height: 8px; margin-top: -4px; background: var(--ev-cesar); }
-.ev-linha-tempo { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; }
-.ev-linha-tempo input[type="range"] { flex: 1; min-width: 80px; accent-color: var(--ev-cesar); }
-.ev-cont { font-size: 12px; color: var(--ev-tinta-2); white-space: nowrap; min-width: 9.5em; text-align: right; }
-.ev-frase { flex: 1 1 100%; margin: 0; min-height: 1.45em; font-size: 13px; color: var(--ev-tinta); }
+/* ---------------------------------------------------------------- linha de baixo: frase, Caminho, DFS, replay e sincronia */
+.ev-tab { padding-top: 10px; }
+.ev-pe { flex: none; display: flex; align-items: center; gap: 4px 14px; min-width: 0; min-height: 28px; font-size: 12.5px; color: var(--ev-tinta-2); }
+.ev-frase { flex: 1 1 auto; min-width: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-pe-bt { flex: none; font-size: 12.5px; white-space: nowrap; }
+.ev-pe-bt[aria-pressed="true"] { color: var(--ev-tinta); }
+.ev-botoes { flex: none; display: flex; align-items: center; gap: 0; }
+.ev-cont { flex: none; margin-left: 6px; white-space: nowrap; }
+.ev-sinc { flex: none; margin-right: -4px; }
+.ev-detalhes { flex: none; display: grid; gap: 4px; max-height: 7.5em; overflow: auto; font-size: 12.5px; }
 
 /* ---------------------------------------------------------------- tabela: corpo */
 .ev-corpo {
   display: flex; flex-direction: column; gap: 14px;
-  max-height: var(--ev-tabela-h, clamp(320px, 52vh, 680px));
+  flex: 1 1 auto; min-height: 80px;
   overflow: auto;
   overscroll-behavior: contain;
   padding-right: 2px;
 }
 .ev-bloco { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.ev-h4 { margin: 0; font: 600 15px/1.2 var(--ev-pixel); color: var(--ev-tinta); }
-.ev-h4--linha { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; cursor: help; }
-.ev-h4-nota { font: 400 12px/1.3 var(--ev-texto); color: var(--ev-tinta-2); }
+.ev-h4 { margin: 0; font: 600 13px/1.2 var(--ev-texto); color: var(--ev-tinta-2); }
 .ev-nota { margin: 0; font-size: 12px; color: var(--ev-tinta-2); }
 .ev-nota--erro { color: var(--ev-erro); }
 .ev-vazio { color: var(--ev-tinta-2); font-style: italic; }
 .ev-mais { color: var(--ev-tinta-2); font-size: 12px; white-space: nowrap; }
 
 /* nomes de vértice: (3,4) com chaves sobrescritas e bônus subscritos */
-.ev-v { font: 500 13px/1 var(--ev-pixel); white-space: nowrap; color: var(--ev-tinta); }
-.ev-v sup, .ev-v sub { font-size: 0.68em; line-height: 0; margin-left: 1px; }
-.ev-v sup { color: #9A5B00; }
-.ev-v sub { color: #1F7A57; }
+.ev-v { font: 500 13px/1 var(--ev-texto); font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ev-tinta); }
+.ev-v sup, .ev-v sub { font-size: 0.72em; line-height: 0; margin-left: 1px; }
+.ev-v sup { color: var(--tocha, #FFB347); }
+.ev-v sub { color: #6FD8A8; }
 .ev-v--alvo { font-weight: 700; letter-spacing: 0.02em; }
 .ev-v--aluno { box-shadow: 0 0 0 2px var(--ev-cesar); border-radius: 2px; padding: 0 2px; }
 
 /* tabelas no estilo dos slides: grade fina, cabeçalho em negrito */
-.ev-rola { max-height: 300px; overflow: auto; border: 1px solid var(--ev-linha); background: #fff; }
+.ev-rola { max-height: 300px; overflow: auto; background: var(--ev-fundo); }
 .ev-rola--xy { max-height: 360px; }
-.ev-rola-x { overflow-x: auto; border: 1px solid var(--ev-linha); background: #fff; }
-.ev-t { border-collapse: separate; border-spacing: 0; width: 100%; background: #fff; font-size: 13px; }
+.ev-rola-x { overflow-x: auto; background: var(--ev-fundo); }
+.ev-t { border-collapse: separate; border-spacing: 0; width: 100%; background: var(--ev-fundo); font-size: 13px; font-variant-numeric: tabular-nums; }
 .ev-t th, .ev-t td {
   padding: 5px 8px; text-align: left; vertical-align: middle;
   border-right: 1px solid var(--ev-linha-2); border-bottom: 1px solid var(--ev-linha-2);
@@ -1593,29 +1303,29 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
 .ev-t th:last-child, .ev-t td:last-child { border-right: 0; }
 .ev-t thead th {
   position: sticky; top: 0; z-index: 1;
-  background: #fff; font-weight: 700; color: var(--ev-tinta);
-  border-bottom: 2px solid var(--ev-tinta);
+  background: var(--ev-fundo); font-weight: 500; color: var(--ev-tinta-2);
+  border-bottom: 1px solid var(--ev-linha);
 }
-.ev-t tbody th { font-weight: 700; background: #fff; }
+.ev-t tbody th { font-weight: 500; background: var(--ev-fundo); }
 .ev-num { width: 3.5em; color: var(--ev-tinta-2); }
-.ev-t tbody tr.ev-atual > * { background: #FFF1E4; }
+.ev-t tbody tr.ev-atual > * { background: #2E2419; }
 .ev-t tbody tr.ev-atual > :first-child { box-shadow: inset 3px 0 0 var(--ev-cesar); }
 
 /* vetor da BFS (horizontal, como o slide): D com a faixa pêssego */
 .ev-t--vetor { width: auto; }
 .ev-t--vetor th, .ev-t--vetor td { min-width: 44px; text-align: center; height: 30px; }
 .ev-t--vetor thead th { position: static; }
-.ev-t--vetor tbody th, .ev-t--vetor .ev-canto { position: sticky; left: 0; z-index: 2; text-align: left; min-width: 30px; font: 700 14px/1 var(--ev-pixel); box-shadow: 1px 0 0 var(--ev-linha); }
+.ev-t--vetor tbody th, .ev-t--vetor .ev-canto { position: sticky; left: 0; z-index: 2; text-align: left; min-width: 30px; font: 600 13px/1 var(--ev-texto); background: var(--ev-fundo); box-shadow: 1px 0 0 var(--ev-linha); }
 .ev-t--vetor tr.ev-faixa > * { background: var(--ev-faixa); }
-.ev-t--vetor tr.ev-faixa > td { font: 600 15px/1 var(--ev-pixel); }
+.ev-t--vetor tr.ev-faixa > td { font: 600 14px/1 var(--ev-texto); }
 .ev-t--vetor .ev-novo { box-shadow: inset 0 0 0 2px var(--ev-cesar); }
-.ev-t--vetor .ev-col-atual { background-image: linear-gradient(rgba(140, 144, 168, 0.18), rgba(140, 144, 168, 0.18)); }
+.ev-t--vetor .ev-col-atual { background-image: linear-gradient(rgba(239, 230, 216, 0.08), rgba(239, 230, 216, 0.08)); }
 .ev-t--vetor .ev-col-aluno { border-bottom-color: var(--ev-cesar); }
 .ev-canto { color: var(--ev-tinta-2); }
 
 .ev-fila { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; margin: 2px 0 0; }
-.ev-fila-rot { font: 700 15px/1 var(--ev-pixel); }
-.ev-fila-itens { display: inline-flex; flex-wrap: wrap; gap: 4px 8px; padding: 5px 9px; background: #fff; box-shadow: 0 0 0 1px var(--ev-linha); min-height: 28px; align-items: center; }
+.ev-fila-rot { font: 600 13px/1 var(--ev-texto); color: var(--ev-tinta-2); }
+.ev-fila-itens { display: inline-flex; flex-wrap: wrap; gap: 4px 8px; padding: 5px 9px; background: var(--ev-fundo-2); min-height: 28px; align-items: center; }
 .ev-fila-dir { font-size: 12px; color: var(--ev-tinta-2); }
 .ev-ordem { margin: 0; font-size: 13px; line-height: 1.7; }
 
@@ -1623,20 +1333,20 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
 .ev-dfs-topo { display: grid; grid-template-columns: minmax(150px, auto) 1fr; gap: 6px 18px; align-items: start; }
 .ev-dfs-nota { grid-column: 1 / -1; }
 .ev-pilha { display: flex; flex-direction: column; gap: 6px; }
-.ev-pilha-l { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border: 1px solid var(--ev-tinta); background: #fff; min-width: 140px; }
+.ev-pilha-l { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border: 1px solid var(--ev-linha); background: var(--ev-fundo); min-width: 140px; }
 .ev-pilha-l li { display: flex; justify-content: space-between; gap: 10px; padding: 4px 9px; border-bottom: 1px solid var(--ev-linha-2); }
 .ev-pilha-l li:last-child { border-bottom: 0; }
 .ev-pilha-l li.ev-topo { background: var(--ev-faixa); box-shadow: inset 3px 0 0 var(--ev-cesar); }
-.ev-df { font: 500 12px/1 var(--ev-pixel); color: var(--ev-tinta-2); }
+.ev-df { font: 500 12px/1 var(--ev-texto); color: var(--ev-tinta-2); }
 .ev-classes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 4px; font-size: 13px; }
 .ev-classes li { display: flex; align-items: center; gap: 8px; }
-.ev-classes b { margin-left: auto; font: 600 15px/1 var(--ev-pixel); }
+.ev-classes b { margin-left: auto; font: 600 13px/1 var(--ev-texto); }
 .ev-classes .ev-ciclo-li { margin-top: 4px; font-weight: 600; }
 .ev-frase-c { white-space: normal; min-width: 180px; }
-.ev-cl-arvore { box-shadow: inset 3px 0 0 #1C1B29; }
-.ev-cl-retorno { box-shadow: inset 3px 0 0 #D64560; }
-.ev-cl-avanco { box-shadow: inset 3px 0 0 #1F9C8A; }
-.ev-cl-cruzamento { box-shadow: inset 3px 0 0 #7B61D9; }
+.ev-cl-arvore { box-shadow: inset 3px 0 0 #EFE6D8; }
+.ev-cl-retorno { box-shadow: inset 3px 0 0 #FF6B86; }
+.ev-cl-avanco { box-shadow: inset 3px 0 0 #3CC8B4; }
+.ev-cl-cruzamento { box-shadow: inset 3px 0 0 #A08CF0; }
 .ev-pilha-c { white-space: normal; }
 .ev-resolucao dl { margin: 0; display: grid; grid-template-columns: 1fr; gap: 2px; }
 .ev-resolucao dt { font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; margin-top: 4px; }
@@ -1646,54 +1356,46 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
 /* Dijkstra / Bellman-Ford: linhas = vértices, colunas = passos */
 .ev-t--dp { width: auto; min-width: 100%; }
 .ev-t--dp tbody tr { height: 26px; } /* = ROW em estados.js (tabela virtualizada) */
-.ev-t--dp tbody th { position: sticky; left: 0; z-index: 1; box-shadow: 1px 0 0 var(--ev-linha); }
-.ev-t--dp thead .ev-canto { position: sticky; left: 0; z-index: 3; }
-.ev-t--dp td { font: 500 13px/1 var(--ev-pixel); min-width: 74px; padding: 3px 6px; }
+.ev-t--dp thead tr { height: 32px; } /* = cabH em estados.js */
+.ev-t--dp thead th { padding-block: 0; }
+/* coluna dos vértices: fundo opaco e um fio à direita, para o que rola por baixo não aparecer */
+.ev-t--dp tbody th { position: sticky; left: 0; z-index: 1; background: var(--ev-fundo); box-shadow: 1px 0 0 var(--ev-linha); }
+.ev-t--dp thead .ev-canto { position: sticky; left: 0; z-index: 3; box-shadow: 1px 0 0 var(--ev-linha); font-weight: 500; color: var(--ev-tinta-2); }
+.ev-t--dp td { font: 500 13px/1 var(--ev-texto); min-width: 74px; padding: 3px 6px; }
 .ev-t--dp tbody th { padding-block: 3px; }
 .ev-t--dp td .ev-v { font-size: 12px; }
 .ev-t--dp .ev-desc { color: var(--ev-tinta-2); text-align: center; }
-.ev-t--dp .ev-fechado { text-align: center; font: 700 16px/1 var(--ev-texto); color: var(--ev-tinta); }
+.ev-t--dp .ev-fechado { text-align: center; font: 700 15px/1 var(--ev-texto); color: var(--ev-tinta-2); }
 .ev-t--dp .ev-fecha { font-weight: 700; box-shadow: inset 0 -2px 0 var(--ev-tinta); }
-.ev-t--dp .ev-mudou { background: #FFF6DA; }
+.ev-t--dp .ev-mudou { background: #2C2618; }
 .ev-t--dp .ev-foco { box-shadow: inset 0 0 0 2px var(--ev-cesar); }
 .ev-t--dp s { color: var(--ev-tinta-2); text-decoration-color: var(--ev-erro); text-decoration-thickness: 1.5px; }
-.ev-t--dp thead .ev-col-agora { background: var(--ev-faixa); }
+.ev-t--dp thead .ev-col-agora { background: var(--ev-faixa); color: var(--ev-tinta); }
+.ev-t--dp tbody tr.ev-atual > th { background: #2E2419; }
 /* [IA] Claude – Bellman-Ford: bloco de passadas sem mudança numa coluna só */
 .ev-t--dp thead .ev-col-vazia { white-space: nowrap; }
-.ev-t--dp thead .ev-th-nota { display: block; font: italic 500 11px/1.2 var(--ev-texto); color: var(--ev-tinta-2); }
-.ev-t--dp td.ev-vazia { color: var(--ev-tinta-2); background: repeating-linear-gradient(135deg, #fff 0 6px, #F6F5F9 6px 12px); }
+.ev-t--dp td.ev-vazia { color: var(--ev-tinta-2); background: repeating-linear-gradient(135deg, var(--ev-fundo) 0 6px, #241F1A 6px 12px); }
 .ev-t--dp tr.ev-lin-aluno > th { box-shadow: inset 3px 0 0 var(--ev-cesar), 1px 0 0 var(--ev-linha); }
 
 /* recusa do Dijkstra */
 .ev-recusa p { margin: 0; font-size: 13.5px; }
-.ev-regra { margin: 2px 0; padding: 8px 12px; font: 600 15px/1.35 var(--ev-pixel); background: #fff; border-left: 4px solid var(--ev-erro); }
+.ev-regra { margin: 2px 0; padding: 8px 12px; font: 600 15px/1.35 var(--ev-texto); background: var(--ev-fundo-2); border-left: 3px solid var(--ev-erro); }
 .ev-neg { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
 .ev-peso-neg { color: var(--ev-erro); font-weight: 700; }
 
-/* rodapé */
-.ev-pe { display: flex; flex-direction: column; gap: 4px; padding-top: 10px; border-top: 2px solid var(--ev-tinta); font-size: 13px; }
-.ev-pe-l { margin: 0; line-height: 1.75; }
+/* detalhes do resultado (abertos pelo botão na linha de baixo) */
+.ev-pe-l { margin: 0; line-height: 1.75; color: var(--ev-tinta); }
 .ev-caminho .ev-v { font-size: 13px; }
 .ev-seta { color: var(--ev-tinta-2); }
 .ev-erro b { color: var(--ev-erro); }
-.ev-py { margin: 2px 0 0; padding: 6px 10px; background: #fff; box-shadow: inset 3px 0 0 var(--ev-tinta-2), 0 0 0 1px var(--ev-linha-2); }
-.ev-py--ok { box-shadow: inset 3px 0 0 var(--ev-ok), 0 0 0 1px var(--ev-linha-2); }
-.ev-py--ok b { color: var(--ev-ok); }
-.ev-py--difere { box-shadow: inset 3px 0 0 var(--ev-erro), 0 0 0 1px var(--ev-linha-2); }
-.ev-py--difere b { color: var(--ev-erro); }
+.ev-py { margin: 0; padding-left: 8px; box-shadow: inset 2px 0 0 var(--ev-tinta-2); }
+.ev-py--ok { box-shadow: inset 2px 0 0 var(--ev-ok); }
+.ev-py--difere { color: var(--ev-erro); box-shadow: inset 2px 0 0 var(--ev-erro); }
 .ev-origem { margin: 0; font-size: 12px; color: var(--ev-tinta-2); }
 
 @media (max-width: 520px) {
-  .ev-card { padding: 12px; }
-  .ev-so-largo { display: none; }
-  .ev-so-estreito { display: inline; }
-  .ev-aba { padding: 7px 9px 8px; font-size: 14px; }
   .ev-dfs-topo { grid-template-columns: 1fr; }
-  .ev-bt span { display: none; }
-  .ev-bt:has(span) { width: 32px; padding: 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ev-bt:active { transform: none; }
+  .ev-cont { display: none; }
 }
 </style>
 <script>
@@ -1751,7 +1453,6 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
   <div class="hero__poeira" aria-hidden="true"></div>
   <div class="wrap hero__grade">
     <div class="hero__conteudo">
-      <p class="hero__selo px"><span class="hero__selo-aluno" data-sprite-rosto aria-hidden="true"></span>Projeto de Teoria dos Grafos da CESAR School</p>
       <h1 class="hero__titulo" id="heroTitulo">Labirinto<br>com Chaves</h1>
       <p class="hero__lead">Um aluno da CESAR School atravessa a masmorra até o baú, pelo caminho que o algoritmo calculou. Cada chave que ele pega cria uma nova camada no grafo de estados.</p>
       <div class="hero__acoes">
@@ -1759,12 +1460,7 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
         <a class="btn btn--fantasma px" href="#como-funciona">Como o grafo funciona</a>
       </div>
     </div>
-    <figure class="hero__janela janela px" aria-labelledby="heroMapa">
-      <figcaption class="janela__barra">
-        <span class="janela__icone" aria-hidden="true"><svg viewBox="0 0 11 9" shape-rendering="crispEdges"><path fill="#8A5A34" d="M1 2h9v6H1z"/><path fill="#B07A45" d="M2 3h7v1H2zM2 5h7v2H2z"/><path fill="#F2C14E" d="M0 1h11v1H0zM0 4h11v1H0zM5 4h1v2H5zM0 2h1v6H0zM10 2h1v6h-1zM0 8h11v1H0z"/><path fill="#FFE9A3" d="M1 1h3v1H1z"/></svg></span>
-        <span class="janela__titulo" id="heroMapa">Masmorra em destaque</span>
-        <span class="janela__sub" id="heroDado"></span>
-      </figcaption>
+    <figure class="hero__janela">
       <div class="hero__palco" id="heroPalco" role="img" aria-label="Diorama 3D da masmorra com o aluno andando até o baú pelo caminho calculado">
         <div class="carregando" data-carregando>
           <span class="carregando__aluno" data-sprite-andando></span>
@@ -1776,181 +1472,161 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
 </section>
 
 <!-- ============================================================ player: área de trabalho -->
-<!-- [IA] Claude – player como área de trabalho: à esquerda a janela 3D (níveis acima, doca e linha do tempo
-     embaixo); à direita a coluna de informações (estado, resultado, mapa de estados, tabela, métricas). -->
+<!-- [IA] Claude – rodada 3 (enxuto): uma barra fina com mapa, algoritmo e Métricas; à esquerda a janela 3D com a
+     doca embaixo; à direita a linha do estado e o papel com o mapa de estados e a tabela. O resto fica atrás de um
+     clique (Visualização, velocidade, Métricas). -->
 <section class="jogar tela sec" id="jogar" aria-labelledby="jogarTitulo">
-  <div class="wrap wrap--larga">
+  <div class="wrap">
+    <h2 class="sr-only" id="jogarTitulo">Jogar</h2>
     <div class="area">
-      <div class="area__esq">
-        <div class="sec__cabeca jogar__cabeca">
-          <h2 id="jogarTitulo">Escolha um mapa</h2>
-          <p>O aluno segue o percurso que o algoritmo calculou. O mesmo percurso aparece no mapa de estados e na tabela do algoritmo, passo a passo.</p>
-        </div>
-
-        <div class="faixa">
-          <div class="niveis" id="niveis" role="radiogroup" aria-label="Mapa"></div>
-          <button class="carregar px" id="btnCarregar" type="button" aria-haspopup="dialog" aria-controls="dlgMapa">
-            <svg viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true"><path d="M4 0h1v6H4zM2 2h1v1H2zM3 1h1v1H3zM5 1h1v1H5zM6 2h1v1H6zM0 6h1v3H0zM8 6h1v3H8zM1 8h7v1H1z"/></svg>
-            <span>Carregar mapa</span>
+      <div class="barra">
+        <div class="pop" id="popMapa">
+          <button class="mapa-sel" id="btnMapa" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="painelMapa">
+            <span class="mapa-sel__mini" id="mapaSelMini" aria-hidden="true"></span>
+            <span class="mapa-sel__codigo" id="mapaSelCodigo">–</span>
+            <span class="mapa-sel__titulo" id="mapaSelTitulo">Carregando</span>
+            <svg class="mapa-sel__seta" viewBox="0 0 7 4" shape-rendering="crispEdges" aria-hidden="true"><path d="M0 0h7v1H0zM1 1h5v1H1zM2 2h3v1H2zM3 3h1v1H3z"/></svg>
           </button>
-        </div>
-
-        <div class="algs px" id="algs" role="radiogroup" aria-label="Algoritmo"></div>
-
-        <div class="janela tela3d px" id="tela3d">
-          <div class="janela__barra">
-            <span class="janela__icone" aria-hidden="true"><svg viewBox="0 0 11 9" shape-rendering="crispEdges"><path fill="#8A5A34" d="M1 2h9v6H1z"/><path fill="#B07A45" d="M2 3h7v1H2zM2 5h7v2H2z"/><path fill="#F2C14E" d="M0 1h11v1H0zM0 4h11v1H0zM5 4h1v2H5zM0 2h1v6H0zM10 2h1v6h-1zM0 8h11v1H0z"/><path fill="#FFE9A3" d="M1 1h3v1H1z"/></svg></span>
-            <span class="janela__titulo" id="janelaMapa">Carregando</span>
-            <span class="janela__sub" id="janelaAlg"></span>
-            <p class="chip px" id="hudStatus" data-status=""><span class="chip__ponto" aria-hidden="true"></span><span id="hudStatusTxt">Carregando</span></p>
+          <div class="pop__painel pop__painel--mapas px" id="painelMapa" hidden>
+            <div class="niveis" id="niveis" role="radiogroup" aria-label="Mapa"></div>
+            <button class="carregar" id="btnCarregar" type="button" aria-haspopup="dialog" aria-controls="dlgMapa">
+              <svg viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true"><path d="M4 0h1v6H4zM2 2h1v1H2zM3 1h1v1H3zM5 1h1v1H5zM6 2h1v1H6zM0 6h1v3H0zM8 6h1v3H8zM1 8h7v1H1z"/></svg>
+              <span>Carregar mapa…</span>
+            </button>
           </div>
-          <div class="janela__vista">
-            <div class="tela3d__render" id="playerPalco" tabindex="0" role="application"
-                 aria-roledescription="masmorra 3D" aria-label="Masmorra. Setas esquerda e direita andam um passo, espaço inicia ou pausa, mais e menos mudam a velocidade."></div>
-            <div class="hud" id="hud">
-              <div class="hud__stats px" aria-hidden="true">
-                <p class="hud__stat"><span class="hud__rotulo">Passo</span><span class="hud__num"><b id="hudPasso">0</b><span class="hud__de" id="hudTotal"></span></span></p>
-                <p class="hud__stat"><span class="hud__rotulo">Custo</span><span class="hud__num"><b id="hudCusto">0</b></span></p>
-              </div>
-              <div class="hud__topo-dir">
-                <div class="hud__cam px" role="group" aria-label="Câmera" id="hudCam">
-                  <button type="button" data-cam="seguir" aria-pressed="true">Seguir</button>
-                  <button type="button" data-cam="livre" aria-pressed="false">Livre</button>
-                  <button type="button" data-cam="topo" aria-pressed="false">Topo</button>
+        </div>
+        <div class="algs" id="algs" role="radiogroup" aria-label="Algoritmo"></div>
+        <button class="barra__metricas" id="btnMetricas" type="button" aria-haspopup="dialog" aria-controls="dlgMetricas">Métricas</button>
+      </div>
+
+      <div class="area__esq">
+        <div class="tela3d px" id="tela3d">
+          <div class="tela3d__render" id="playerPalco" tabindex="0" role="application"
+               aria-roledescription="masmorra 3D" aria-label="Masmorra. Setas esquerda e direita andam um passo, espaço inicia ou pausa, mais e menos mudam a velocidade."></div>
+          <div class="hud" id="hud">
+            <div class="hud__stats" id="hudStats" aria-hidden="true">
+              <p class="hud__stat"><span class="hud__rotulo">Passo</span><span class="hud__num"><b id="hudPasso">0</b><span class="hud__de" id="hudTotal"></span></span></p>
+              <p class="hud__stat"><span class="hud__rotulo">Custo</span><span class="hud__num"><b id="hudCusto">0</b></span></p>
+            </div>
+            <p class="chip px" id="hudStatus" data-status="" hidden><span class="chip__ponto" aria-hidden="true"></span><span id="hudStatusTxt"></span></p>
+            <div class="pop hud__vis" id="popVis">
+              <button class="hud__btn" id="btnVis" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="painelVis" aria-label="Visualização" title="Visualização">
+                <svg viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true"><path d="M0 1h9v1H0zM0 4h9v1H0zM0 7h9v1H0z" opacity=".45"/><path d="M2 0h2v3H2zM5 3h2v3H5zM1 6h2v3H1z"/></svg>
+              </button>
+              <div class="pop__painel pop__painel--vis px" id="painelVis" hidden>
+                <div class="vis__grupo" id="visCam">
+                  <p class="vis__rotulo" id="rotCam">Câmera</p>
+                  <div class="seg" role="group" aria-labelledby="rotCam" id="hudCam">
+                    <button type="button" data-cam="seguir" aria-pressed="true">Seguir</button>
+                    <button type="button" data-cam="livre" aria-pressed="false">Livre</button>
+                    <button type="button" data-cam="topo" aria-pressed="false">Topo</button>
+                  </div>
                 </div>
-                <div class="hud__camada px" title="Escurece as casas que não existem no grafo com esse conjunto de chaves">
-                  <label for="selCamada">Camada</label>
-                  <select id="selCamada" aria-describedby="notaCamada"></select>
+                <div class="vis__grupo">
+                  <label class="vis__rotulo" for="selCamada">Camada</label>
+                  <select class="vis__select" id="selCamada" aria-describedby="notaCamada"></select>
+                </div>
+                <div class="vis__toggles" role="group" aria-label="Mostrar">
+                  <label class="chk" title="Armadilhas são estados de onde o baú não é mais alcançável"><input id="chkTrap" type="checkbox" checked aria-describedby="notaCamada"><span class="chk__caixa" aria-hidden="true"></span><span>Armadilhas</span></label>
+                  <label class="chk"><input id="chkRastro" type="checkbox" checked><span class="chk__caixa" aria-hidden="true"></span><span>Rastro</span></label>
+                  <label class="chk"><input id="chkMini" type="checkbox"><span class="chk__caixa" aria-hidden="true"></span><span>Minimapa</span></label>
                 </div>
               </div>
-              <div class="hud__inv px" id="hudInv" role="group" aria-label="Chaves no inventário" hidden></div>
-              <div class="hud__mini px" id="hudMini">
-                <canvas id="minimapa" width="160" height="96" aria-label="Minimapa: clique numa casa do percurso para ir até ela" role="img"></canvas>
-              </div>
-              <div class="hud__dialogo px" id="hudDialogo" role="status" hidden>
-                <p class="hud__dialogo-titulo" id="dialogoTitulo"></p>
-                <p class="hud__dialogo-texto" id="dialogoTexto"></p>
-                <div class="hud__dialogo-acoes" id="dialogoAcoes"></div>
-              </div>
-              <div class="carregando hud__carregando" id="hudCarregando" hidden>
-                <span class="carregando__aluno" data-sprite-andando></span>
-                <span class="carregando__texto" id="hudCarregandoTxt">Carregando o mapa</span>
-              </div>
+            </div>
+            <div class="hud__inv" id="hudInv" role="group" aria-label="Chaves no inventário" hidden></div>
+            <div class="hud__mini px" id="hudMini" hidden>
+              <canvas id="minimapa" width="160" height="96" aria-label="Minimapa: clique numa casa do percurso para ir até ela" role="img"></canvas>
+            </div>
+            <div class="hud__dialogo px" id="hudDialogo" role="status" hidden>
+              <p class="hud__dialogo-titulo" id="dialogoTitulo"></p>
+              <p class="hud__dialogo-texto" id="dialogoTexto"></p>
+              <div class="hud__dialogo-acoes" id="dialogoAcoes"></div>
+            </div>
+            <div class="carregando hud__carregando" id="hudCarregando" hidden>
+              <span class="carregando__aluno" data-sprite-andando></span>
+              <span class="carregando__texto" id="hudCarregandoTxt">Carregando o mapa</span>
             </div>
           </div>
         </div>
 
-        <div class="tempo" id="tempo">
-          <div class="tempo__marcas" id="tempoMarcas" aria-hidden="true"></div>
-          <input class="tempo__range" id="tempoRange" type="range" min="0" max="0" value="0" step="1" aria-label="Passo do percurso">
-        </div>
-
         <div class="doca">
           <div class="doca__transporte" role="group" aria-label="Controles do percurso">
-            <button class="btn-ico px" id="btnInicio" type="button" aria-label="Voltar ao início" title="Voltar ao início">
+            <button class="btn-ico" id="btnInicio" type="button" aria-label="Voltar ao início" title="Voltar ao início">
               <svg viewBox="0 0 10 8" shape-rendering="crispEdges" aria-hidden="true"><path d="M0 1h1v6H0zM2 3h1v2H2zM3 2h1v4H3zM4 1h1v6H4zM5 3h1v2H5zM6 2h1v4H6zM7 1h1v6H7z"/></svg>
             </button>
-            <button class="btn-ico px" id="btnVoltar" type="button" aria-label="Passo anterior" title="Passo anterior (seta para a esquerda)">
+            <button class="btn-ico" id="btnVoltar" type="button" aria-label="Passo anterior" title="Passo anterior (seta para a esquerda)">
               <svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 3h1v2H1zM2 2h1v4H2zM3 1h1v6H3zM5 1h2v6H5z"/></svg>
             </button>
             <button class="btn-ico btn-ico--play px" id="btnPlay" type="button" aria-label="Animar o percurso" title="Animar o percurso (espaço)">
               <svg class="ico-play" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 0h1v8H1zM2 1h1v6H2zM3 2h1v4H3zM4 3h1v2H4z"/></svg>
               <svg class="ico-pausa" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 1h2v6H1zM5 1h2v6H5z"/></svg>
             </button>
-            <button class="btn-ico px" id="btnAvancar" type="button" aria-label="Próximo passo" title="Próximo passo (seta para a direita)">
+            <button class="btn-ico" id="btnAvancar" type="button" aria-label="Próximo passo" title="Próximo passo (seta para a direita)">
               <svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 1h2v6H1zM4 1h1v6H4zM5 2h1v4H5zM6 3h1v2H6z"/></svg>
             </button>
-            <button class="btn-ico px" id="btnFim" type="button" aria-label="Ir para o fim" title="Ir para o fim">
+            <button class="btn-ico" id="btnFim" type="button" aria-label="Ir para o fim" title="Ir para o fim">
               <svg viewBox="0 0 10 8" shape-rendering="crispEdges" aria-hidden="true"><path d="M9 1h1v6H9zM7 3h1v2H7zM6 2h1v4H6zM5 1h1v6H5zM4 3h1v2H4zM3 2h1v4H3zM2 1h1v6H2z"/></svg>
             </button>
           </div>
+          <div class="tempo" id="tempo">
+            <div class="tempo__marcas" id="tempoMarcas" aria-hidden="true"></div>
+            <input class="tempo__range" id="tempoRange" type="range" min="0" max="0" value="0" step="1" aria-label="Passo do percurso">
+          </div>
           <div class="vel" id="vel">
-            <button class="vel__botao px" id="btnVel" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="velMenu" title="Velocidade (teclas + e −)">
-              <svg viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true"><path d="M2 0h5v1H2zM1 1h1v1H1zM7 1h1v1H7zM0 2h1v5H0zM8 2h1v5H8zM4 2h1v3H4zM5 4h1v1H5zM6 5h1v1H6zM1 7h1v1H1zM7 7h1v1H7z"/></svg>
-              <span>Velocidade: <b id="velTxt">1×</b></span>
-            </button>
+            <button class="vel__botao" id="btnVel" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="velMenu" aria-label="Velocidade: 1×" title="Velocidade (teclas + e −)"><b id="velTxt">1×</b></button>
             <ul class="vel__menu px" id="velMenu" role="listbox" aria-label="Velocidade" tabindex="-1" hidden></ul>
-            <span class="vel__nota" id="velNota">3 passos/s</span>
-          </div>
-          <div class="doca__toggles">
-            <label class="toggle" title="Armadilhas são estados de onde o baú não é mais alcançável"><input id="chkTrap" type="checkbox" checked aria-describedby="notaCamada"><span class="toggle__caixa" aria-hidden="true"></span><span>Armadilhas</span></label>
-            <label class="toggle"><input id="chkRastro" type="checkbox" checked><span class="toggle__caixa" aria-hidden="true"></span><span>Rastro</span></label>
           </div>
         </div>
-
         <p class="sr-only" id="notaCamada">A camada escurece as casas que não existem no grafo com esse conjunto de chaves. Armadilhas são estados de onde o baú não é mais alcançável.</p>
-        <ul class="legenda" id="legenda" aria-label="Legenda das casas deste mapa"></ul>
-
-        <div class="extras">
-          <details class="painel px hist-card metricas" id="cardMetricas" hidden>
-            <summary class="painel__titulo" id="tMetricas">Métricas do grafo</summary>
-            <div id="metricas"></div>
-          </details>
-
-          <details class="painel px hist-card" id="cardHist" hidden>
-            <summary class="painel__titulo" id="tHist">Últimas consultas (RDS)</summary>
-            <div class="hist">
-              <table>
-                <thead><tr><th scope="col">Hora</th><th scope="col">Mapa</th><th scope="col">Algoritmo</th><th scope="col">Custo</th><th scope="col">Instância</th></tr></thead>
-                <tbody id="tbHist"></tbody>
-              </table>
-            </div>
-          </details>
-        </div>
       </div>
 
-      <aside class="info" id="info" aria-label="Informações do mapa">
-        <div class="resumo">
-          <section class="painel painel--compacto px" aria-labelledby="tEstado">
-            <div class="painel__topo">
-              <h3 class="painel__titulo" id="tEstado">Estado atual</h3>
-              <p class="rotulo-estado" id="dRotulo">–</p>
-            </div>
-            <dl class="dados dados--estado">
-              <div><dt>Passo</dt><dd id="dPasso">–</dd></div>
-              <div><dt>Custo acumulado</dt><dd id="dCusto">–</dd></div>
-              <div class="dados__largo"><dt>Posição</dt><dd id="dPos">–</dd></div>
-              <div><dt>Chaves</dt><dd id="dChaves">–</dd></div>
-              <div><dt title="Bônus já usados">Bônus</dt><dd id="dBonus">–</dd></div>
-            </dl>
-          </section>
-          <section class="painel painel--compacto px" aria-labelledby="tResultado">
-            <div class="painel__topo">
-              <h3 class="painel__titulo" id="tResultado">Resultado</h3>
-              <p class="resultado" id="dStatus" data-status="">–</p>
-            </div>
-            <p class="resultado__python" id="dPython">–</p>
-            <p class="resultado__msg" id="dMsg" hidden></p>
-            <dl class="dados dados--duplo">
-              <div><dt>Passos</dt><dd id="dPassos">–</dd></div>
-              <div><dt>Custo</dt><dd id="dCustoTot">–</dd></div>
-              <div><dt>Estados</dt><dd id="dEstados">–</dd></div>
-              <div><dt>Arcos</dt><dd id="dArcos">–</dd></div>
-              <div><dt>Teto</dt><dd id="dTeto">–</dd></div>
-              <div><dt>Armadilhas</dt><dd id="dTrap">–</dd></div>
-            </dl>
-          </section>
+      <aside class="info" id="info" aria-label="Estado e grafo de estados">
+        <div class="estado" aria-labelledby="tEstado">
+          <h3 class="sr-only" id="tEstado">Estado atual</h3>
+          <div class="estado__linha">
+            <p class="rotulo-estado" id="dRotulo">–</p>
+            <p class="resultado" id="dStatus" data-status="" hidden></p>
+          </div>
         </div>
 
         <div class="estados" id="estados">
           <section class="estados__bloco estados__bloco--mapa" aria-labelledby="tMapaEstados">
-            <h3 class="estados__titulo" id="tMapaEstados">Mapa de estados</h3>
+            <h3 class="sr-only" id="tMapaEstados">Mapa de estados</h3>
             <div class="estados__mapa" id="estadosMapa">
               <p class="estados__vazio">O mapa de estados aparece aqui quando o mapa carregar.</p>
             </div>
           </section>
           <div class="estados__divisor" id="estadosDivisor" role="separator" aria-orientation="horizontal" aria-controls="estadosMapa" aria-label="Dividir mapa e tabela" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50" tabindex="0"><span aria-hidden="true"></span></div>
           <section class="estados__bloco estados__bloco--tabela" aria-labelledby="tTabela">
-            <h3 class="estados__titulo" id="tTabela">Tabela</h3>
+            <h3 class="sr-only" id="tTabela">Tabela do algoritmo</h3>
             <div class="estados__tabela" id="estadosTabela">
               <p class="estados__vazio">A tabela do algoritmo aparece aqui, no formato das aulas.</p>
             </div>
           </section>
         </div>
-
       </aside>
     </div>
   </div>
+
+  <dialog class="gaveta" id="dlgMetricas" aria-labelledby="tMetricas">
+    <div class="gaveta__cabeca">
+      <h3 class="gaveta__titulo" id="tMetricas">Métricas</h3>
+      <button class="gaveta__fechar" type="button" id="btnFecharMetricas" aria-label="Fechar">
+        <svg viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><path d="M0 0h1v1H0zM1 1h1v1H1zM2 2h3v3H2zM5 1h1v1H5zM6 0h1v1H6zM1 5h1v1H1zM0 6h1v1H0zM5 5h1v1H5zM6 6h1v1H6z"/></svg>
+      </button>
+    </div>
+    <p class="gaveta__sub" id="metricasSub"></p>
+    <div id="metricas"><p class="gaveta__vazio">As métricas aparecem quando o mapa carregar.</p></div>
+    <section class="gaveta__bloco" id="cardHist" hidden aria-labelledby="tHist">
+      <h4 class="metricas__sub" id="tHist">Últimas consultas (RDS)</h4>
+      <div class="hist">
+        <table>
+          <thead><tr><th scope="col">Hora</th><th scope="col">Mapa</th><th scope="col">Algoritmo</th><th scope="col">Custo</th><th scope="col">Instância</th></tr></thead>
+          <tbody id="tbHist"></tbody>
+        </table>
+      </div>
+    </section>
+  </dialog>
 
   <dialog class="dlg px" id="dlgMapa" aria-labelledby="dlgTitulo">
     <form class="dlg__form" id="formMapa" method="dialog">
@@ -1993,7 +1669,7 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
 
     <div class="manual__figuras">
       <figure class="fig fig--estado">
-        <figcaption class="fig__legenda">O estado agora, lido do player</figcaption>
+        <figcaption class="fig__legenda">O estado agora</figcaption>
         <div class="tupla" id="tupla">
           <div class="tupla__linha" aria-hidden="true">
             <span class="tupla__tok" id="tPos">(1,1)</span><span class="tupla__sep">|</span><span class="tupla__tok" id="tChaves">-</span><span class="tupla__sep">|</span><span class="tupla__tok" id="tBonus">{}</span>
@@ -9206,6 +8882,9 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
    src/traco.py; LAB.traco (grafo.js) só os reproduz. Duas áreas, montadas nos contêineres que o app.js entrega:
    (1) mapaEl  → o grafo de estados desenhado em camadas (uma por conjunto de chaves), com o aluno por cima;
    (2) tabelaEl → abas BFS / DFS / Dijkstra / Bellman-Ford com replay e as tabelas na orientação da Profª Laura.
+   [IA] Claude – rodada 3 (enxuto): sem moldura própria (o papel é do contêiner), zoom pela roda/pinça, legenda num
+   "?", replay da tabela segue o aluno por padrão e só mostra controles quando a sincronia é desligada; a velocidade é
+   a do player (setVelocidade). Contador, frase e caminho numa linha só embaixo da tabela.
    API: new LAB.EstadosView({ mapaEl, tabelaEl, fetchTraco: async (alg, fonte) => json, reducedMotion })
         .load(mapa) .setAlgoritmo(key) .setPasso(percurso, idx) .setVelocidade(mult) .on('alg', fn) .dispose() */
 (function (raiz) {
@@ -9218,16 +8897,17 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     { key: 'DFS', nome: 'DFS', alg: 'DFS', fonte: false },
     { key: 'DIJKSTRA', nome: 'Dijkstra', alg: 'DIJKSTRA', fonte: false },
     { key: 'BELLMAN_FORD', nome: 'Bellman-Ford', alg: 'BELLMAN_FORD', fonte: false },
-    { key: 'BELLMAN_FORD_FONTE_CONSUMIVEL', nome: 'Bellman-Ford, fonte consumível', curto: 'BF fonte', alg: 'BELLMAN_FORD', fonte: true }
+    { key: 'BELLMAN_FORD_FONTE_CONSUMIVEL', nome: 'Bellman-Ford, fonte consumível', curto: 'Fonte consumível', alg: 'BELLMAN_FORD', fonte: true }
   ];
   var VELOCIDADES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
   var EVENTOS_POR_S = 3; // 1× = 3 eventos por segundo
+  // [IA] Claude – rodada 4: o mapa fica no mesmo chão escuro da página (sem papel); tinta clara, nós em tons de pedra
   var COR = {
-    naoVisitado: '#D9DCE8', visitado: '#8C90A8', encerrado: '#1C1B29',
-    tinta: '#1C1B29', tintaFraca: '#5B5F7A', arco: '#B7BDD0', arcoForte: '#1C1B29', papel: '#F3F5FA',
-    quadricula: '#DCE3F0', cesar: '#FF6002', erro: '#E0334F', ok: '#2E9E6B',
-    arvore: '#1C1B29', retorno: '#D64560', avanco: '#1F9C8A', cruzamento: '#7B61D9',
-    chave: { a: '#FFC23A', b: '#35C8F0', c: '#F45BC8', d: '#7DDB45' }, semChave: '#6E7391'
+    naoVisitado: '#2A241E', visitado: '#7A6650', encerrado: '#EFE6D8',
+    tinta: '#EFE6D8', tintaFraca: '#B5A895', apagada: '#8A7660', arco: '#4A3E33', arcoForte: '#EFE6D8', papel: '#1F1B17',
+    quadricula: '#2A241E', cesar: '#FF6002', erro: '#FF5470', ok: '#3FCF8E',
+    arvore: '#EFE6D8', retorno: '#FF6B86', avanco: '#3CC8B4', cruzamento: '#A08CF0',
+    chave: { a: '#FFC23A', b: '#35C8F0', c: '#F45BC8', d: '#7DDB45' }, semChave: '#8A7660'
   };
   var NOME_ESTADO = { BFS: ['não visitado', 'visitado (na fila)', 'encerrado'], DFS: ['não visitado', 'visitado (na pilha)', 'encerrado'],
     DIJKSTRA: ['não visitado', 'aberto', 'fechado'], BELLMAN_FORD: ['não visitado', 'com estimativa', 'final'] };
@@ -9235,13 +8915,11 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
   // ------------------------------------------------------------------ utilidades
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  var ZOOM_W = 44; // largura reservada para os botões de zoom no canto do palco
   function num(x) {
     if (x === Infinity || x === null || x === undefined) return '∞';
     if (x === -Infinity) return '−∞';
     return Number(x).toLocaleString('pt-BR', { maximumFractionDigits: 2 }).replace('-', '−');
   }
-  function mult(m) { return m === 1 ? 'Normal' : String(m).replace('.', ',') + '×'; }
   function lerp(a, b, t) { return a + (b - a) * t; }
   function hexRgb(h) { var n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
   function mistura(h1, h2, t) { var a = hexRgb(h1), b = hexRgb(h2); return 'rgb(' + Math.round(lerp(a[0], b[0], t)) + ',' + Math.round(lerp(a[1], b[1], t)) + ',' + Math.round(lerp(a[2], b[2], t)) + ')'; }
@@ -9259,14 +8937,12 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
   }
   function svgIco(p) { return '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">' + p + '</svg>'; }
   var ICO = {
-    inicio: svgIco('<rect x="2" y="3" width="2" height="10"/><path d="M14 3 6 8l8 5z"/>'),
     voltar: svgIco('<path d="M12 3 4 8l8 5z"/>'),
+    elo: svgIco('<rect x="1.5" y="5" width="8" height="6" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="6.5" y="5" width="8" height="6" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>'),
     play: svgIco('<path d="M4 2.5 13.5 8 4 13.5z"/>'),
     pausa: svgIco('<rect x="3.5" y="3" width="3" height="10"/><rect x="9.5" y="3" width="3" height="10"/>'),
     avancar: svgIco('<path d="M4 3l8 5-8 5z"/>'),
     fim: svgIco('<path d="M2 3l8 5-8 5z"/><rect x="12" y="3" width="2" height="10"/>'),
-    mais: svgIco('<rect x="7" y="3" width="2" height="10"/><rect x="3" y="7" width="10" height="2"/>'),
-    menos: svgIco('<rect x="3" y="7" width="10" height="2"/>'),
     tudo: svgIco('<path d="M2 2h5v2H4v3H2zM14 2v5h-2V4H9V2zM2 14V9h2v3h3v2zM14 14H9v-2h3V9h2z"/>'),
     alvo: svgIco('<path d="M7 1h2v3H7zM7 12h2v3H7zM1 7h3v2H1zM12 7h3v2h-3z"/><path d="M8 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>')
   };
@@ -9305,33 +8981,45 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     m.innerHTML = '';
     var card = this.cardMapa = el('div', 'ev-card ev-mapa');
     card.innerHTML =
-      '<div class="ev-cab"><h3 class="ev-titulo">Mapa de estados</h3><p class="ev-sub" data-r="sub">Carregando…</p></div>' +
-      '<div class="ev-palco" data-r="palco" tabindex="0" role="img" aria-label="Grafo de estados">' +
+      '<div class="ev-ferr">' +
+        '<button type="button" class="ev-ico" data-a="seguir" aria-pressed="true" aria-label="Seguir o aluno" title="Seguir o aluno (tecla C centraliza)">' + ICO.alvo + '</button>' +
+        '<button type="button" class="ev-ico" data-a="tudo" aria-label="Ver o grafo inteiro" title="Ver o grafo inteiro (tecla 0)">' + ICO.tudo + '</button>' +
+        '<span class="ev-ajuda"><button type="button" class="ev-ico ev-ico--txt" data-a="legenda" aria-expanded="false" aria-label="Legenda do mapa de estados">?</button>' +
+          '<ul class="ev-legenda" data-r="legenda" role="tooltip" hidden></ul></span>' +
+      '</div>' +
+      '<div class="ev-palco" data-r="palco" tabindex="0" role="img" aria-label="Grafo de estados. Roda do mouse ou pinça aproximam; arraste para mover.">' +
         '<canvas class="ev-cv" data-r="cv"></canvas><canvas class="ev-cv ev-cv--sobre" data-r="cv2"></canvas>' +
         '<div class="ev-dica" data-r="dica" role="tooltip" hidden></div>' +
-        '<div class="ev-zoom"><button type="button" class="ev-bt ev-bt--ico" data-a="mais" aria-label="Aproximar">' + ICO.mais + '</button>' +
-        '<button type="button" class="ev-bt ev-bt--ico" data-a="menos" aria-label="Afastar">' + ICO.menos + '</button>' +
-        '<button type="button" class="ev-bt ev-bt--ico" data-a="tudo" aria-label="Ver o mapa inteiro">' + ICO.tudo + '</button></div>' +
         '<div class="ev-aviso" data-r="aviso" hidden></div>' +
-      '</div>' +
-      '<div class="ev-mapa-pe">' +
-        '<div class="ev-acoes"><button type="button" class="ev-bt" data-a="centralizar" aria-label="Centralizar no aluno">' + ICO.alvo + '<span>Centralizar no aluno</span></button>' +
-        '<label class="ev-chk"><input type="checkbox" data-r="seguir" checked> Seguir o aluno</label></div>' +
-        '<ul class="ev-legenda" data-r="legenda"></ul>' +
       '</div>';
     m.appendChild(card);
     this.r = {};
     card.querySelectorAll('[data-r]').forEach(function (e) { self.r[e.getAttribute('data-r')] = e; });
     this.cv = this.r.cv; this.cv2 = this.r.cv2;
     this.ctx = this.cv.getContext('2d'); this.ctx2 = this.cv2.getContext('2d');
+    var btSeguir = card.querySelector('[data-a="seguir"]'), btLeg = card.querySelector('[data-a="legenda"]'), ajuda = card.querySelector('.ev-ajuda');
+    // [IA] Claude – fix: o hover (só mouse) abre a legenda sem fixar; o clique/toque fixa ou fecha. Antes o clique logo
+    // depois do hover fechava o que o hover tinha acabado de abrir, e no toque a legenda nunca aparecia.
+    var legFixa = false, legHover = false;
+    var legenda = function (abre) { self.r.legenda.hidden = !abre; btLeg.setAttribute('aria-expanded', String(!!abre)); if (!abre) { legFixa = false; legHover = false; } };
     this._escuta(card, 'click', function (e) {
       var b = e.target.closest('[data-a]'); if (!b) return;
       var a = b.getAttribute('data-a');
-      if (a === 'mais') self._zoomEm(1.4); else if (a === 'menos') self._zoomEm(1 / 1.4);
-      else if (a === 'tudo') { self._usuarioMexeu = false; self._ajusta(true); }
-      else if (a === 'centralizar') self._centraAluno(true, true);
+      if (a === 'tudo') { self._usuarioMexeu = false; self._ajusta(true); }
+      else if (a === 'seguir') {
+        self.seguir = !self.seguir;
+        btSeguir.setAttribute('aria-pressed', String(self.seguir));
+        if (self.seguir) self._centraAluno(true, true);
+      } else if (a === 'legenda') {
+        if (legHover && !legFixa) { legenda(true); legFixa = true; legHover = false; }
+        else if (self.r.legenda.hidden) { legenda(true); legFixa = true; }
+        else legenda(false);
+      }
     });
-    this._escuta(this.r.seguir, 'change', function () { self.seguir = self.r.seguir.checked; if (self.seguir) self._centraAluno(false, true); });
+    this._escuta(ajuda, 'pointerenter', function (e) { if (e.pointerType === 'mouse' && self.r.legenda.hidden) { legenda(true); legHover = true; } });
+    this._escuta(ajuda, 'pointerleave', function (e) { if (e.pointerType === 'mouse' && legHover && !legFixa) legenda(false); });
+    this._escuta(ajuda, 'focusout', function () { legenda(false); });
+    this._escuta(ajuda, 'keydown', function (e) { if (e.key === 'Escape' && !self.r.legenda.hidden) { e.stopPropagation(); legenda(false); } });
     this._interacaoCanvas();
 
     // ---- tabela
@@ -9339,65 +9027,49 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     t.classList.add('ev-raiz');
     t.innerHTML = '';
     var ct = this.cardTab = el('div', 'ev-card ev-tab');
+    // [IA] Claude – rodada 4: sem abas (a tabela segue o algoritmo da barra de cima); a DFS das armadilhas é um link na
+    // linha de baixo, que também guarda o replay (só quando a sincronia está desligada) e o ícone de sincronia.
     ct.innerHTML =
-      '<div class="ev-abas" role="tablist" aria-label="Algoritmo da tabela" data-t="abas"></div>' +
-      '<div class="ev-ctl" data-t="ctl">' +
-        '<div class="ev-botoes" role="group" aria-label="Replay do algoritmo">' +
-          '<button type="button" class="ev-bt ev-bt--ico" data-c="inicio" aria-label="Voltar ao início">' + ICO.inicio + '</button>' +
-          '<button type="button" class="ev-bt ev-bt--ico" data-c="voltar" aria-label="Passo anterior">' + ICO.voltar + '</button>' +
-          '<button type="button" class="ev-bt ev-bt--ico ev-bt--play" data-c="play" aria-label="Reproduzir">' + ICO.play + '</button>' +
-          '<button type="button" class="ev-bt ev-bt--ico" data-c="avancar" aria-label="Próximo passo">' + ICO.avancar + '</button>' +
-          '<button type="button" class="ev-bt" data-c="fim" aria-label="Ir para o fim">' + ICO.fim + '<span>Ir para o fim</span></button>' +
-        '</div>' +
-        '<div class="ev-vel"><button type="button" class="ev-bt" data-c="vel" aria-haspopup="listbox" aria-expanded="false">Velocidade: <b data-t="velrot">Normal</b></button>' +
-          '<ul class="ev-menu" role="listbox" tabindex="-1" aria-label="Velocidade do replay" data-t="menu" hidden></ul></div>' +
-        '<label class="ev-chk"><input type="checkbox" data-t="sinc" checked> Sincronizar com o aluno</label>' +
-        '<div class="ev-linha-tempo"><input type="range" min="0" max="0" value="0" step="1" data-t="scrub" aria-label="Evento do traço">' +
-          '<span class="ev-cont" data-t="cont" aria-live="off">Evento 0 de 0</span></div>' +
-        '<p class="ev-frase" data-t="frase" aria-live="polite"></p>' +
-      '</div>' +
+      '<p class="sr-only" data-t="abas" aria-live="polite"></p>' +
       '<div class="ev-corpo" data-t="corpo"></div>' +
-      '<div class="ev-pe" data-t="pe"></div>';
+      '<div class="ev-pe" data-t="ctl"><p class="ev-frase" data-t="frase" aria-live="polite"></p>' +
+        '<button type="button" class="ev-link ev-pe-bt" data-x="detalhes" data-t="btdet" aria-expanded="false">Caminho</button>' +
+        '<button type="button" class="ev-link ev-pe-bt" data-x="dfs" data-t="btdfs" aria-pressed="false">DFS</button>' +
+        '<div class="ev-botoes" data-t="botoes" role="group" aria-label="Replay da tabela" hidden>' +
+          '<button type="button" class="ev-ico" data-c="voltar" aria-label="Evento anterior" title="Evento anterior">' + ICO.voltar + '</button>' +
+          '<button type="button" class="ev-ico" data-c="play" aria-label="Reproduzir" title="Reproduzir">' + ICO.play + '</button>' +
+          '<button type="button" class="ev-ico" data-c="avancar" aria-label="Próximo evento" title="Próximo evento">' + ICO.avancar + '</button>' +
+          '<button type="button" class="ev-ico" data-c="fim" aria-label="Ir para o fim" title="Ir para o fim">' + ICO.fim + '</button>' +
+          '<span class="ev-cont" data-t="cont"></span>' +
+        '</div>' +
+        '<button type="button" class="ev-ico ev-sinc" data-c="sinc" data-t="sinc" aria-pressed="true" aria-label="Seguir o aluno" title="Seguir o aluno: a tabela acompanha o passo do player">' + ICO.elo + '</button>' +
+      '</div>' +
+      '<div class="ev-detalhes" data-t="pe" hidden></div>';
     t.appendChild(ct);
     this.t = {};
     ct.querySelectorAll('[data-t]').forEach(function (e) { self.t[e.getAttribute('data-t')] = e; });
-    // menu de velocidade (tipo YouTube)
-    this.t.menu.innerHTML = VELOCIDADES.map(function (v) {
-      return '<li role="option" data-v="' + v + '" aria-selected="' + (v === 1) + '">' + mult(v) + '</li>';
-    }).join('');
     this._escuta(ct, 'click', function (e) {
       var ab = e.target.closest('[data-aba]');
       if (ab) { self._trocaAba(ab.getAttribute('data-aba'), true); return; }
-      var op = e.target.closest('[data-v]');
-      if (op) { self.setVelocidade(+op.getAttribute('data-v')); self._menu(false); self.t.ctl.querySelector('[data-c="vel"]').focus(); return; }
       var b = e.target.closest('[data-c]');
       if (b) { self._controle(b.getAttribute('data-c')); return; }
       var x = e.target.closest('[data-x]');
       if (x) { self._acaoExtra(x.getAttribute('data-x'), x); }
     });
     this._escuta(ct, 'keydown', function (e) { self._teclado(e); });
-    this._escuta(this.t.menu, 'keydown', function (e) {
-      var i = VELOCIDADES.indexOf(self.vel);
-      if (e.key === 'ArrowDown') { e.preventDefault(); self.setVelocidade(VELOCIDADES[Math.min(VELOCIDADES.length - 1, i + 1)]); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); self.setVelocidade(VELOCIDADES[Math.max(0, i - 1)]); }
-      else if (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') { e.preventDefault(); self._menu(false); self.t.ctl.querySelector('[data-c="vel"]').focus(); }
-    });
-    this._escuta(document, 'pointerdown', function (e) { if (!self.t.menu.hidden && !e.target.closest('.ev-vel')) self._menu(false); });
-    this._escuta(this.t.sinc, 'change', function () { self.sincronizar = self.t.sinc.checked; if (self.sincronizar) { self._pausa(); self._sincroniza(); } });
-    var scrubRaf = 0;
-    this._escuta(this.t.scrub, 'input', function () {
-      var v = +self.t.scrub.value;
-      self._largaSinc();
-      if (scrubRaf) return;
-      scrubRaf = requestAnimationFrame(function () { scrubRaf = 0; self._vaiPara(+self.t.scrub.value); });
-      void v;
-    });
     this._escuta(this.t.corpo, 'scroll', function () { if (self._virtual) self._virtual(); }, { passive: true, capture: true });
 
     // redimensionamento
     if (typeof ResizeObserver === 'function') {
       this._ro = new ResizeObserver(function () { self._redimensiona(); });
       this._ro.observe(this.r.palco);
+      // largura da tabela mudou: recalcula quantas colunas cabem inteiras
+      var larg = 0;
+      this._roTab = new ResizeObserver(function () {
+        var w = self.t.corpo.clientWidth; if (Math.abs(w - larg) < 2) return; larg = w;
+        self._jcMax = null; self._renderTabela();
+      });
+      this._roTab.observe(this.t.corpo);
     } else this._escuta(raiz, 'resize', function () { self._redimensiona(); });
     this._redimensiona();
     this._abas();
@@ -9416,6 +9088,7 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
   P.setAlgoritmo = function (key) {
     key = String(key || '').toUpperCase();
     if (!ALGS.some(function (a) { return a.key === key; })) return Promise.resolve();
+    if (key !== 'DFS') this.algPlayer = key;
     if (key === this.key && this.T) return Promise.resolve();
     return this._trocaAba(key, false);
   };
@@ -9432,15 +9105,13 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     m = +m;
     if (VELOCIDADES.indexOf(m) < 0) m = VELOCIDADES.reduce(function (a, b) { return Math.abs(b - m) < Math.abs(a - m) ? b : a; }, 1);
     this.vel = m;
-    this.t.velrot.textContent = mult(m);
-    var self = this;
-    this.t.menu.querySelectorAll('[data-v]').forEach(function (li) { li.setAttribute('aria-selected', String(+li.getAttribute('data-v') === self.vel)); });
     if (this.tocando) { this._pausa(); this._toca(); }
   };
   P.dispose = function () {
     this._pausa();
     cancelAnimationFrame(this._raf); cancelAnimationFrame(this._rafOverlay); cancelAnimationFrame(this._rafPan);
     if (this._ro) this._ro.disconnect();
+    if (this._roTab) this._roTab.disconnect();
     this._dispose.forEach(function (f) { f(); });
     this._dispose = [];
     this.mapaEl.innerHTML = ''; this.tabelaEl.innerHTML = '';
@@ -9453,13 +9124,15 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     if (key !== 'BELLMAN_FORD_FONTE_CONSUMIVEL') return true;
     return !!(this.mapa && this.mapa.algoritmos && this.mapa.algoritmos.BELLMAN_FORD_FONTE_CONSUMIVEL);
   };
+  // sem abas: só o nome (para leitores de tela) e o link da DFS, que alterna com o algoritmo do player
   P._abas = function () {
-    var self = this;
-    this.t.abas.innerHTML = ALGS.filter(function (a) { return self._temAlg(a.key); }).map(function (a) {
-      var sel = a.key === self.key;
-      return '<button type="button" role="tab" class="ev-aba" data-aba="' + a.key + '" aria-selected="' + sel + '" tabindex="' + (sel ? 0 : -1) + '"' +
-        (a.curto ? ' title="' + a.nome + '"' : '') + '>' + (a.curto ? '<span class="ev-so-largo">' + a.nome + '</span><span class="ev-so-estreito">' + a.curto + '</span>' : a.nome) + '</button>';
-    }).join('');
+    var nome = function (k) { var d = ALGS.filter(function (a) { return a.key === k; })[0]; return d ? d.nome : k; };
+    var dfs = this.key === 'DFS', volta = this.algPlayer && this.algPlayer !== 'DFS' ? this.algPlayer : 'BFS';
+    this.t.abas.textContent = 'Tabela: ' + nome(this.key);
+    var b = this.t.btdfs;
+    b.textContent = dfs ? 'Voltar ao ' + nome(volta) : 'DFS';
+    b.setAttribute('aria-pressed', String(dfs));
+    b.title = dfs ? 'Voltar à tabela do ' + nome(volta) : 'Ver a DFS: classifica os arcos e acha os ciclos (não tem percurso para o aluno)';
   };
   P._trocaAba = function (key, doUsuario) {
     if (!this._temAlg(key)) key = 'BFS';
@@ -9467,13 +9140,13 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     this.key = key;
     this._abas();
     if (doUsuario && key !== antes) this._emite('alg', key);
-    if (doUsuario) { var b = this.t.abas.querySelector('[aria-selected="true"]'); if (b) b.focus(); }
     return this._carregaAlg(key);
   };
   P._carregaAlg = function (key) {
     var self = this, def = ALGS.filter(function (a) { return a.key === key; })[0];
     if (!this.mapa) return Promise.resolve();
     this._pausa();
+    this._jcMax = null;
     var ck = (this.mapa.nome || '') + '|' + key;
     if (!this.cache[ck]) {
       if (!this.fetchTraco || !LAB.traco) {
@@ -9495,7 +9168,6 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
       self._calculaAluno();
       self.anim = null;
       self.k = -1;
-      self.t.scrub.max = String(T.eventos.length);
       if (self.sincronizar && self.percurso) self._sincroniza(true);
       else self._vaiPara(T.eventos.length, true);
       self._legenda();
@@ -9518,15 +9190,12 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     this.r.aviso.hidden = false; this.r.aviso.innerHTML = msg;
     this.t.corpo.innerHTML = '<p class="ev-nota ev-nota--erro">' + msg + '</p>';
   };
+  // as contagens (estados, arcos) ficam na gaveta de Métricas; aqui só o rótulo acessível do palco
   P._sub = function () {
     var T = this.T; if (!T) return;
-    var def = ALGS.filter(function (a) { return a.key === this.key; }, this)[0];
-    // [IA] Claude – curto para caber numa linha (mapa e algoritmo já aparecem na janela e nas abas); o completo vai no title
     var nCam = this.layout ? this.layout.camadas.length : 0;
-    this.r.sub.textContent = T.nEstados.toLocaleString('pt-BR') + ' estados, ' + T.nArcos.toLocaleString('pt-BR') + ' arcos' +
-      (nCam > 1 ? ', ' + nCam + ' camadas' : '');
-    this.r.sub.title = def.nome + ' em ' + (this.mapa.nome || 'mapa') + ': ' + this.r.sub.textContent;
-    this.r.palco.setAttribute('aria-label', 'Grafo de estados de ' + (this.mapa.nome || 'mapa') + ' com ' + T.nEstados + ' estados, desenhado em camadas por conjunto de chaves.');
+    this.r.palco.setAttribute('aria-label', 'Grafo de estados de ' + (this.mapa.nome || 'mapa') + ' com ' + T.nEstados + ' estados' +
+      (nCam > 1 ? ' em ' + nCam + ' camadas, uma por conjunto de chaves' : '') + '. Roda do mouse ou pinça aproximam; arraste para mover.');
   };
 
   // ------------------------------------------------------------------ replay
@@ -9548,15 +9217,16 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
         this.anim = { t0: t0, de: de, dur: Math.min(260, 900 / (EVENTOS_POR_S * this.vel)) };
       } else this.anim = null;
     } else this.anim = null;
-    this.t.scrub.value = String(k);
-    this.t.cont.textContent = 'Evento ' + k.toLocaleString('pt-BR') + ' de ' + T.eventos.length.toLocaleString('pt-BR');
-    this.t.frase.textContent = T.eventos.length ? LAB.traco.fraseEvento(T, this.st.evento) : 'O traço não tem eventos: veja o resultado abaixo.';
+    this.t.cont.textContent = k.toLocaleString('pt-BR') + ' de ' + T.eventos.length.toLocaleString('pt-BR');
+    this.t.cont.title = 'Evento ' + this.t.cont.textContent + ' do traço';
+    this.t.frase.textContent = T.eventos.length ? LAB.traco.fraseEvento(T, this.st.evento) : 'Este traço não tem eventos.';
     this._renderTabela();
     this._pede();
   };
   P._controle = function (c) {
-    var T = this.T; if (!T && c !== 'vel') return;
-    if (c === 'vel') { this._menu(this.t.menu.hidden); return; }
+    var T = this.T;
+    if (c === 'sinc') { this._defineSinc(!this.sincronizar); return; }
+    if (!T) return;
     if (c === 'play') { if (this.tocando) this._pausa(); else { this._largaSinc(); if (this.k >= T.eventos.length) this._vaiPara(0); this._toca(); } return; }
     this._largaSinc(); this._pausa();
     if (c === 'inicio') this._vaiPara(0);
@@ -9568,11 +9238,6 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
   P._proximo = function (dir) {
     var tab = this.T ? LAB.traco.tabela(this.T) : null;
     return tab && tab.salto ? tab.salto(this.k, dir) : this.k + dir;
-  };
-  P._menu = function (abre) {
-    var b = this.t.ctl.querySelector('[data-c="vel"]');
-    this.t.menu.hidden = !abre; b.setAttribute('aria-expanded', String(!!abre));
-    if (abre) this.t.menu.focus();
   };
   P._toca = function () {
     var self = this;
@@ -9592,9 +9257,16 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     var b = this.t && this.t.ctl.querySelector('[data-c="play"]'); if (!b) return;
     b.innerHTML = this.tocando ? ICO.pausa : ICO.play;
     b.setAttribute('aria-label', this.tocando ? 'Pausar' : 'Reproduzir');
-    b.classList.toggle('ev-bt--ativo', this.tocando);
+    b.classList.toggle('ev-ico--ativo', this.tocando);
   };
-  P._largaSinc = function () { if (this.sincronizar) { this.sincronizar = false; this.t.sinc.checked = false; } };
+  P._largaSinc = function () { if (this.sincronizar) this._defineSinc(false); };
+  // sincronia com o aluno: ligada, a tabela segue o passo do player e os controles próprios somem
+  P._defineSinc = function (sim) {
+    this.sincronizar = !!sim;
+    this.t.sinc.setAttribute('aria-pressed', String(this.sincronizar));
+    this.t.botoes.hidden = this.sincronizar;
+    if (this.sincronizar) { this._pausa(); this._sincroniza(); }
+  };
   // sincronizar: o replay vai até o evento em que o algoritmo fixou o estado onde o aluno está
   P._sincroniza = function (forca) {
     var T = this.T; if (!T) return;
@@ -9609,19 +9281,9 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
   };
   P._teclado = function (e) {
     if (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== 'range' && e.target.type !== 'checkbox') return;
-    if (e.target.closest && e.target.closest('.ev-menu')) return;
-    var i = VELOCIDADES.indexOf(this.vel);
-    if (e.target.getAttribute && e.target.getAttribute('role') === 'tab' && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
-      var abas = Array.prototype.slice.call(this.t.abas.querySelectorAll('[role="tab"]'));
-      var j = abas.indexOf(e.target) + (e.key === 'ArrowRight' ? 1 : -1);
-      j = (j + abas.length) % abas.length;
-      e.preventDefault(); this._trocaAba(abas[j].getAttribute('data-aba'), true); return;
-    }
     if (e.key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); this._controle('play'); }
     else if (e.key === 'ArrowRight' && e.target.type !== 'range') { e.preventDefault(); this._controle('avancar'); }
     else if (e.key === 'ArrowLeft' && e.target.type !== 'range') { e.preventDefault(); this._controle('voltar'); }
-    else if (e.key === '+' || e.key === '=') { e.preventDefault(); this.setVelocidade(VELOCIDADES[Math.min(VELOCIDADES.length - 1, i + 1)]); }
-    else if (e.key === '-' || e.key === '_') { e.preventDefault(); this.setVelocidade(VELOCIDADES[Math.max(0, i - 1)]); }
     else if (e.key === 'End') { e.preventDefault(); this._controle('fim'); }
     else if (e.key === 'Home') { e.preventDefault(); this._controle('inicio'); }
   };
@@ -9680,7 +9342,7 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
       var nr = Math.ceil(nL / nc), gy = cel * 1.9, topo = cel * 1.2, s = 1;
       for (var it = 0; it < 3; it++) {
         var tw = nc * pw + (nc - 1) * gapX + cel * 3.2, th = nr * ph + (nr - 1) * gy + topo + cel * 0.3;
-        s = Math.min((W - 28 - ZOOM_W) / tw, (H - 28) / th);
+        s = Math.min((W - 28) / tw, (H - 28) / th);
         gy = Math.max(cel * 1.9, 24 / s); topo = Math.max(cel * 1.2, 20 / s);
       }
       if (s > melhorS * 1.02) { melhorS = s; melhor = nc; melhorGY = gy; melhorTopo = topo; }
@@ -9731,9 +9393,8 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
   };
   P._ajusta = function (anima) {
     var L = this.layout; if (!L) return;
-    // [IA] Claude – a barra de zoom (canto direito) não cobre o grafo: o "ajustar" desconta a largura dela
-    var m = L.mundo, pad = 14, zw = ZOOM_W, s = Math.min((this.W - pad * 2 - zw) / (m.x1 - m.x0), (this.H - pad * 2) / (m.y1 - m.y0));
-    var alvo = { s: s, x: (this.W - zw) / 2 - s * (m.x0 + m.x1) / 2, y: this.H / 2 - s * (m.y0 + m.y1) / 2 };
+    var m = L.mundo, pad = 12, s = Math.min((this.W - pad * 2) / (m.x1 - m.x0), (this.H - pad * 2) / (m.y1 - m.y0));
+    var alvo = { s: s, x: this.W / 2 - s * (m.x0 + m.x1) / 2, y: this.H / 2 - s * (m.y0 + m.y1) / 2 };
     this._panPara(alvo, anima);
     this.sFit = s;
   };
@@ -10027,7 +9688,7 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
         var cp = curva(u, n, n === T.alvo ? 0.08 : (L.cam[u] !== L.cam[n] ? 0.22 : 0.14));
         var mx = 0.25 * cp[0] + 0.5 * cp[2] + 0.25 * cp[4], my = 0.25 * cp[1] + 0.5 * cp[3] + 0.25 * cp[5];
         var txt = num(aa.peso), tw = ctx.measureText(txt).width + 4 * Math.max(px, 0.45);
-        ctx.fillStyle = 'rgba(243,245,250,0.92)'; ctx.fillRect(mx - tw / 2, my - 6.5 * Math.max(px, 0.45), tw, 13 * Math.max(px, 0.45));
+        ctx.fillStyle = 'rgba(31,27,23,0.92)'; ctx.fillRect(mx - tw / 2, my - 6.5 * Math.max(px, 0.45), tw, 13 * Math.max(px, 0.45));
         ctx.fillStyle = aa.peso < 0 ? COR.erro : COR.tintaFraca; ctx.fillText(txt, mx, my);
       }
     }
@@ -10046,7 +9707,7 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
       if (!lotes[e].length) continue;
       ctx.beginPath(); lotes[e].forEach(bolinha);
       ctx.fillStyle = this._corDoEstado(e); ctx.fill();
-      ctx.strokeStyle = e === 0 ? '#AEB3C6' : COR.tinta; ctx.lineWidth = borda; ctx.stroke();
+      ctx.strokeStyle = e === 0 ? '#4A3E33' : e === 1 ? COR.tintaFraca : COR.encerrado; ctx.lineWidth = borda; ctx.stroke();
     }
     if (soltos.length) {
       animando = true;
@@ -10081,7 +9742,7 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
       else txtIn = num(st.d[n]);
       if (n === T.alvo && rt < 14) txtIn = '';
       ctx.font = '600 ' + Math.min(L.raio[n] * 0.95, (txtIn.length > 3 ? 0.62 : 0.85) * L.raio[n]) + 'px ' + fPix;
-      ctx.fillStyle = est === 0 ? COR.tintaFraca : '#FFFFFF';
+      ctx.fillStyle = est === 0 ? COR.apagada : est === 2 ? '#1A1612' : COR.tinta;
       if (txtIn) ctx.fillText(txtIn, L.x[n], L.y[n] + L.raio[n] * 0.04);
       // DFS: d/f ao lado (acima) do nó, como no slide
       if (a === 'DFS' && est > 0 && rt >= 15) {
@@ -10103,8 +9764,8 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     }
     // ALVO: rótulo sempre que couber
     if (T.alvo >= 0 && dentro(T.alvo)) {
-      ctx.font = '700 ' + Math.max(11 * px, L.cel * 0.34) + 'px ' + fPix; ctx.fillStyle = COR.tinta;
-      ctx.fillText('ALVO', L.x[T.alvo], L.y[T.alvo] + L.raio[T.alvo] + Math.max(10 * px, L.cel * 0.3));
+      ctx.font = '500 ' + Math.max(11 * px, L.cel * 0.34) + 'px ' + this._fonte('texto'); ctx.fillStyle = COR.tintaFraca;
+      ctx.fillText('baú', L.x[T.alvo], L.y[T.alvo] + L.raio[T.alvo] + Math.max(10 * px, L.cel * 0.3));
     }
     ctx.restore();
     if (animando) this._pede();
@@ -10146,19 +9807,19 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
       var o = L.origem[q], ox = o[0], oy = o[1];
       if (ox > vis.x1 || oy > vis.y1 || ox + L.painel.w < vis.x0 || oy + L.painel.h < vis.y0) continue;
       // folha
-      ctx.fillStyle = 'rgba(255,255,255,0.72)';
+      ctx.fillStyle = 'rgba(239,230,216,0.035)';
       ctx.fillRect(ox, oy, L.painel.w, L.painel.h);
       var existe = camCasas[L.camadas[q]] || {};
       for (var r = 0; r < L.R; r++) {
         var y = oy + r * cel; if (y > vis.y1 || y + cel < vis.y0) continue;
         for (var c = 0; c < L.C; c++) {
           var x = ox + c * cel, ch = grade[r][c];
-          if (ch === '#') { ctx.fillStyle = 'rgba(28,27,41,0.10)'; ctx.fillRect(x, y, cel, cel); continue; }
+          if (ch === '#') { ctx.fillStyle = 'rgba(239,230,216,0.10)'; ctx.fillRect(x, y, cel, cel); continue; }
           var tint = null;
-          if (ch === '~') tint = 'rgba(53,150,240,0.13)';
-          else if (ch === ',') tint = 'rgba(140,95,60,0.13)';
-          else if ('^>v<'.indexOf(ch) >= 0) tint = 'rgba(28,27,41,0.05)';
-          if (!existe[r * L.C + c]) tint = 'rgba(28,27,41,0.035)';
+          if (ch === '~') tint = 'rgba(53,150,240,0.2)';
+          else if (ch === ',') tint = 'rgba(170,115,70,0.22)';
+          else if ('^>v<'.indexOf(ch) >= 0) tint = 'rgba(239,230,216,0.05)';
+          if (!existe[r * L.C + c]) tint = 'rgba(0,0,0,0.28)';
           if (tint) { ctx.fillStyle = tint; ctx.fillRect(x, y, cel, cel); }
           if (s * cel < 6) continue;
           if ('ABCD'.indexOf(ch) >= 0) { ctx.fillStyle = COR.chave[ch.toLowerCase()]; ctx.globalAlpha = 0.55; ctx.fillRect(x + cel * 0.08, y + cel * 0.08, cel * 0.84, cel * 0.84); ctx.globalAlpha = 1; }
@@ -10168,13 +9829,13 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
           else if (ch === '+' || ch === '*') { ctx.fillStyle = ch === '+' ? 'rgba(46,158,107,0.28)' : 'rgba(233,174,60,0.32)'; ctx.fillRect(x + cel * 0.12, y + cel * 0.12, cel * 0.76, cel * 0.76); }
         }
       }
-      ctx.strokeStyle = 'rgba(28,27,41,0.28)'; ctx.lineWidth = px; ctx.strokeRect(ox, oy, L.painel.w, L.painel.h);
+      ctx.strokeStyle = 'rgba(239,230,216,0.16)'; ctx.lineWidth = px; ctx.strokeRect(ox, oy, L.painel.w, L.painel.h);
       // etiqueta da camada
       var fs = Math.max(11 * px, Math.min(cel * 0.62, 15 * px));
       ctx.font = '600 ' + fs + 'px ' + this._fonte('texto'); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
       var k = L.camadas[q], cor = k === '-' ? COR.tintaFraca : COR.chave[k[k.length - 1]];
       ctx.fillStyle = cor; ctx.fillRect(ox, oy - fs * 1.15, fs * 0.6, fs * 0.6);
-      ctx.fillStyle = COR.tinta; ctx.fillText(nomeCamada(k), ox + fs * 0.95, oy - fs * 0.55);
+      ctx.fillStyle = COR.tintaFraca; ctx.fillText(nomeCamada(k), ox + fs * 0.95, oy - fs * 0.55);
     }
   };
   P._casasPorCamada = function () {
@@ -10224,7 +9885,7 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     if (this._cabeca !== 'nada') {
       ctx.imageSmoothingEnabled = false;
       var img = this._cabeca, w = hs, hh = hs * img.height / img.width;
-      ctx.fillStyle = 'rgba(28,27,41,0.18)'; ctx.fillRect(hx + 1, hy + 2, w, hh);
+      ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(hx + 1, hy + 2, w, hh);
       ctx.drawImage(img, hx, hy, w, hh);
     } else {
       ctx.beginPath(); ctx.arc(p[0], hy + hs / 2, hs / 2.4, 0, Math.PI * 2); ctx.fillStyle = COR.cesar; ctx.fill();
@@ -10245,7 +9906,7 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     var a = this.T ? this.T.algoritmo : 'BFS', nomes = NOME_ESTADO[a] || NOME_ESTADO.BFS, itens = [];
     var bola = function (cor, borda) { return '<i class="ev-bola" style="background:' + cor + (borda ? ';box-shadow:inset 0 0 0 1px ' + borda : '') + '"></i>'; };
     var linha = function (cor, trac) { return '<i class="ev-traco' + (trac ? ' ev-traco--trac' : '') + '" style="--c:' + cor + '"></i>'; };
-    itens.push(bola(COR.naoVisitado, '#AEB3C6') + nomes[0]);
+    itens.push(bola(COR.naoVisitado, '#4A3E33') + nomes[0]);
     itens.push(bola(COR.visitado) + nomes[1]);
     itens.push(bola(COR.encerrado) + nomes[2]);
     if (a === 'DFS') {
@@ -10320,8 +9981,8 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     }
     if (ln < 0) linhas = '<tr><td colspan="4" class="ev-vazio">A tabela começa quando a origem entra na fila.</td></tr>';
     var visitados = T.res.ordem.slice(0, nD);
-    h += '<section class="ev-bloco"><h4 class="ev-h4">Passo a passo</h4>' + this._ocultas(j0) +
-      '<div class="ev-rola" data-auto="fim"><table class="ev-t ev-t--passos"><thead><tr><th>Passo</th><th>Sai da fila</th><th>Entra na fila</th><th>Fila (início → fim)</th></tr></thead><tbody>' + linhas + '</tbody></table></div>' +
+    h += '<section class="ev-bloco"><h4 class="ev-h4">Iterações</h4>' + this._ocultas(j0) +
+      '<div class="ev-rola" data-auto="fim"><table class="ev-t ev-t--passos"><thead><tr><th title="Iteração">It.</th><th>Sai da fila</th><th>Entra na fila</th><th>Fila (início → fim)</th></tr></thead><tbody>' + linhas + '</tbody></table></div>' +
       '<p class="ev-ordem"><b>Ordem de visita:</b> ' + this._condensa(visitados, 8, 3) + '</p></section>';
     this._depois = function () { self._rolaFim(); self._rolaColunaAtual(); };
     return h;
@@ -10373,7 +10034,7 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     }
     if (ln < 0) linhas = '<tr><td colspan="5" class="ev-vazio">A tabela começa quando a origem é descoberta (tempo −1 → d = 0).</td></tr>';
     h += '<section class="ev-bloco"><h4 class="ev-h4">Exercício guiado</h4>' + this._ocultas(j0) +
-      '<div class="ev-rola" data-auto="fim"><table class="ev-t ev-t--passos"><thead><tr><th>Passo</th><th>Em</th><th>Olha</th><th>O que acontece</th><th>Pilha de chamadas</th></tr></thead><tbody>' + linhas + '</tbody></table></div></section>';
+      '<div class="ev-rola" data-auto="fim"><table class="ev-t ev-t--passos"><thead><tr><th title="Iteração">It.</th><th>Em</th><th>Olha</th><th>O que acontece</th><th>Pilha de chamadas</th></tr></thead><tbody>' + linhas + '</tbody></table></div></section>';
     // resolução (slide 31)
     var seq = T.res.ordem.slice(0, this._nDescAte(st.k));
     var arestas = function (tipo) {
@@ -10423,33 +10084,28 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
   // Dijkstra / Bellman-Ford: linhas = vértices, colunas = Passo 1…k, células (d, p) / * / –
   P._tabColunas = function () {
     var T = this.T, st = this.st, tab = this.tab, dij = T.algoritmo === 'DIJKSTRA', self = this;
-    var col = st.coluna || 0, nLin = tab.linhasAte(col, st.k), JC = dij ? 6 : 4;
+    // [IA] Claude – rodada 4: quantas colunas cabem inteiras (medido no último desenho; zera ao redimensionar)
+    var col = st.coluna || 0, nLin = tab.linhasAte(col, st.k), JC = Math.min(dij ? 6 : 4, this._jcMax || 99);
     // colunas = blocos da tabela (Bellman-Ford: passadas seguidas sem mudança numa coluna só, cortada no passo atual)
     var bAgora = tab.blocoDaColuna(col), b1 = tab.blocos.indexOf(bAgora), b0 = Math.max(0, b1 - JC + 1), cols = [];
     for (var q = b0; q <= b1; q++) {
       var bl = tab.blocos[q], fimV = Math.min(bl.fim, col);
-      cols.push({ j: fimV, rot: bl.ini === 0 ? 'Início' : bl.vazio ? (fimV > bl.ini ? 'Passos ' + bl.ini + '–' + fimV : 'Passo ' + bl.ini) + '<span class="ev-th-nota">nada mudou</span>' : 'Passo ' + bl.ini,
+      // cabeçalho = só o número da iteração (o "passo" da tela é o do aluno, no HUD)
+      cols.push({ j: fimV, rot: bl.ini === 0 ? 'início' : bl.vazio && fimV > bl.ini ? bl.ini + '–' + fimV : String(bl.ini),
+        dica: bl.ini === 0 ? 'Antes da primeira ' + (dij ? 'iteração' : 'passada') : (dij ? 'Iteração ' : (bl.vazio && fimV > bl.ini ? 'Passadas ' : 'Passada ')) + (bl.vazio && fimV > bl.ini ? bl.ini + ' a ' + fimV : bl.ini) + (bl.vazio ? ': nada mudou' : ''),
         vazio: bl.vazio });
     }
     var c0 = b0;
     var foco = st.olhando ? st.olhando[1] : st.atual;
-    var cab = '<th scope="col" class="ev-canto">v</th>' + cols.map(function (c, i) {
+    var cab = '<th scope="col" class="ev-canto" title="' + (dij ? 'Linhas: vértices. Colunas: iterações.' : 'Linhas: vértices. Colunas: passadas.') + '">' + (dij ? 'v \\ it.' : 'v \\ pass.') + '</th>' + cols.map(function (c, i) {
       var cls = (i === cols.length - 1 ? 'ev-col-agora' : '') + (c.vazio ? ' ev-col-vazia' : '');
-      return '<th scope="col"' + (cls ? ' class="' + cls.trim() + '"' : '') + '>' + c.rot + '</th>';
+      return '<th scope="col"' + (cls ? ' class="' + cls.trim() + '"' : '') + ' title="' + esc(c.dica) + '">' + c.rot + '</th>';
     }).join('');
-    // [IA] Claude – cabeçalho de uma linha (título + onde estamos); a regra da tabela fica no title/aria do título
-    var regra = dij ? 'Cada coluna é um passo: o vértice aberto de menor d é fechado (*) e seus arcos são relaxados.'
+    var regra = dij ? 'Cada coluna é uma iteração: o vértice aberto de menor d é fechado (*) e seus arcos são relaxados.'
       : 'Cada coluna é uma passada completa por todos os arcos. O código do grupo faz sempre as |V|−1 = ' + (T.n - 1).toLocaleString('pt-BR') +
         ' passadas; passadas seguidas em que nada mudou aparecem juntas numa coluna só, e o replay as pula de uma vez.';
-    var onde;
-    if (dij) onde = col ? 'Passo ' + col + (tab.colunas ? ' de ' + tab.colunas.toLocaleString('pt-BR') : '') : 'Antes do primeiro passo';
-    else if (st.fim) onde = T.res.cicloNegativo ? 'Depois de ' + T.res.passadas.toLocaleString('pt-BR') + ' passadas, a passada extra ainda relaxou: ciclo negativo'
-      : T.res.passadas.toLocaleString('pt-BR') + ' passadas (|V|−1); a última mudança foi na passada ' + tab.ultimaMudanca.toLocaleString('pt-BR');
-    else onde = 'Passada ' + (st.passada || 0).toLocaleString('pt-BR') + ' de ' + T.res.passadas.toLocaleString('pt-BR') +
-      (bAgora.vazio && col > bAgora.ini ? ', nada mudou desde a passada ' + (bAgora.ini - 1).toLocaleString('pt-BR') : ', ' + (st.relaxadosNaPassada || 0) + ' relaxamento(s)');
-    if (c0 > 0) onde += '; mostrando os últimos ' + cols.length;
-    var h = '<section class="ev-bloco"><h4 class="ev-h4 ev-h4--linha" title="' + esc(regra) + '">' + (dij ? 'Tabela do Dijkstra' : 'Tabela do Bellman-Ford') +
-      '<span class="ev-h4-nota">' + esc(onde) + '.</span></h4><p class="sr-only">' + esc(regra) + '</p>' +
+    // [IA] Claude – rodada 4: sem legenda visível acima da tabela (a coluna destacada já diz onde estamos); a regra fica para leitores de tela
+    var h = '<section class="ev-bloco"><h4 class="sr-only">' + (dij ? 'Tabela do Dijkstra' : 'Tabela do Bellman-Ford') + '</h4><p class="sr-only">' + esc(regra) + '</p>' +
       '<div class="ev-rola ev-rola--xy" data-virtual="1"><table class="ev-t ev-t--dp"><thead><tr>' + cab + '</tr></thead><tbody data-vbody></tbody></table></div></section>';
     var celHTML = function (v, cc) {
       var j = cc.j, c = tab.celula(v, j, st.k);
@@ -10462,6 +10118,12 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
     var ROW = 26; // = altura da linha em estados.css (.ev-t--dp tbody tr)
     this._depois = function () {
       var box = self.t.corpo.querySelector('[data-virtual]'), tb = box.querySelector('[data-vbody]');
+      // altura = cabeçalho + linhas inteiras (quando a coluna tem altura fixa): nem a primeira nem a última linha ficam cortadas
+      var bloco = box.parentNode;
+      if (bloco && raiz.matchMedia && raiz.matchMedia('(min-width: 960px)').matches) {
+        var disp = bloco.clientHeight - (box.offsetTop - bloco.offsetTop);
+        if (disp > 32 + ROW) { box.style.flex = 'none'; box.style.height = (32 + Math.floor((disp - 32) / ROW) * ROW) + 'px'; }
+      } else box.style.height = box.style.flex = '';
       var desenha = function () {
         var topo = box.scrollTop, alt = Math.max(box.clientHeight, 420), cabH = 32;
         var i0 = Math.max(0, Math.floor((topo - cabH) / ROW) - 6), i1 = Math.min(nLin, Math.ceil((topo + alt) / ROW) + 6);
@@ -10481,48 +10143,46 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
       var alvoV = self.sincronizar && self.alunoNo >= 0 ? self.alunoNo : foco, pos = alvoV >= 0 ? tab.vertices.indexOf(alvoV) : -1;
       if (pos >= 0 && pos < nLin) {
         var y = 32 + pos * ROW;
-        if (y < box.scrollTop + 32 || y > box.scrollTop + box.clientHeight - ROW) box.scrollTop = Math.max(0, y - box.clientHeight / 2);
+        // rola em múltiplos da altura da linha: nenhuma linha fica cortada embaixo do cabeçalho
+        if (y < box.scrollTop + 32 || y > box.scrollTop + box.clientHeight - ROW) box.scrollTop = Math.max(0, Math.round((y - box.clientHeight / 2) / ROW) * ROW);
       }
       box.scrollLeft = box.scrollWidth;
       desenha();
+      // colunas inteiras: se a última não coube, mostra uma a menos (até caber; volta a crescer ao redimensionar)
+      if (box.scrollWidth > box.clientWidth + 1 && cols.length > 1) { self._jcMax = cols.length - 1; self._renderTabela(); }
     };
     return h;
   };
 
-  // ------------------------------------------------------------------ rodapé: caminho, custo, Python
+  // ------------------------------------------------------------------ rodapé: caminho e conferência com o Python
+  // fica recolhido atrás de um botão na linha de baixo; só é montado quando está aberto
   P._rodape = function () {
-    var T = this.T, f = T.final, pe = this.t.pe, self = this, h = '';
+    var T = this.T, f = T.final, pe = this.t.pe, h = '';
+    this.t.btdet.textContent = T.algoritmo !== 'DFS' && f.status === 'OK' ? 'Caminho' : T.algoritmo !== 'DFS' && f.status === 'CICLO_NEGATIVO' ? 'Ciclo' : 'Resultado';
+    if (pe.hidden) return;
     var py = this.mapa && this.mapa.algoritmos ? this.mapa.algoritmos[this.key] : null;
     if (T.algoritmo === 'DFS') {
-      var cl = T.res.classes;
-      h += '<p class="ev-pe-l"><b>Tem ciclo:</b> ' + (T.res.temCiclo ? 'sim, ' + cl.retorno.toLocaleString('pt-BR') + ' arco(s) de retorno' : 'não') +
-        '. Árvore ' + cl.arvore.toLocaleString('pt-BR') + ', retorno ' + cl.retorno.toLocaleString('pt-BR') + ', avanço ' + cl.avanco.toLocaleString('pt-BR') +
-        ', cruzamento ' + cl.cruzamento.toLocaleString('pt-BR') + '.</p>';
-    } else if (f.status === 'RECUSA') {
-      h += '<p class="ev-pe-l ev-erro"><b>Recusa:</b> ' + esc(f.mensagem || 'há arcos de peso negativo.') + '</p>';
+      h += '<p class="ev-pe-l">DFS sobre o grafo sem o ALVO: ' + T.nEstados.toLocaleString('pt-BR') + ' estados e ' + T.nArcos.toLocaleString('pt-BR') + ' arcos' +
+        (T.res.temCiclo ? ', com ciclo.' : ', sem ciclo.') + '</p>';
     } else if (f.status === 'CICLO_NEGATIVO') {
       h += '<p class="ev-pe-l ev-erro"><b>Ciclo negativo</b> de custo ' + num(f.custo) + ' (' + (f.caminho.length - 1) + ' arcos): ' + this._caminhoHTML(f.caminho) + '</p>';
     } else if (f.status === 'SEM_SOLUCAO') {
-      h += '<p class="ev-pe-l"><b>Sem solução:</b> o ALVO não tem predecessor; nenhum caminho leva até a saída.</p>';
-    } else {
-      h += '<p class="ev-pe-l ev-caminho"><b>Caminho pelos predecessores:</b> ' + this._caminhoHTML(f.caminho) + '</p>' +
-        '<p class="ev-pe-l"><b>' + f.passos.toLocaleString('pt-BR') + '</b> passos, custo <b>' + num(f.custo) + '</b>' + (T.algoritmo === 'BFS' ? ' (BFS minimiza passos, não custo)' : '') + '.</p>';
+      h += '<p class="ev-pe-l">O ALVO não tem predecessor: nenhum caminho leva até a saída.</p>';
+    } else if (f.status === 'OK') {
+      h += '<p class="ev-pe-l ev-caminho">' + this._caminhoHTML(f.caminho) + '</p>';
     }
     // concordância: o resultado final do traço × mapa.algoritmos (os dois vêm do Python)
-    if (T.algoritmo === 'DFS') h += '<p class="ev-py">Resultado do Python: DFS sobre o grafo sem o ALVO, ' + T.nEstados.toLocaleString('pt-BR') + ' estados e ' + T.nArcos.toLocaleString('pt-BR') + ' arcos.</p>';
-    else if (py) {
+    if (T.algoritmo !== 'DFS' && py) {
       var dif = [];
       if (py.status !== f.status) dif.push('status ' + f.status + ' no traço × ' + py.status + ' no resultado');
       if (f.status === 'OK' && py.passos !== f.passos) dif.push('passos ' + f.passos + ' × ' + py.passos);
       if ((f.status === 'OK' || f.status === 'CICLO_NEGATIVO') && py.custo !== f.custo) dif.push('custo ' + num(f.custo) + ' × ' + num(py.custo));
       if (this.mapa.estados !== undefined && T.nEstados !== this.mapa.estados && !T.fonteConsumivel) dif.push('estados ' + T.nEstados + ' × ' + this.mapa.estados);
-      var desc = py.status === 'OK' ? 'OK, ' + py.passos + ' passos, custo ' + num(py.custo) : py.status === 'CICLO_NEGATIVO' ? 'ciclo negativo, custo ' + num(py.custo) : py.status === 'RECUSA' ? 'recusa' : 'sem solução';
-      h += dif.length ? '<p class="ev-py ev-py--difere"><b>Resultado do Python:</b> ' + desc + '. Não confere com o traço: ' + esc(dif.join('; ')) + '.</p>'
-        : '<p class="ev-py ev-py--ok"><b>Resultado do Python:</b> ' + desc + '. Confere com o traço.</p>';
+      h += dif.length ? '<p class="ev-py ev-py--difere">Não confere com o resultado do Python: ' + esc(dif.join('; ')) + '.</p>'
+        : '<p class="ev-py ev-py--ok">Confere com o resultado do Python.</p>';
     }
     h += '<p class="ev-origem">Os eventos vêm do código Python do grupo (src/graphs/algorithms.py); esta tela só os reproduz.</p>';
     pe.innerHTML = h;
-    void self;
   };
   P._caminhoHTML = function (ids) {
     var self = this, sep = ' <span class="ev-seta">→</span> ';
@@ -10535,6 +10195,15 @@ input[type="range"]:not(.tempo__range)::-moz-range-thumb {
   };
   P._acaoExtra = function (x, b) {
     if (x === 'caminho') { this.expandeCaminho = !this.expandeCaminho; this._rodape(); }
+    else if (x === 'dfs') {
+      this._trocaAba(this.key === 'DFS' ? (this.algPlayer && this._temAlg(this.algPlayer) ? this.algPlayer : 'BFS') : 'DFS', false);
+      if (this.t.btdfs) this.t.btdfs.focus();
+    }
+    else if (x === 'detalhes') {
+      this.t.pe.hidden = !this.t.pe.hidden;
+      b.setAttribute('aria-expanded', String(!this.t.pe.hidden));
+      this._rodape();
+    }
     else if (x === 'foca') {
       var u = +b.getAttribute('data-u'), L = this.layout; if (!L) return;
       var s = Math.max(this.view.s, 11 / (L.raio[u] || 10));
@@ -10560,7 +10229,10 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
    desenho 2D em canvas com a mesma API, para a página nunca quebrar.
    [IA] Claude – rodada 2: área de trabalho (janela 3D + coluna de informações), mapa de estados e tabela
    (LAB.EstadosView, alimentada pelos traços do Python), métricas, velocidade estilo YouTube (0,25× a 2×),
-   "Ir para o fim", mapa surpresa (POST api/mapa), tema masmorra com o baú como objetivo. */
+   "Ir para o fim", mapa surpresa (POST api/mapa), tema masmorra com o baú como objetivo.
+   [IA] Claude – rodada 3 (enxuto): barra fina com seletor de mapa (popover) e algoritmo; HUD só com passo/custo e
+   chaves; câmera, camada, armadilhas, rastro e minimapa num popover "Visualização"; doca de uma linha; linha do
+   estado; métricas e histórico numa gaveta. */
 (function () {
   "use strict";
 
@@ -10576,7 +10248,7 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     BFS: { nome: "BFS", sub: "menos passos", completo: "BFS" },
     DIJKSTRA: { nome: "Dijkstra", sub: "menor custo", completo: "Dijkstra" },
     BELLMAN_FORD: { nome: "Bellman-Ford", sub: "aceita bônus negativo", completo: "Bellman-Ford" },
-    BELLMAN_FORD_FONTE_CONSUMIVEL: { nome: "Bellman-Ford", sub: "fonte consumível", completo: "Bellman-Ford, fonte consumível" }
+    BELLMAN_FORD_FONTE_CONSUMIVEL: { nome: "Fonte consumível", sub: "Bellman-Ford com a fonte valendo uma vez", completo: "Bellman-Ford, fonte consumível" }
   };
   var TITULOS = {
     m01: "Terreno", m02: "Uma chave", m03: "Três chaves", m04: "Esteiras", m05: "Bônus",
@@ -10589,7 +10261,6 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     CICLO_NEGATIVO: "Ciclo negativo: o custo cai sem limite"
   };
   var STATUS_CURTO = { OK: "Chega ao baú", SEM_SOLUCAO: "Sem caminho", RECUSA: "Recusou o mapa", CICLO_NEGATIVO: "Ciclo negativo" };
-  var CHIP_TXT = { SEM_SOLUCAO: "Sem caminho", RECUSA: "Dijkstra recusou", CICLO_NEGATIVO: "Ciclo negativo" };
   var CASA_NOME = {
     ".": "chão", "S": "início", "G": "baú (saída)", ",": "lama", "~": "água", "+": "bônus", "*": "fonte",
     "^": "esteira para o norte", ">": "esteira para o leste", "v": "esteira para o sul", "<": "esteira para o oeste"
@@ -10730,6 +10401,7 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     camada: "todas",
     armadilhas: true,
     rastro: true,
+    minimapa: false,
     vel: PASSOS_1X,
     mult: 1,
     cam: "seguir",
@@ -11200,7 +10872,7 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     var box = $("niveis");
     box.textContent = "";
     nomes.forEach(function (nome, i) {
-      var b = el("button", "nivel px" + (nome === NOME_PERSONALIZADO ? " nivel--seu" : ""));
+      var b = el("button", "nivel" + (nome === NOME_PERSONALIZADO ? " nivel--seu" : ""));
       b.type = "button";
       b.setAttribute("role", "radio");
       b.setAttribute("aria-checked", "false");
@@ -11215,7 +10887,7 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
       b.appendChild(txt);
       b.setAttribute("aria-label", codigo(nome) + ", " + titulo(nome));
       b.title = codigo(nome) + " " + titulo(nome);
-      b.addEventListener("click", function () { selecionarMapa(nome); });
+      b.addEventListener("click", function () { fecharPops(); selecionarMapa(nome); });
       box.appendChild(b);
       if (S.cache[nome] || (S.grades && S.grades[nome])) revelarMiniatura(nome, true);
     });
@@ -11232,17 +10904,28 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     agendaMapa = setTimeout(function () { selecionarMapa(nome); }, 320);
   }
   function marcarNivel(nome) {
-    var faixa = $("niveis");
     $$(".nivel").forEach(function (b) {
       var sel = b.dataset.nome === nome;
       b.setAttribute("aria-checked", sel ? "true" : "false");
       b.tabIndex = sel ? 0 : -1;
-      // no celular a faixa rola: centraliza o cartão escolhido
-      if (sel && faixa.scrollWidth > faixa.clientWidth + 2) {
-        var alvo = b.offsetLeft - (faixa.clientWidth - b.offsetWidth) / 2;
-        faixa.scrollTo({ left: Math.max(0, alvo), behavior: REDUZIDO ? "auto" : "smooth" });
-      }
     });
+    atualizarSeletorMapa(nome);
+  }
+  /** Botão do seletor de mapa na barra: miniatura + código + título do mapa escolhido. */
+  function atualizarSeletorMapa(nome) {
+    if (!nome) return;
+    var btn = $("btnMapa");
+    $("mapaSelCodigo").textContent = codigo(nome);
+    $("mapaSelTitulo").textContent = titulo(nome);
+    btn.setAttribute("aria-label", "Mapa: " + codigo(nome) + ", " + titulo(nome) + ". Trocar de mapa");
+    var mini = $("mapaSelMini"), grade = S.cache[nome] ? S.cache[nome].grade : (S.grades && S.grades[nome]);
+    if (mini.dataset.nome === nome || !grade || !grade.length) return;
+    var cel = Math.max(1, Math.floor(Math.min(30 / grade[0].length, 20 / grade.length)));
+    var c = miniatura(grade, cel);
+    if (!c) return;
+    mini.dataset.nome = nome;
+    mini.textContent = "";
+    mini.appendChild(c);
   }
   /** Mostra a miniatura do mapa no cartão assim que os dados dele existirem. */
   function revelarMiniatura(nome, semAnimacao) {
@@ -11251,14 +10934,16 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     if (!b || !grade || !grade.length || b.dataset.revelado) return;
     var mini = b.querySelector(".nivel__mini");
     var C = grade[0].length, L = grade.length;
-    var w = Math.max(60, mini.clientWidth || 112), h = Math.max(36, mini.clientHeight || 70);
-    var cel = Math.max(1, Math.floor(Math.min((w - 8) / C, (h - 8) / L)));
+    // o cartão pode estar num popover fechado (clientWidth 0): usa o tamanho do CSS (48 × 30)
+    var w = mini.clientWidth || 48, h = mini.clientHeight || 30;
+    var cel = Math.max(1, Math.floor(Math.min((w - 4) / C, (h - 4) / L)));
     var c = miniatura(grade, cel);
     if (!c) return;
     b.dataset.revelado = "1";
     mini.textContent = "";
     mini.appendChild(c);
     if (!semAnimacao && !REDUZIDO) mini.classList.add("is-revelado");
+    if (nome === S.nome) atualizarSeletorMapa(nome);
   }
   /** Miniatura do mapa em `cel` px CSS por casa (LAB.pixel.mapThumb ou desenho próprio). */
   function miniatura(grade, cel) {
@@ -11304,15 +10989,12 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     box.textContent = "";
     algsDoMapa(mapa).forEach(function (k) {
       var r = mapa.algoritmos[k], inf = infoAlg(k);
-      var b = el("button", "alg px");
+      var b = el("button", "alg", inf.nome);
       b.type = "button";
       b.setAttribute("role", "radio");
       b.dataset.alg = k;
-      b.appendChild(el("span", "alg__nome", inf.nome));
-      b.appendChild(el("span", "alg__sub", inf.sub));
-      var res = el("span", "alg__res", resumoAlg(r));
-      res.setAttribute("data-status", r.status);
-      b.appendChild(res);
+      // o resultado de cada algoritmo fica na dica (title) e no rótulo acessível, não dentro do botão
+      b.title = inf.completo + ": " + inf.sub + ". " + resumoAlg(r);
       b.setAttribute("aria-label", inf.completo + ", " + inf.sub + ". " + resumoAlg(r));
       b.addEventListener("click", function () { selecionarAlg(k, { anunciar: true }); });
       box.appendChild(b);
@@ -11355,7 +11037,6 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
       montarAlgs();
       montarCamadas();
       montarInventario();
-      montarLegenda();
       atualizarCatalogo();
       montarPilha();
       atualizarSecaoAlgoritmos();
@@ -11409,7 +11090,7 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     chamar(playerR, "setTrailVisible", S.rastro);
     montarLinhaTempo();
     atualizarResultado(r);
-    atualizarJanela();
+    chip(null);
     dialogoStatus(r);
     desenharMinimapaBase();
     estadosChamar("setAlgoritmo", alg);
@@ -11559,16 +11240,11 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
   }
   function render() {
     var p = passoAtual(), n = ultimo(), temPerc = S.perc.length > 0;
-    // HUD
+    // HUD: passo e custo acumulado (cada número aparece uma vez na tela)
     $("hudPasso").textContent = temPerc ? S.idx : "–";
-    $("hudTotal").textContent = temPerc ? "de " + n : "";
+    $("hudTotal").textContent = temPerc ? "de " + n + (eCiclo() && S.voltas ? ", volta " + (S.voltas + 1) : "") : "";
     $("hudCusto").textContent = p ? fmt(custoMostrado(p)) : "–";
-    var chip = $("hudStatus"), st;
-    if (S.status === "OK") st = S.idx >= n ? "OK" : "andando";
-    else st = S.status;
-    chip.setAttribute("data-status", st);
-    $("hudStatusTxt").textContent = st === "andando" ? (S.idx === 0 ? "Pronto para sair" : "A caminho do baú") : st === "OK" ? "Baú aberto!" :
-      st === "CICLO_NEGATIVO" && S.voltas ? "Ciclo negativo, volta " + (S.voltas + 1) : (CHIP_TXT[st] || "–");
+    $("hudStats").hidden = !temPerc;
     atualizarInventario(p);
     // linha do tempo
     var tr = $("tempoRange");
@@ -11580,28 +11256,32 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     $("btnAvancar").disabled = !temPerc || (S.idx >= n && !eCiclo());
     $("btnPlay").disabled = !temPerc || n === 0;
     $("btnFim").disabled = !temPerc || S.idx >= n;
-    // inspetor
-    $("dPasso").textContent = temPerc ? S.idx + " de " + n : "–";
-    rotuloEstado($("dRotulo"), p ? p.estado : "");
-    $("dPos").textContent = p ? "linha " + p.linha + ", coluna " + p.coluna + ", " + nomeCasa(p.casa) : "–";
-    var txtChaves = p ? (p.chaves || "nenhuma") : "–";
-    var dc = $("dChaves");
-    if (dc.dataset.v !== txtChaves) {
-      dc.dataset.v = txtChaves;
-      dc.textContent = "";
-      if (p && p.chaves) {
-        p.chaves.split("").forEach(function (l) {
-          var ic = iconeChave(l, 2);
-          if (ic) dc.appendChild(ic);
-          dc.appendChild(document.createTextNode(l));
-        });
-      } else dc.textContent = txtChaves;
-    }
-    $("dBonus").textContent = p ? (p.bonus && p.bonus.length ? "{" + p.bonus.join(", ") + "}" : "nenhum") : "–";
-    $("dCusto").textContent = p ? fmt(custoMostrado(p)) : "–";
+    // linha do estado: rótulo, chaves na mão e bônus consumidos
+    var rot = $("dRotulo");
+    // sem percurso (recusa, sem caminho): mostra o estado inicial, que é onde o aluno fica
+    var ini = !p && S.mapa ? posInicio(S.mapa) : null;
+    rotuloEstado(rot, p ? p.estado : ini ? "(" + ini[0] + "," + ini[1] + ")|-|{}" : "");
+    var pos = p ? "linha " + p.linha + ", coluna " + p.coluna + ", " + nomeCasa(p.casa) : "";
+    rot.title = pos;
+    rot.setAttribute("aria-label", p ? "Estado " + p.estado + ": " + pos : "Sem estado");
+    // [IA] Claude – rodada 4: as chaves e os bônus já estão no rótulo (e as chaves no inventário do HUD); o resultado
+    // só aparece no fim do percurso (ou quando não há percurso), à direita do rótulo, sem repetir passos e custo do HUD
+    $("dStatus").hidden = temPerc && S.status === "OK" && S.idx < n;
     renderTupla(p);
     desenharMinimapa();
     if (temPerc) estadosChamar("setPasso", S.perc, S.idx);
+  }
+
+  /** Chip do HUD só para os finais (baú aberto ou sem caminho); some sozinho. */
+  var chipTimer = 0;
+  function chip(status, txt) {
+    var c = $("hudStatus");
+    clearTimeout(chipTimer);
+    if (!status) { c.hidden = true; return; }
+    c.setAttribute("data-status", status);
+    $("hudStatusTxt").textContent = txt;
+    c.hidden = false;
+    chipTimer = setTimeout(function () { c.hidden = true; }, REDUZIDO ? 4000 : 2800);
   }
 
   /** Rótulo do estado com as barras separadoras destacadas (na Pixelify Sans "|" lembra um "l"). */
@@ -11670,9 +11350,10 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
   var miniBase = null, miniCel = 0;
   function desenharMinimapaBase() {
     miniBase = null;
-    if (!S.mapa) return;
+    $("hudMini").hidden = !S.minimapa;
+    if (!S.mapa || !S.minimapa) return;
     var g = S.mapa.grade, C = g[0].length, L = g.length;
-    var largo = window.innerWidth < 900 ? 108 : 168, alto = window.innerWidth < 900 ? 84 : 104;
+    var largo = window.innerWidth < 900 ? 108 : 160, alto = window.innerWidth < 900 ? 84 : 100;
     miniCel = Math.max(1, Math.floor(Math.min(largo / C, alto / L)));
     miniBase = miniatura(g, miniCel);
     var cv = $("minimapa");
@@ -11755,32 +11436,25 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
   /* ---------------------------------------------------------------- inspetor: resultado e camada */
   function atualizarResultadoMapa() {
     var m = S.mapa;
-    $("dEstados").textContent = fmt(m.estados);
-    $("dArcos").textContent = fmt(m.arcos);
-    $("dTeto").textContent = fmt(m.teto);
-    $("dTrap").textContent = fmt((m.armadilhas || []).length);
     $("cEstados").textContent = fmt(m.estados);
     $("cArcos").textContent = fmt(m.arcos);
     $("cTeto").textContent = fmt(m.teto);
   }
+  /** Resultado do Python numa linha só: status e, quando há, passos e custo (sem repetir o que o HUD mostra). */
   function atualizarResultado(r) {
     var d = $("dStatus");
-    d.textContent = (STATUS_TXT[r.status] || r.status);
+    d.textContent = "";
     d.setAttribute("data-status", r.status);
-    // [IA] Claude – o resultado vem do Python (src/solve.py); a linha deixa isso explícito
-    var py = "Python: " + r.status;
-    if (r.status === "OK") py += " em " + fmt(r.passos) + " passos, custo " + fmt(r.custo);
-    else if (r.status === "CICLO_NEGATIVO") {
+    // forma curta: a frase longa já está na faixa da janela 3D (e no title)
+    d.appendChild(el("span", "resultado__status", r.status === "OK" ? STATUS_TXT.OK : (STATUS_CURTO[r.status] || r.status)));
+    var extras = [];
+    if (r.status === "CICLO_NEGATIVO") {
       // o Python manda passos = null no ciclo; o tamanho do ciclo é o do percurso devolvido (estados − 1)
       var nCiclo = r.passos != null ? r.passos : (r.percurso && r.percurso.length > 1 ? r.percurso.length - 1 : null);
-      py += nCiclo != null ? ", ciclo de " + fmt(nCiclo) + " arcos, custo " + fmt(r.custo) + " por volta" : ", custo " + fmt(r.custo) + " por volta";
+      extras.push((nCiclo != null ? fmt(nCiclo) + " arcos, " : "") + fmt(r.custo) + " por volta");
     }
-    $("dPython").textContent = py;
-    var msg = $("dMsg");
-    msg.textContent = r.mensagem || "";
-    msg.hidden = !r.mensagem;
-    $("dPassos").textContent = r.passos == null ? "–" : fmt(r.passos);
-    $("dCustoTot").textContent = fmt(r.custo);
+    extras.forEach(function (t) { d.appendChild(el("span", "resultado__dado", t)); });
+    d.title = (STATUS_TXT[r.status] || r.status) + ". Resultado do Python (src/solve.py)" + (r.mensagem ? ": " + r.mensagem : "");
   }
   function montarCamadas() {
     var sel = $("selCamada");
@@ -11795,6 +11469,7 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
   function definirCamada(k) {
     S.camada = k;
     $("selCamada").value = k;
+    $("btnVis").classList.toggle("is-marcado", k !== "todas");
     chamar(playerR, "setLayer", k);
     $$(".camada").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.camada === k ? "true" : "false"); });
   }
@@ -11846,8 +11521,9 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     if (on) dialogo(null);
   }
 
-  /* ---------------------------------------------------------------- legenda compacta */
+  /* ---------------------------------------------------------------- legenda compacta (não usada no player desde a rodada 4: o manual "Casas e custos" cobre) */
   function montarLegenda() {
+    if (!$("legenda")) return;
     var ul = $("legenda"), s = S.mapa.grade.join(""), itens = [];
     var tem = function (re) { var m = s.match(re); return m ? m[0] : null; };
     [[/\./, "chão", "1"], [/,/, "lama", "3"], [/~/, "água", "5"], [/\+/, "bônus", "−4"], [/\*/, "fonte", "−2"],
@@ -11915,8 +11591,8 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     $("nBonus").textContent = bonus.length ? "bônus número " + listaPt(bonus.map(String)) : "nenhum";
     var algNome = infoAlg(S.alg).completo;
     $("tuplaNota").textContent = S.perc.length
-      ? "Mapa " + codigo(S.nome) + " com " + algNome + ", passo " + S.idx + " de " + ultimo() + ". Dê play no player e a tupla muda junto."
-      : "Mapa " + codigo(S.nome) + " com " + algNome + ": não há percurso, então a tupla fica no início.";
+      ? codigo(S.nome) + ", " + algNome + ", passo " + S.idx
+      : codigo(S.nome) + ", " + algNome + ": sem percurso, a tupla fica no início";
     var chave = $("tPos").textContent + chaves + bonus.join();
     if (chave !== tuplaAnterior) { tuplaAnterior = chave; agendarGuias(); }
   }
@@ -12035,10 +11711,6 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
   function iniciarHero(mapa) {
     var palco = $("heroPalco");
     var alg = melhorAlg(mapa), r = mapa.algoritmos[alg];
-    $("heroMapa").textContent = codigo(mapa.nome || MAPA_DESTAQUE) + " " + titulo(mapa.nome || MAPA_DESTAQUE);
-    $("heroDado").textContent = r && r.status === "OK"
-      ? "até o baú pelo " + infoAlg(alg).nome + ": " + r.passos + " passos, custo " + fmt(r.custo)
-      : (STATUS_TXT[r && r.status] || "");
     palco.setAttribute("aria-label", "Diorama 3D do mapa " + codigo(mapa.nome) + ": o aluno da CESAR School percorre a masmorra até o baú pelo caminho do " + infoAlg(alg).nome + ".");
     var criado = criarRenderer(palco, { interactive: false, attract: true, pixelScale: "auto", reducedMotion: REDUZIDO });
     heroR = criado.r; heroTipo = criado.tipo;
@@ -12075,6 +11747,7 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     $$("canvas", p).forEach(function (c) { c.remove(); });
     playerR = new Mapa2D(p, { interactive: true }); playerTipo = "2d";
     $("tela3d").classList.add("is-2d");
+    $("visCam").hidden = true;
     ligarEventosPlayer();
     if (S.mapa) {
       playerR.load(S.mapa);
@@ -12089,6 +11762,7 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     var criado = criarRenderer($("playerPalco"), { interactive: true, attract: false, pixelScale: "auto", reducedMotion: REDUZIDO });
     playerR = criado.r; playerTipo = criado.tipo;
     $("tela3d").classList.toggle("is-2d", playerTipo === "2d");
+    $("visCam").hidden = playerTipo === "2d";   // o desenho 2D não tem câmera
     ligarEventosPlayer();
     observarVisibilidade($("tela3d"), function (vis) {
       S.playerVisivel = vis;
@@ -12107,12 +11781,13 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     chamar(playerR, "on", "goal", function () {
       if (!S.mapa || S.status !== "OK") return;
       render();
+      chip("OK", "Baú aberto!");
       anunciar(msgFinal());
     });
     chamar(playerR, "on", "fail", function () {
       if (!S.mapa) return;
-      $("hudStatus").setAttribute("data-status", S.status || "SEM_SOLUCAO");
-      $("hudStatusTxt").textContent = "Não chega ao baú";
+      // o aviso do status já está na faixa do HUD: o chip só aparece quando não há faixa
+      if ($("hudDialogo").hidden) chip(S.status || "SEM_SOLUCAO", "Não chega ao baú");
       anunciar("O algoritmo não leva o aluno até o baú. " + (STATUS_TXT[S.status] || ""));
     });
   }
@@ -12127,16 +11802,28 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     $("btnAvancar").addEventListener("click", function () { passo(1); });
     $("btnVoltar").addEventListener("click", function () { passo(-1); });
     $("btnInicio").addEventListener("click", function () { S.voltas = 0; irPara(0, { anunciar: true }); });
-    $("btnFim").addEventListener("click", function () { irPara(ultimo(), { anunciar: true }); });
+    $("btnFim").addEventListener("click", function () {
+      irPara(ultimo(), { anunciar: true });
+      // [IA] Claude – fix: no ciclo negativo o salto até o fim (sem animar) também mostra o final triste
+      if (eCiclo() && S.perc.length) chamar(playerR, "showEnding", { animate: !REDUZIDO });
+    });
     $("tempoRange").addEventListener("input", function (e) { irPara(+e.target.value); });
+    ligarPop($("btnMapa"), $("painelMapa"), function () {
+      var sel = $$('.nivel[aria-checked="true"]')[0] || $$(".nivel")[0];
+      if (sel) sel.focus({ preventScroll: true });
+    });
+    ligarPop($("btnVis"), $("painelVis"));
     ligarVelocidade();
     ligarDivisor();
     ligarDialogoMapa();
+    ligarGaveta();
     $("chkTrap").addEventListener("change", function (e) { S.armadilhas = e.target.checked; chamar(playerR, "setTrapsVisible", S.armadilhas); });
     $("chkRastro").addEventListener("change", function (e) { S.rastro = e.target.checked; chamar(playerR, "setTrailVisible", S.rastro); desenharMinimapa(); });
+    $("chkMini").addEventListener("change", function (e) { S.minimapa = e.target.checked; desenharMinimapaBase(); desenharMinimapa(); });
     $("selCamada").addEventListener("change", function (e) { definirCamada(e.target.value); });
     $$("#hudCam button").forEach(function (b) {
       b.addEventListener("click", function () {
+        $("btnVis").classList.toggle("is-marcado", b.getAttribute("data-cam") !== "seguir");
         S.cam = b.getAttribute("data-cam");
         $$("#hudCam button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
         chamar(playerR, "setCamera", S.cam);
@@ -12190,11 +11877,51 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
   /* ================================================================ [IA] Claude – rodada 2: janela, velocidade,
      mapa de estados + tabela (LAB.EstadosView), métricas, divisor e mapa surpresa */
 
-  /* ---------------------------------------------------------------- barra de título da janela 3D */
-  function atualizarJanela() {
-    if (!S.mapa) return;
-    $("janelaMapa").textContent = S.nome === NOME_PERSONALIZADO ? "Mapa personalizado" : codigo(S.nome) + " " + titulo(S.nome);
-    $("janelaAlg").textContent = "com " + infoAlg(S.alg).completo;
+  /* ---------------------------------------------------------------- popovers (seletor de mapa, Visualização) */
+  var pops = [];
+  /** Popover simples: botão com aria-expanded, fecha com Esc, clique fora ou foco saindo. */
+  function ligarPop(btn, painel, aoAbrir) {
+    var caixa = btn.parentNode;
+    function abrir() {
+      fecharPops();
+      painel.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+      if (aoAbrir) aoAbrir();
+    }
+    function fechar(focarBotao) {
+      if (painel.hidden) return;
+      painel.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+      if (focarBotao) btn.focus({ preventScroll: true });
+    }
+    btn.addEventListener("click", function () { if (painel.hidden) abrir(); else fechar(false); });
+    caixa.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !painel.hidden) { e.preventDefault(); e.stopPropagation(); fechar(true); }
+    });
+    caixa.addEventListener("focusout", function (e) {
+      if (e.relatedTarget && !caixa.contains(e.relatedTarget)) fechar(false);
+    });
+    document.addEventListener("pointerdown", function (e) { if (!caixa.contains(e.target)) fechar(false); });
+    pops.push(fechar);
+  }
+  function fecharPops() { pops.forEach(function (f) { f(false); }); }
+
+  /* ---------------------------------------------------------------- gaveta de métricas */
+  function ligarGaveta() {
+    var dlg = $("dlgMetricas"), btn = $("btnMetricas");
+    function fechar() {
+      if (typeof dlg.close === "function" && dlg.open) dlg.close();
+      else { dlg.removeAttribute("open"); btn.focus({ preventScroll: true }); }
+    }
+    btn.addEventListener("click", function () {
+      fecharPops();
+      if (typeof dlg.showModal === "function") { if (!dlg.open) dlg.showModal(); }
+      else dlg.setAttribute("open", "");
+      $("btnFecharMetricas").focus();
+    });
+    $("btnFecharMetricas").addEventListener("click", fechar);
+    dlg.addEventListener("click", function (e) { if (e.target === dlg) fechar(); });
+    dlg.addEventListener("close", function () { btn.focus({ preventScroll: true }); });
   }
 
   /* ---------------------------------------------------------------- velocidade estilo YouTube */
@@ -12212,13 +11939,13 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     S.vel = PASSOS_1X * m;
     chamar(playerR, "setSpeed", S.vel);
     $("velTxt").textContent = decimalPt(m) + "×";
-    $("velNota").textContent = notaVel(m);
+    $("btnVel").setAttribute("aria-label", "Velocidade: " + rotuloVel(m) + ", " + notaVel(m));
     $("btnVel").title = "Velocidade: " + notaVel(m) + " (teclas + e −)";
     $$("#velMenu [role=option]").forEach(function (li) {
       li.setAttribute("aria-selected", +li.dataset.mult === m ? "true" : "false");
     });
-    // a tabela/grafo tem velocidade própria; só acompanha a do aluno com "Sincronizar com o aluno" ligado
-    if (ev && ev.sincronizar) estadosChamar("setVelocidade", m);
+    // o replay da tabela (quando não está sincronizado com o aluno) usa a mesma velocidade
+    estadosChamar("setVelocidade", m);
     if (o.anunciar) anunciar("Velocidade " + (m === 1 ? "normal" : decimalPt(m) + " vezes") + ", " + notaVel(m));
   }
   function mudarVelocidade(d, anunciarMudanca) {
@@ -12236,6 +11963,7 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
       li.dataset.i = String(i);
       li.appendChild(el("span", "vel__check"));
       li.appendChild(el("span", null, rotuloVel(m)));
+      li.title = notaVel(m);
       li.addEventListener("click", function () { definirVelocidade(m, { anunciar: true }); fechar(true); });
       li.addEventListener("pointermove", function () { marcarAtivo(i); });
       menu.appendChild(li);
@@ -12246,6 +11974,7 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
       $$("[role=option]", menu).forEach(function (li, j) { li.classList.toggle("is-ativo", j === ativo); });
     }
     function abrir() {
+      fecharPops();
       menu.hidden = false;
       btn.setAttribute("aria-expanded", "true");
       marcarAtivo(VELOCIDADES.indexOf(S.mult));
@@ -12419,11 +12148,15 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     return t;
   }
   function montarMetricas() {
-    var card = $("cardMetricas"), box = $("metricas");
+    var box = $("metricas");
     var m = normalizarMetricas(S.mapa && S.mapa.metricas);
     box.textContent = "";
-    if (!m || !m.g) { card.hidden = true; return; }
-    card.hidden = false;
+    $("metricasSub").textContent = S.nome === NOME_PERSONALIZADO ? "Mapa personalizado" : codigo(S.nome) + " " + titulo(S.nome);
+    if (!m || !m.g) {
+      // sem solve.metricas: ao menos o tamanho do grafo de estados
+      box.appendChild(tabela(["Grafo", "Ordem", "Tamanho"], [["G_est (estados)", fmt(S.mapa.estados), fmt(S.mapa.arcos)]]));
+      return;
+    }
     var g = m.g;
     var gp = g.G_pos || g.g_pos || {}, ge = g.G_est || g.g_est || {};
     box.appendChild(tabela(["Grafo", "Ordem", "Tamanho", "Densidade"], [
@@ -12446,7 +12179,7 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     item("Becos", fmt(becos.length), becos.slice(0, 40).join("  "));
     if (g.maior_grau_saida) item("Maior grau de saída", fmt(g.maior_grau_saida.grau), g.maior_grau_saida.estado);
     if (g.maior_grau_entrada) item("Maior grau de entrada", fmt(g.maior_grau_entrada.grau), g.maior_grau_entrada.estado);
-    if (g.n_armadilhas != null) item("Armadilhas", fmt(g.n_armadilhas) + (g.pct_armadilhas != null ? " (" + pct(g.pct_armadilhas) + ")" : ""));
+    item("Armadilhas", g.n_armadilhas != null ? fmt(g.n_armadilhas) + (g.pct_armadilhas != null ? " (" + pct(g.pct_armadilhas) + ")" : "") : fmt((S.mapa.armadilhas || []).length));
     box.appendChild(dl);
 
     if (m.camadas.length) {
@@ -12461,17 +12194,19 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
       p.appendChild(document.createTextNode(m.entre === 1 ? " arco muda de camada" : " arcos mudam de camada"));
       box.appendChild(p);
       if (m.casas.length) {
-        var ul = el("ul", "metricas__casas");
-        m.casas.forEach(function (c) {
-          var li = el("li");
-          var casa = c.casa || [];
-          var sim = c.simbolo || "";
-          if (/[a-d]/.test(sim)) li.style.setProperty("--cor-chave", corChave(sim));
-          li.appendChild(el("b", null, sim));
-          li.appendChild(document.createTextNode(" (" + casa[0] + "," + casa[1] + ") " + fmt(c.arcos) + (c.arcos === 1 ? " arco" : " arcos")));
-          ul.appendChild(li);
+        // [IA] Claude – rodada 4: lista corrida em vez de chips ("b em (1,12), c em (6,6): 1 arco cada")
+        var arcosIguais = m.casas.every(function (c) { return c.arcos === m.casas[0].arcos; });
+        var q = el("p", "metricas__casas");
+        m.casas.forEach(function (c, i) {
+          var casa = c.casa || [], sim = c.simbolo || "";
+          if (i) q.appendChild(document.createTextNode(i === m.casas.length - 1 ? " e " : ", "));
+          var b = el("b", null, sim);
+          if (/[a-d]/.test(sim)) b.style.color = corChave(sim);
+          q.appendChild(b);
+          q.appendChild(document.createTextNode(" em (" + casa[0] + "," + casa[1] + ")" + (arcosIguais ? "" : " (" + fmt(c.arcos) + (c.arcos === 1 ? " arco)" : " arcos)"))));
         });
-        box.appendChild(ul);
+        if (arcosIguais && m.casas.length) q.appendChild(document.createTextNode(": " + fmt(m.casas[0].arcos) + (m.casas[0].arcos === 1 ? " arco" : " arcos") + (m.casas.length > 1 ? " cada" : "")));
+        box.appendChild(q);
       }
     }
     var comp = S.mapa.comparacao_modelagem || S.mapa.comparacao || (S.mapa.metricas && S.mapa.metricas.comparacao_modelagem);
@@ -12501,9 +12236,9 @@ window.__TRACOS__ = {"m01_terreno":{"BFS":{"algoritmo":"BFS","fonteConsumivel":f
     function fechar() {
       if (typeof dlg.close === "function" && dlg.open) dlg.close();
       else dlg.removeAttribute("open");
-      $("btnCarregar").focus({ preventScroll: true });
+      $("btnMapa").focus({ preventScroll: true });
     }
-    $("btnCarregar").addEventListener("click", abrir);
+    $("btnCarregar").addEventListener("click", function () { fecharPops(); abrir(); });
     $("btnDlgCancelar").addEventListener("click", fechar);
     $$("[data-fechar]", dlg).forEach(function (b) { b.addEventListener("click", fechar); });
     dlg.addEventListener("click", function (e) { if (e.target === dlg) fechar(); });

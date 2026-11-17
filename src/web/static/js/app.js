@@ -5,7 +5,10 @@
    desenho 2D em canvas com a mesma API, para a página nunca quebrar.
    [IA] Claude – rodada 2: área de trabalho (janela 3D + coluna de informações), mapa de estados e tabela
    (LAB.EstadosView, alimentada pelos traços do Python), métricas, velocidade estilo YouTube (0,25× a 2×),
-   "Ir para o fim", mapa surpresa (POST api/mapa), tema masmorra com o baú como objetivo. */
+   "Ir para o fim", mapa surpresa (POST api/mapa), tema masmorra com o baú como objetivo.
+   [IA] Claude – rodada 3 (enxuto): barra fina com seletor de mapa (popover) e algoritmo; HUD só com passo/custo e
+   chaves; câmera, camada, armadilhas, rastro e minimapa num popover "Visualização"; doca de uma linha; linha do
+   estado; métricas e histórico numa gaveta. */
 (function () {
   "use strict";
 
@@ -21,7 +24,7 @@
     BFS: { nome: "BFS", sub: "menos passos", completo: "BFS" },
     DIJKSTRA: { nome: "Dijkstra", sub: "menor custo", completo: "Dijkstra" },
     BELLMAN_FORD: { nome: "Bellman-Ford", sub: "aceita bônus negativo", completo: "Bellman-Ford" },
-    BELLMAN_FORD_FONTE_CONSUMIVEL: { nome: "Bellman-Ford", sub: "fonte consumível", completo: "Bellman-Ford, fonte consumível" }
+    BELLMAN_FORD_FONTE_CONSUMIVEL: { nome: "Fonte consumível", sub: "Bellman-Ford com a fonte valendo uma vez", completo: "Bellman-Ford, fonte consumível" }
   };
   var TITULOS = {
     m01: "Terreno", m02: "Uma chave", m03: "Três chaves", m04: "Esteiras", m05: "Bônus",
@@ -34,7 +37,6 @@
     CICLO_NEGATIVO: "Ciclo negativo: o custo cai sem limite"
   };
   var STATUS_CURTO = { OK: "Chega ao baú", SEM_SOLUCAO: "Sem caminho", RECUSA: "Recusou o mapa", CICLO_NEGATIVO: "Ciclo negativo" };
-  var CHIP_TXT = { SEM_SOLUCAO: "Sem caminho", RECUSA: "Dijkstra recusou", CICLO_NEGATIVO: "Ciclo negativo" };
   var CASA_NOME = {
     ".": "chão", "S": "início", "G": "baú (saída)", ",": "lama", "~": "água", "+": "bônus", "*": "fonte",
     "^": "esteira para o norte", ">": "esteira para o leste", "v": "esteira para o sul", "<": "esteira para o oeste"
@@ -175,6 +177,7 @@
     camada: "todas",
     armadilhas: true,
     rastro: true,
+    minimapa: false,
     vel: PASSOS_1X,
     mult: 1,
     cam: "seguir",
@@ -645,7 +648,7 @@
     var box = $("niveis");
     box.textContent = "";
     nomes.forEach(function (nome, i) {
-      var b = el("button", "nivel px" + (nome === NOME_PERSONALIZADO ? " nivel--seu" : ""));
+      var b = el("button", "nivel" + (nome === NOME_PERSONALIZADO ? " nivel--seu" : ""));
       b.type = "button";
       b.setAttribute("role", "radio");
       b.setAttribute("aria-checked", "false");
@@ -660,7 +663,7 @@
       b.appendChild(txt);
       b.setAttribute("aria-label", codigo(nome) + ", " + titulo(nome));
       b.title = codigo(nome) + " " + titulo(nome);
-      b.addEventListener("click", function () { selecionarMapa(nome); });
+      b.addEventListener("click", function () { fecharPops(); selecionarMapa(nome); });
       box.appendChild(b);
       if (S.cache[nome] || (S.grades && S.grades[nome])) revelarMiniatura(nome, true);
     });
@@ -677,17 +680,28 @@
     agendaMapa = setTimeout(function () { selecionarMapa(nome); }, 320);
   }
   function marcarNivel(nome) {
-    var faixa = $("niveis");
     $$(".nivel").forEach(function (b) {
       var sel = b.dataset.nome === nome;
       b.setAttribute("aria-checked", sel ? "true" : "false");
       b.tabIndex = sel ? 0 : -1;
-      // no celular a faixa rola: centraliza o cartão escolhido
-      if (sel && faixa.scrollWidth > faixa.clientWidth + 2) {
-        var alvo = b.offsetLeft - (faixa.clientWidth - b.offsetWidth) / 2;
-        faixa.scrollTo({ left: Math.max(0, alvo), behavior: REDUZIDO ? "auto" : "smooth" });
-      }
     });
+    atualizarSeletorMapa(nome);
+  }
+  /** Botão do seletor de mapa na barra: miniatura + código + título do mapa escolhido. */
+  function atualizarSeletorMapa(nome) {
+    if (!nome) return;
+    var btn = $("btnMapa");
+    $("mapaSelCodigo").textContent = codigo(nome);
+    $("mapaSelTitulo").textContent = titulo(nome);
+    btn.setAttribute("aria-label", "Mapa: " + codigo(nome) + ", " + titulo(nome) + ". Trocar de mapa");
+    var mini = $("mapaSelMini"), grade = S.cache[nome] ? S.cache[nome].grade : (S.grades && S.grades[nome]);
+    if (mini.dataset.nome === nome || !grade || !grade.length) return;
+    var cel = Math.max(1, Math.floor(Math.min(30 / grade[0].length, 20 / grade.length)));
+    var c = miniatura(grade, cel);
+    if (!c) return;
+    mini.dataset.nome = nome;
+    mini.textContent = "";
+    mini.appendChild(c);
   }
   /** Mostra a miniatura do mapa no cartão assim que os dados dele existirem. */
   function revelarMiniatura(nome, semAnimacao) {
@@ -696,14 +710,16 @@
     if (!b || !grade || !grade.length || b.dataset.revelado) return;
     var mini = b.querySelector(".nivel__mini");
     var C = grade[0].length, L = grade.length;
-    var w = Math.max(60, mini.clientWidth || 112), h = Math.max(36, mini.clientHeight || 70);
-    var cel = Math.max(1, Math.floor(Math.min((w - 8) / C, (h - 8) / L)));
+    // o cartão pode estar num popover fechado (clientWidth 0): usa o tamanho do CSS (48 × 30)
+    var w = mini.clientWidth || 48, h = mini.clientHeight || 30;
+    var cel = Math.max(1, Math.floor(Math.min((w - 4) / C, (h - 4) / L)));
     var c = miniatura(grade, cel);
     if (!c) return;
     b.dataset.revelado = "1";
     mini.textContent = "";
     mini.appendChild(c);
     if (!semAnimacao && !REDUZIDO) mini.classList.add("is-revelado");
+    if (nome === S.nome) atualizarSeletorMapa(nome);
   }
   /** Miniatura do mapa em `cel` px CSS por casa (LAB.pixel.mapThumb ou desenho próprio). */
   function miniatura(grade, cel) {
@@ -749,15 +765,12 @@
     box.textContent = "";
     algsDoMapa(mapa).forEach(function (k) {
       var r = mapa.algoritmos[k], inf = infoAlg(k);
-      var b = el("button", "alg px");
+      var b = el("button", "alg", inf.nome);
       b.type = "button";
       b.setAttribute("role", "radio");
       b.dataset.alg = k;
-      b.appendChild(el("span", "alg__nome", inf.nome));
-      b.appendChild(el("span", "alg__sub", inf.sub));
-      var res = el("span", "alg__res", resumoAlg(r));
-      res.setAttribute("data-status", r.status);
-      b.appendChild(res);
+      // o resultado de cada algoritmo fica na dica (title) e no rótulo acessível, não dentro do botão
+      b.title = inf.completo + ": " + inf.sub + ". " + resumoAlg(r);
       b.setAttribute("aria-label", inf.completo + ", " + inf.sub + ". " + resumoAlg(r));
       b.addEventListener("click", function () { selecionarAlg(k, { anunciar: true }); });
       box.appendChild(b);
@@ -800,7 +813,6 @@
       montarAlgs();
       montarCamadas();
       montarInventario();
-      montarLegenda();
       atualizarCatalogo();
       montarPilha();
       atualizarSecaoAlgoritmos();
@@ -854,7 +866,7 @@
     chamar(playerR, "setTrailVisible", S.rastro);
     montarLinhaTempo();
     atualizarResultado(r);
-    atualizarJanela();
+    chip(null);
     dialogoStatus(r);
     desenharMinimapaBase();
     estadosChamar("setAlgoritmo", alg);
@@ -1004,16 +1016,11 @@
   }
   function render() {
     var p = passoAtual(), n = ultimo(), temPerc = S.perc.length > 0;
-    // HUD
+    // HUD: passo e custo acumulado (cada número aparece uma vez na tela)
     $("hudPasso").textContent = temPerc ? S.idx : "–";
-    $("hudTotal").textContent = temPerc ? "de " + n : "";
+    $("hudTotal").textContent = temPerc ? "de " + n + (eCiclo() && S.voltas ? ", volta " + (S.voltas + 1) : "") : "";
     $("hudCusto").textContent = p ? fmt(custoMostrado(p)) : "–";
-    var chip = $("hudStatus"), st;
-    if (S.status === "OK") st = S.idx >= n ? "OK" : "andando";
-    else st = S.status;
-    chip.setAttribute("data-status", st);
-    $("hudStatusTxt").textContent = st === "andando" ? (S.idx === 0 ? "Pronto para sair" : "A caminho do baú") : st === "OK" ? "Baú aberto!" :
-      st === "CICLO_NEGATIVO" && S.voltas ? "Ciclo negativo, volta " + (S.voltas + 1) : (CHIP_TXT[st] || "–");
+    $("hudStats").hidden = !temPerc;
     atualizarInventario(p);
     // linha do tempo
     var tr = $("tempoRange");
@@ -1025,28 +1032,32 @@
     $("btnAvancar").disabled = !temPerc || (S.idx >= n && !eCiclo());
     $("btnPlay").disabled = !temPerc || n === 0;
     $("btnFim").disabled = !temPerc || S.idx >= n;
-    // inspetor
-    $("dPasso").textContent = temPerc ? S.idx + " de " + n : "–";
-    rotuloEstado($("dRotulo"), p ? p.estado : "");
-    $("dPos").textContent = p ? "linha " + p.linha + ", coluna " + p.coluna + ", " + nomeCasa(p.casa) : "–";
-    var txtChaves = p ? (p.chaves || "nenhuma") : "–";
-    var dc = $("dChaves");
-    if (dc.dataset.v !== txtChaves) {
-      dc.dataset.v = txtChaves;
-      dc.textContent = "";
-      if (p && p.chaves) {
-        p.chaves.split("").forEach(function (l) {
-          var ic = iconeChave(l, 2);
-          if (ic) dc.appendChild(ic);
-          dc.appendChild(document.createTextNode(l));
-        });
-      } else dc.textContent = txtChaves;
-    }
-    $("dBonus").textContent = p ? (p.bonus && p.bonus.length ? "{" + p.bonus.join(", ") + "}" : "nenhum") : "–";
-    $("dCusto").textContent = p ? fmt(custoMostrado(p)) : "–";
+    // linha do estado: rótulo, chaves na mão e bônus consumidos
+    var rot = $("dRotulo");
+    // sem percurso (recusa, sem caminho): mostra o estado inicial, que é onde o aluno fica
+    var ini = !p && S.mapa ? posInicio(S.mapa) : null;
+    rotuloEstado(rot, p ? p.estado : ini ? "(" + ini[0] + "," + ini[1] + ")|-|{}" : "");
+    var pos = p ? "linha " + p.linha + ", coluna " + p.coluna + ", " + nomeCasa(p.casa) : "";
+    rot.title = pos;
+    rot.setAttribute("aria-label", p ? "Estado " + p.estado + ": " + pos : "Sem estado");
+    // [IA] Claude – rodada 4: as chaves e os bônus já estão no rótulo (e as chaves no inventário do HUD); o resultado
+    // só aparece no fim do percurso (ou quando não há percurso), à direita do rótulo, sem repetir passos e custo do HUD
+    $("dStatus").hidden = temPerc && S.status === "OK" && S.idx < n;
     renderTupla(p);
     desenharMinimapa();
     if (temPerc) estadosChamar("setPasso", S.perc, S.idx);
+  }
+
+  /** Chip do HUD só para os finais (baú aberto ou sem caminho); some sozinho. */
+  var chipTimer = 0;
+  function chip(status, txt) {
+    var c = $("hudStatus");
+    clearTimeout(chipTimer);
+    if (!status) { c.hidden = true; return; }
+    c.setAttribute("data-status", status);
+    $("hudStatusTxt").textContent = txt;
+    c.hidden = false;
+    chipTimer = setTimeout(function () { c.hidden = true; }, REDUZIDO ? 4000 : 2800);
   }
 
   /** Rótulo do estado com as barras separadoras destacadas (na Pixelify Sans "|" lembra um "l"). */
@@ -1115,9 +1126,10 @@
   var miniBase = null, miniCel = 0;
   function desenharMinimapaBase() {
     miniBase = null;
-    if (!S.mapa) return;
+    $("hudMini").hidden = !S.minimapa;
+    if (!S.mapa || !S.minimapa) return;
     var g = S.mapa.grade, C = g[0].length, L = g.length;
-    var largo = window.innerWidth < 900 ? 108 : 168, alto = window.innerWidth < 900 ? 84 : 104;
+    var largo = window.innerWidth < 900 ? 108 : 160, alto = window.innerWidth < 900 ? 84 : 100;
     miniCel = Math.max(1, Math.floor(Math.min(largo / C, alto / L)));
     miniBase = miniatura(g, miniCel);
     var cv = $("minimapa");
@@ -1200,32 +1212,25 @@
   /* ---------------------------------------------------------------- inspetor: resultado e camada */
   function atualizarResultadoMapa() {
     var m = S.mapa;
-    $("dEstados").textContent = fmt(m.estados);
-    $("dArcos").textContent = fmt(m.arcos);
-    $("dTeto").textContent = fmt(m.teto);
-    $("dTrap").textContent = fmt((m.armadilhas || []).length);
     $("cEstados").textContent = fmt(m.estados);
     $("cArcos").textContent = fmt(m.arcos);
     $("cTeto").textContent = fmt(m.teto);
   }
+  /** Resultado do Python numa linha só: status e, quando há, passos e custo (sem repetir o que o HUD mostra). */
   function atualizarResultado(r) {
     var d = $("dStatus");
-    d.textContent = (STATUS_TXT[r.status] || r.status);
+    d.textContent = "";
     d.setAttribute("data-status", r.status);
-    // [IA] Claude – o resultado vem do Python (src/solve.py); a linha deixa isso explícito
-    var py = "Python: " + r.status;
-    if (r.status === "OK") py += " em " + fmt(r.passos) + " passos, custo " + fmt(r.custo);
-    else if (r.status === "CICLO_NEGATIVO") {
+    // forma curta: a frase longa já está na faixa da janela 3D (e no title)
+    d.appendChild(el("span", "resultado__status", r.status === "OK" ? STATUS_TXT.OK : (STATUS_CURTO[r.status] || r.status)));
+    var extras = [];
+    if (r.status === "CICLO_NEGATIVO") {
       // o Python manda passos = null no ciclo; o tamanho do ciclo é o do percurso devolvido (estados − 1)
       var nCiclo = r.passos != null ? r.passos : (r.percurso && r.percurso.length > 1 ? r.percurso.length - 1 : null);
-      py += nCiclo != null ? ", ciclo de " + fmt(nCiclo) + " arcos, custo " + fmt(r.custo) + " por volta" : ", custo " + fmt(r.custo) + " por volta";
+      extras.push((nCiclo != null ? fmt(nCiclo) + " arcos, " : "") + fmt(r.custo) + " por volta");
     }
-    $("dPython").textContent = py;
-    var msg = $("dMsg");
-    msg.textContent = r.mensagem || "";
-    msg.hidden = !r.mensagem;
-    $("dPassos").textContent = r.passos == null ? "–" : fmt(r.passos);
-    $("dCustoTot").textContent = fmt(r.custo);
+    extras.forEach(function (t) { d.appendChild(el("span", "resultado__dado", t)); });
+    d.title = (STATUS_TXT[r.status] || r.status) + ". Resultado do Python (src/solve.py)" + (r.mensagem ? ": " + r.mensagem : "");
   }
   function montarCamadas() {
     var sel = $("selCamada");
@@ -1240,6 +1245,7 @@
   function definirCamada(k) {
     S.camada = k;
     $("selCamada").value = k;
+    $("btnVis").classList.toggle("is-marcado", k !== "todas");
     chamar(playerR, "setLayer", k);
     $$(".camada").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.camada === k ? "true" : "false"); });
   }
@@ -1291,8 +1297,9 @@
     if (on) dialogo(null);
   }
 
-  /* ---------------------------------------------------------------- legenda compacta */
+  /* ---------------------------------------------------------------- legenda compacta (não usada no player desde a rodada 4: o manual "Casas e custos" cobre) */
   function montarLegenda() {
+    if (!$("legenda")) return;
     var ul = $("legenda"), s = S.mapa.grade.join(""), itens = [];
     var tem = function (re) { var m = s.match(re); return m ? m[0] : null; };
     [[/\./, "chão", "1"], [/,/, "lama", "3"], [/~/, "água", "5"], [/\+/, "bônus", "−4"], [/\*/, "fonte", "−2"],
@@ -1360,8 +1367,8 @@
     $("nBonus").textContent = bonus.length ? "bônus número " + listaPt(bonus.map(String)) : "nenhum";
     var algNome = infoAlg(S.alg).completo;
     $("tuplaNota").textContent = S.perc.length
-      ? "Mapa " + codigo(S.nome) + " com " + algNome + ", passo " + S.idx + " de " + ultimo() + ". Dê play no player e a tupla muda junto."
-      : "Mapa " + codigo(S.nome) + " com " + algNome + ": não há percurso, então a tupla fica no início.";
+      ? codigo(S.nome) + ", " + algNome + ", passo " + S.idx
+      : codigo(S.nome) + ", " + algNome + ": sem percurso, a tupla fica no início";
     var chave = $("tPos").textContent + chaves + bonus.join();
     if (chave !== tuplaAnterior) { tuplaAnterior = chave; agendarGuias(); }
   }
@@ -1480,10 +1487,6 @@
   function iniciarHero(mapa) {
     var palco = $("heroPalco");
     var alg = melhorAlg(mapa), r = mapa.algoritmos[alg];
-    $("heroMapa").textContent = codigo(mapa.nome || MAPA_DESTAQUE) + " " + titulo(mapa.nome || MAPA_DESTAQUE);
-    $("heroDado").textContent = r && r.status === "OK"
-      ? "até o baú pelo " + infoAlg(alg).nome + ": " + r.passos + " passos, custo " + fmt(r.custo)
-      : (STATUS_TXT[r && r.status] || "");
     palco.setAttribute("aria-label", "Diorama 3D do mapa " + codigo(mapa.nome) + ": o aluno da CESAR School percorre a masmorra até o baú pelo caminho do " + infoAlg(alg).nome + ".");
     var criado = criarRenderer(palco, { interactive: false, attract: true, pixelScale: "auto", reducedMotion: REDUZIDO });
     heroR = criado.r; heroTipo = criado.tipo;
@@ -1520,6 +1523,7 @@
     $$("canvas", p).forEach(function (c) { c.remove(); });
     playerR = new Mapa2D(p, { interactive: true }); playerTipo = "2d";
     $("tela3d").classList.add("is-2d");
+    $("visCam").hidden = true;
     ligarEventosPlayer();
     if (S.mapa) {
       playerR.load(S.mapa);
@@ -1534,6 +1538,7 @@
     var criado = criarRenderer($("playerPalco"), { interactive: true, attract: false, pixelScale: "auto", reducedMotion: REDUZIDO });
     playerR = criado.r; playerTipo = criado.tipo;
     $("tela3d").classList.toggle("is-2d", playerTipo === "2d");
+    $("visCam").hidden = playerTipo === "2d";   // o desenho 2D não tem câmera
     ligarEventosPlayer();
     observarVisibilidade($("tela3d"), function (vis) {
       S.playerVisivel = vis;
@@ -1552,12 +1557,13 @@
     chamar(playerR, "on", "goal", function () {
       if (!S.mapa || S.status !== "OK") return;
       render();
+      chip("OK", "Baú aberto!");
       anunciar(msgFinal());
     });
     chamar(playerR, "on", "fail", function () {
       if (!S.mapa) return;
-      $("hudStatus").setAttribute("data-status", S.status || "SEM_SOLUCAO");
-      $("hudStatusTxt").textContent = "Não chega ao baú";
+      // o aviso do status já está na faixa do HUD: o chip só aparece quando não há faixa
+      if ($("hudDialogo").hidden) chip(S.status || "SEM_SOLUCAO", "Não chega ao baú");
       anunciar("O algoritmo não leva o aluno até o baú. " + (STATUS_TXT[S.status] || ""));
     });
   }
@@ -1572,16 +1578,28 @@
     $("btnAvancar").addEventListener("click", function () { passo(1); });
     $("btnVoltar").addEventListener("click", function () { passo(-1); });
     $("btnInicio").addEventListener("click", function () { S.voltas = 0; irPara(0, { anunciar: true }); });
-    $("btnFim").addEventListener("click", function () { irPara(ultimo(), { anunciar: true }); });
+    $("btnFim").addEventListener("click", function () {
+      irPara(ultimo(), { anunciar: true });
+      // [IA] Claude – fix: no ciclo negativo o salto até o fim (sem animar) também mostra o final triste
+      if (eCiclo() && S.perc.length) chamar(playerR, "showEnding", { animate: !REDUZIDO });
+    });
     $("tempoRange").addEventListener("input", function (e) { irPara(+e.target.value); });
+    ligarPop($("btnMapa"), $("painelMapa"), function () {
+      var sel = $$('.nivel[aria-checked="true"]')[0] || $$(".nivel")[0];
+      if (sel) sel.focus({ preventScroll: true });
+    });
+    ligarPop($("btnVis"), $("painelVis"));
     ligarVelocidade();
     ligarDivisor();
     ligarDialogoMapa();
+    ligarGaveta();
     $("chkTrap").addEventListener("change", function (e) { S.armadilhas = e.target.checked; chamar(playerR, "setTrapsVisible", S.armadilhas); });
     $("chkRastro").addEventListener("change", function (e) { S.rastro = e.target.checked; chamar(playerR, "setTrailVisible", S.rastro); desenharMinimapa(); });
+    $("chkMini").addEventListener("change", function (e) { S.minimapa = e.target.checked; desenharMinimapaBase(); desenharMinimapa(); });
     $("selCamada").addEventListener("change", function (e) { definirCamada(e.target.value); });
     $$("#hudCam button").forEach(function (b) {
       b.addEventListener("click", function () {
+        $("btnVis").classList.toggle("is-marcado", b.getAttribute("data-cam") !== "seguir");
         S.cam = b.getAttribute("data-cam");
         $$("#hudCam button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
         chamar(playerR, "setCamera", S.cam);
@@ -1635,11 +1653,51 @@
   /* ================================================================ [IA] Claude – rodada 2: janela, velocidade,
      mapa de estados + tabela (LAB.EstadosView), métricas, divisor e mapa surpresa */
 
-  /* ---------------------------------------------------------------- barra de título da janela 3D */
-  function atualizarJanela() {
-    if (!S.mapa) return;
-    $("janelaMapa").textContent = S.nome === NOME_PERSONALIZADO ? "Mapa personalizado" : codigo(S.nome) + " " + titulo(S.nome);
-    $("janelaAlg").textContent = "com " + infoAlg(S.alg).completo;
+  /* ---------------------------------------------------------------- popovers (seletor de mapa, Visualização) */
+  var pops = [];
+  /** Popover simples: botão com aria-expanded, fecha com Esc, clique fora ou foco saindo. */
+  function ligarPop(btn, painel, aoAbrir) {
+    var caixa = btn.parentNode;
+    function abrir() {
+      fecharPops();
+      painel.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+      if (aoAbrir) aoAbrir();
+    }
+    function fechar(focarBotao) {
+      if (painel.hidden) return;
+      painel.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+      if (focarBotao) btn.focus({ preventScroll: true });
+    }
+    btn.addEventListener("click", function () { if (painel.hidden) abrir(); else fechar(false); });
+    caixa.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !painel.hidden) { e.preventDefault(); e.stopPropagation(); fechar(true); }
+    });
+    caixa.addEventListener("focusout", function (e) {
+      if (e.relatedTarget && !caixa.contains(e.relatedTarget)) fechar(false);
+    });
+    document.addEventListener("pointerdown", function (e) { if (!caixa.contains(e.target)) fechar(false); });
+    pops.push(fechar);
+  }
+  function fecharPops() { pops.forEach(function (f) { f(false); }); }
+
+  /* ---------------------------------------------------------------- gaveta de métricas */
+  function ligarGaveta() {
+    var dlg = $("dlgMetricas"), btn = $("btnMetricas");
+    function fechar() {
+      if (typeof dlg.close === "function" && dlg.open) dlg.close();
+      else { dlg.removeAttribute("open"); btn.focus({ preventScroll: true }); }
+    }
+    btn.addEventListener("click", function () {
+      fecharPops();
+      if (typeof dlg.showModal === "function") { if (!dlg.open) dlg.showModal(); }
+      else dlg.setAttribute("open", "");
+      $("btnFecharMetricas").focus();
+    });
+    $("btnFecharMetricas").addEventListener("click", fechar);
+    dlg.addEventListener("click", function (e) { if (e.target === dlg) fechar(); });
+    dlg.addEventListener("close", function () { btn.focus({ preventScroll: true }); });
   }
 
   /* ---------------------------------------------------------------- velocidade estilo YouTube */
@@ -1657,13 +1715,13 @@
     S.vel = PASSOS_1X * m;
     chamar(playerR, "setSpeed", S.vel);
     $("velTxt").textContent = decimalPt(m) + "×";
-    $("velNota").textContent = notaVel(m);
+    $("btnVel").setAttribute("aria-label", "Velocidade: " + rotuloVel(m) + ", " + notaVel(m));
     $("btnVel").title = "Velocidade: " + notaVel(m) + " (teclas + e −)";
     $$("#velMenu [role=option]").forEach(function (li) {
       li.setAttribute("aria-selected", +li.dataset.mult === m ? "true" : "false");
     });
-    // a tabela/grafo tem velocidade própria; só acompanha a do aluno com "Sincronizar com o aluno" ligado
-    if (ev && ev.sincronizar) estadosChamar("setVelocidade", m);
+    // o replay da tabela (quando não está sincronizado com o aluno) usa a mesma velocidade
+    estadosChamar("setVelocidade", m);
     if (o.anunciar) anunciar("Velocidade " + (m === 1 ? "normal" : decimalPt(m) + " vezes") + ", " + notaVel(m));
   }
   function mudarVelocidade(d, anunciarMudanca) {
@@ -1681,6 +1739,7 @@
       li.dataset.i = String(i);
       li.appendChild(el("span", "vel__check"));
       li.appendChild(el("span", null, rotuloVel(m)));
+      li.title = notaVel(m);
       li.addEventListener("click", function () { definirVelocidade(m, { anunciar: true }); fechar(true); });
       li.addEventListener("pointermove", function () { marcarAtivo(i); });
       menu.appendChild(li);
@@ -1691,6 +1750,7 @@
       $$("[role=option]", menu).forEach(function (li, j) { li.classList.toggle("is-ativo", j === ativo); });
     }
     function abrir() {
+      fecharPops();
       menu.hidden = false;
       btn.setAttribute("aria-expanded", "true");
       marcarAtivo(VELOCIDADES.indexOf(S.mult));
@@ -1864,11 +1924,15 @@
     return t;
   }
   function montarMetricas() {
-    var card = $("cardMetricas"), box = $("metricas");
+    var box = $("metricas");
     var m = normalizarMetricas(S.mapa && S.mapa.metricas);
     box.textContent = "";
-    if (!m || !m.g) { card.hidden = true; return; }
-    card.hidden = false;
+    $("metricasSub").textContent = S.nome === NOME_PERSONALIZADO ? "Mapa personalizado" : codigo(S.nome) + " " + titulo(S.nome);
+    if (!m || !m.g) {
+      // sem solve.metricas: ao menos o tamanho do grafo de estados
+      box.appendChild(tabela(["Grafo", "Ordem", "Tamanho"], [["G_est (estados)", fmt(S.mapa.estados), fmt(S.mapa.arcos)]]));
+      return;
+    }
     var g = m.g;
     var gp = g.G_pos || g.g_pos || {}, ge = g.G_est || g.g_est || {};
     box.appendChild(tabela(["Grafo", "Ordem", "Tamanho", "Densidade"], [
@@ -1891,7 +1955,7 @@
     item("Becos", fmt(becos.length), becos.slice(0, 40).join("  "));
     if (g.maior_grau_saida) item("Maior grau de saída", fmt(g.maior_grau_saida.grau), g.maior_grau_saida.estado);
     if (g.maior_grau_entrada) item("Maior grau de entrada", fmt(g.maior_grau_entrada.grau), g.maior_grau_entrada.estado);
-    if (g.n_armadilhas != null) item("Armadilhas", fmt(g.n_armadilhas) + (g.pct_armadilhas != null ? " (" + pct(g.pct_armadilhas) + ")" : ""));
+    item("Armadilhas", g.n_armadilhas != null ? fmt(g.n_armadilhas) + (g.pct_armadilhas != null ? " (" + pct(g.pct_armadilhas) + ")" : "") : fmt((S.mapa.armadilhas || []).length));
     box.appendChild(dl);
 
     if (m.camadas.length) {
@@ -1906,17 +1970,19 @@
       p.appendChild(document.createTextNode(m.entre === 1 ? " arco muda de camada" : " arcos mudam de camada"));
       box.appendChild(p);
       if (m.casas.length) {
-        var ul = el("ul", "metricas__casas");
-        m.casas.forEach(function (c) {
-          var li = el("li");
-          var casa = c.casa || [];
-          var sim = c.simbolo || "";
-          if (/[a-d]/.test(sim)) li.style.setProperty("--cor-chave", corChave(sim));
-          li.appendChild(el("b", null, sim));
-          li.appendChild(document.createTextNode(" (" + casa[0] + "," + casa[1] + ") " + fmt(c.arcos) + (c.arcos === 1 ? " arco" : " arcos")));
-          ul.appendChild(li);
+        // [IA] Claude – rodada 4: lista corrida em vez de chips ("b em (1,12), c em (6,6): 1 arco cada")
+        var arcosIguais = m.casas.every(function (c) { return c.arcos === m.casas[0].arcos; });
+        var q = el("p", "metricas__casas");
+        m.casas.forEach(function (c, i) {
+          var casa = c.casa || [], sim = c.simbolo || "";
+          if (i) q.appendChild(document.createTextNode(i === m.casas.length - 1 ? " e " : ", "));
+          var b = el("b", null, sim);
+          if (/[a-d]/.test(sim)) b.style.color = corChave(sim);
+          q.appendChild(b);
+          q.appendChild(document.createTextNode(" em (" + casa[0] + "," + casa[1] + ")" + (arcosIguais ? "" : " (" + fmt(c.arcos) + (c.arcos === 1 ? " arco)" : " arcos)"))));
         });
-        box.appendChild(ul);
+        if (arcosIguais && m.casas.length) q.appendChild(document.createTextNode(": " + fmt(m.casas[0].arcos) + (m.casas[0].arcos === 1 ? " arco" : " arcos") + (m.casas.length > 1 ? " cada" : "")));
+        box.appendChild(q);
       }
     }
     var comp = S.mapa.comparacao_modelagem || S.mapa.comparacao || (S.mapa.metricas && S.mapa.metricas.comparacao_modelagem);
@@ -1946,9 +2012,9 @@
     function fechar() {
       if (typeof dlg.close === "function" && dlg.open) dlg.close();
       else dlg.removeAttribute("open");
-      $("btnCarregar").focus({ preventScroll: true });
+      $("btnMapa").focus({ preventScroll: true });
     }
-    $("btnCarregar").addEventListener("click", abrir);
+    $("btnCarregar").addEventListener("click", function () { fecharPops(); abrir(); });
     $("btnDlgCancelar").addEventListener("click", fechar);
     $$("[data-fechar]", dlg).forEach(function (b) { b.addEventListener("click", fechar); });
     dlg.addEventListener("click", function (e) { if (e.target === dlg) fechar(); });
