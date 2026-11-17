@@ -249,6 +249,17 @@ h2 { font-size: 48px; line-height: 1; }
   font: 700 19px/1 var(--f-pixel);
   white-space: nowrap;
 }
+/* [IA] Claude – link discreto de volta ao menu de projetos ("/"), antes da marca */
+.nav__voltar {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-right: -12px; padding: 8px 14px 8px 4px;
+  font: 500 15px/1 var(--f-texto); color: var(--luar-fraco); text-decoration: none;
+  box-shadow: inset -1px 0 0 var(--noite-3);
+  white-space: nowrap;
+}
+.nav__voltar svg { width: 6px; height: 11px; }
+.nav__voltar:hover { color: var(--luar); }
+.arquivo .nav__voltar { display: none; }
 .nav__icone { display: grid; place-items: center; width: 32px; height: 32px; }
 .nav__icone svg { width: 24px; height: 14px; }
 .nav__icone canvas { width: 32px; height: auto; }
@@ -1075,6 +1086,8 @@ h2 { font-size: 48px; line-height: 1; }
   .nav { inset: 8px 0 auto; padding-inline: 8px; }
   .nav__barra { --px-borda: transparent; --px-fundo: rgba(26, 22, 18, 0.94); gap: 12px; padding-inline: 8px; }
   .nav__menu { display: inline-flex; }
+  .nav__voltar span { display: none; }
+  .nav__voltar { padding-right: 12px; margin-right: -4px; min-width: 32px; min-height: 32px; justify-content: center; }
   .pill--barra { display: none; }
   .nav__links {
     position: absolute; top: calc(100% + 8px); left: 0; right: 0;
@@ -1400,6 +1413,7 @@ h2 { font-size: 48px; line-height: 1; }
 </style>
 <script>
   document.documentElement.classList.add("js");
+  if (location.protocol === "file:") document.documentElement.classList.add("arquivo"); // [IA] Claude – sem menu de projetos
   // Pré-carrega a Pixelify Sans quando a página é servida pelo Flask. No arquivo estático
   // (src/viz.py) o CSS vira <style> com a fonte embutida e este link não existe: nada a fazer.
   (function () {
@@ -1419,6 +1433,11 @@ h2 { font-size: 48px; line-height: 1; }
 <!-- ============================================================ navbar -->
 <header class="nav" id="nav">
   <div class="nav__barra px">
+    <!-- [IA] Claude – volta ao menu de projetos ("/"); some no arquivo estático, que não tem menu -->
+    <a class="nav__voltar" href="./" data-so-servidor aria-label="Voltar ao menu de projetos" title="Menu de projetos">
+      <svg viewBox="0 0 4 7" shape-rendering="crispEdges" aria-hidden="true"><path d="M3 0h1v7H3zM2 1h1v5H2zM1 2h1v3H1zM0 3h1v1H0z"/></svg>
+      <span>Projetos</span>
+    </a>
     <a class="nav__marca" href="#inicio">
       <span class="nav__icone" id="navIcone" aria-hidden="true">
         <svg viewBox="0 0 12 7" shape-rendering="crispEdges"><path fill="#FFC23A" d="M1 1h3v1H1zM0 2h1v3H0zM4 2h1v3H4zM1 5h3v1H1zM5 3h6v1H5zM8 4h1v2H8zM10 4h1v1h-1z"/></svg>

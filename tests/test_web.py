@@ -59,6 +59,12 @@ def test_enderecos_antigos_redirecionam(cliente, antigo, destino):
     assert r.headers["Location"].endswith(destino)
 
 
+def test_redirecionamento_mantem_a_query(cliente):
+    r = cliente.get("/labirinto?mapa=m05")
+    assert r.status_code == 302
+    assert r.headers["Location"].endswith("/parte1?mapa=m05")
+
+
 @pytest.mark.parametrize("arquivo", ["js/app.js", "vendor/three.min.js", "css/app.css"])
 def test_arquivos_estaticos(cliente, arquivo):
     r = cliente.get(f"/static/{arquivo}")

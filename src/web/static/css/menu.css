@@ -5,7 +5,7 @@
   position: relative;
   display: flex; flex-direction: column;
   min-height: 100vh; min-height: 100svh;
-  overflow: hidden;
+  overflow-x: clip; /* só o brilho das tochas; a página continua rolando na vertical */
 }
 
 /* Parede de pedra da masmorra: canvas em resolução de texel, ampliado sem suavização e bem escurecido. */
@@ -23,13 +23,6 @@
   margin-inline: auto; padding: 20px var(--gutter) 0;
 }
 .menu__topo .pill { margin-left: auto; font-size: 13px; padding: 6px 10px; }
-.menu__voltar {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 8px 4px;
-  font: 600 16px/1 var(--f-pixel); color: var(--luar-fraco); text-decoration: none;
-}
-.menu__voltar svg { width: 8px; height: 14px; }
-.menu__voltar:hover { color: var(--luar); }
 
 .menu__palco {
   flex: 1;
@@ -131,12 +124,11 @@
 .cartucho--trancado { grid-template-columns: 112px minmax(0, 1fr); }
 .cartucho__parte { display: flex; align-items: center; gap: 14px; }
 .cartucho__selo {
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center;
   padding: 3px 8px 4px;
   font: 600 13px/1 var(--f-pixel); color: var(--luar-fraco);
   box-shadow: inset 0 0 0 2px var(--noite-3);
 }
-.cartucho__selo svg { width: 9px; height: 10px; }
 .nw { white-space: nowrap; }
 .cartucho.is-piscando { --px-borda: var(--luar); --px-fundo: var(--noite-3); }
 .cartucho.is-negado { animation: negar 0.36s steps(6); }
@@ -210,6 +202,21 @@
   .cartucho--trancado { grid-template-columns: 64px minmax(0, 1fr); }
 }
 @media (hover: none) { .dicas { display: none; } }
+/* telas baixas (notebook 1366x650, celular): menos ar vertical para os dois cartuchos caberem sem rolar */
+@media (max-height: 760px) {
+  .menu__palco { padding-top: 16px; padding-bottom: 32px; }
+  .menu__titulo { font-size: clamp(40px, 6vw, 76px); }
+  .menu__sub { margin-top: 12px; }
+  .escolha { margin-top: 24px; }
+  .tocha__luz { width: 200px; height: 200px; margin: -100px 0 0 -100px; }
+}
+@media (max-width: 640px) and (max-height: 760px) {
+  .menu__palco { padding-top: 24px; }
+  .menu__titulo { font-size: 40px; }
+  .escolha { margin-top: 20px; }
+  .escolha__rotulo { margin-bottom: 10px; }
+  .cartucho__desc { line-height: 1.4; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .tocha__luz, .tocha .chama-a, .tocha .chama-b, .cursor__seta { animation: none; }

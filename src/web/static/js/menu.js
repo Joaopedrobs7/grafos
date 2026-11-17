@@ -130,7 +130,7 @@
     var s = slots[i];
     marcar(i, false);
     if (s.hasAttribute("data-trancado")) {
-      avisar("A Parte 2 ainda está trancada: ela entra aqui quando o dataset e o benchmark ficarem prontos.");
+      avisar("Disponível quando a Parte 2 for entregue.");
       if (!calmo) {
         s.classList.remove("is-negado"); void s.offsetWidth; s.classList.add("is-negado");
         quadro("front", "idle");

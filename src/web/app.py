@@ -102,17 +102,23 @@ def parte2():
     return send_from_directory(TEMPLATES, "parte2.html")
 
 
+def _com_query(destino: str) -> str:
+    # mantém a query string (ex.: /labirinto?mapa=m05 -> /parte1?mapa=m05)
+    q = request.query_string.decode("latin-1")
+    return f"{destino}?{q}" if q else destino
+
+
 @app.get("/parte1/")
 @app.get("/labirinto")
 @app.get("/labirinto/")
 def labirinto_antigo():
     # links antigos e a barra final (que quebraria os caminhos relativos) vão para /parte1
-    return redirect(url_for("parte1"), 302)
+    return redirect(_com_query(url_for("parte1")), 302)
 
 
 @app.get("/parte2/")
 def parte2_barra():
-    return redirect(url_for("parte2"), 302)
+    return redirect(_com_query(url_for("parte2")), 302)
 
 
 @app.get("/favicon.ico")
