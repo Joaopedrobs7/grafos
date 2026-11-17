@@ -257,6 +257,10 @@
 .ev-t--dp .ev-foco { box-shadow: inset 0 0 0 2px var(--ev-cesar); }
 .ev-t--dp s { color: var(--ev-tinta-2); text-decoration-color: var(--ev-erro); text-decoration-thickness: 1.5px; }
 .ev-t--dp thead .ev-col-agora { background: var(--ev-faixa); }
+/* [IA] Claude – Bellman-Ford: bloco de passadas sem mudança numa coluna só */
+.ev-t--dp thead .ev-col-vazia { white-space: nowrap; }
+.ev-t--dp thead .ev-th-nota { display: block; font: italic 500 11px/1.2 var(--ev-texto); color: var(--ev-tinta-2); }
+.ev-t--dp td.ev-vazia { color: var(--ev-tinta-2); background: repeating-linear-gradient(135deg, #fff 0 6px, #F6F5F9 6px 12px); }
 .ev-t--dp tr.ev-lin-aluno > th { box-shadow: inset 3px 0 0 var(--ev-cesar), 1px 0 0 var(--ev-linha); }
 
 /* recusa do Dijkstra */

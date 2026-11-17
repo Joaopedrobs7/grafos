@@ -11,8 +11,20 @@ Veja [`docs/cloud/ARQUITETURA_AWS.md`](docs/cloud/ARQUITETURA_AWS.md).
 
 ## Instalação
 
+<!-- [IA] Claude – ativação do venv no Windows e no Linux/macOS -->
+Python 3.11+. Na raiz do repositório:
+
+```powershell
+# Windows (PowerShell)
+py -3.11 -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
 ```bash
-python3.11 -m venv .venv && source .venv/bin/activate   # Python 3.11+
+# Linux/macOS
+python3.11 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -89,8 +101,7 @@ se o teto teórico de estados passar de 250 000. No arquivo standalone os traço
 embutidos em `window.__TRACOS__` (`{mapa: {"BFS": traço, ..., "BELLMAN_FORD_FONTE_CONSUMIVEL": ...}}`).
 
 **Página 404.** Endereços desconhecidos recebem `404.html` com status 404: as paredes do labirinto
-formam "404", a saída fica presa dentro do zero e o aluno anda entre os becos sem saída (o trajeto
-é uma BFS de verdade; dá para clicar no chão ou usar as setas). Respeita `prefers-reduced-motion`
+formam "404", a saída fica presa dentro do zero e o aluno anda entre os becos sem saída (dá para clicar no chão ou usar as setas). Respeita `prefers-reduced-motion`
 e continua funcionando se o `pixel.js` ou as fontes não carregarem. Rotas `/api/*` mantêm o 404
 padrão do Flask.
 
@@ -115,8 +126,34 @@ As instâncias do Auto Scaling Group sobem da AMI e, no boot, o user data do lau
 push na `main` e, no console, **Auto Scaling Group → Atualização da instância → Iniciar**.
 `/api/info` mostra a versão em execução (`main@<commit>`).
 
+
+<!-- [IA] Claude – configuração do token e download do dataset da Parte 2 (Kaggle) -->
+## Parte 2 — dataset (Kaggle)
+
+Gere um token em kaggle.com → Settings → API → *Create New Token* (começa com `KGAT_`) e grave-o
+fora do repositório (nunca faça commit do token):
+
+```powershell
+# Windows (PowerShell)
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.kaggle" | Out-Null
+Set-Content -Encoding ascii "$env:USERPROFILE\.kaggle\access_token" "KGAT_seu_token"
+```
+
+```bash
+# Linux/macOS
+mkdir -p ~/.kaggle && echo KGAT_seu_token > ~/.kaggle/access_token && chmod 600 ~/.kaggle/access_token
+```
+
+Teste e baixe (com o venv ativo):
+
+```bash
+kaggle competitions list
+kaggle datasets download <dono>/<dataset> -p data/dataset_parte2 --unzip
+```
+
 ## Estrutura
 
+<!-- [IA] Claude – linha tests/ inclui test_algorithms.py -->
 ```
 data/mapas/          mapas fornecidos m01–m08
 data/mapas_grupo/    g01_fabrica (3 chaves + esteira + bônus) e g02_armadilha (59,6% de armadilhas)
@@ -130,7 +167,7 @@ src/viz.py           figuras (matplotlib) e montagem do HTML interativo
 src/cli.py           linha de comando
 src/web/             aplicação Flask (API + labirinto interativo + identificação da instância EC2)
 deploy/              user data, systemd, Apache e script de atualização para EC2
-tests/               pytest (bfs, dfs, dijkstra, bellman_ford, estados, io, traco, web)
+tests/               pytest (algorithms, bfs, dfs, dijkstra, bellman_ford, estados, io, traco, web)
 out/parte1/          saídas geradas
 ```
 
@@ -168,4 +205,5 @@ o deploy web. Pendente: PDF (manual + técnica, prova do m05, discussões, matri
 ## Uso de IA
 
 Partes deste código foram geradas com apoio de IA (Claude) e estão marcadas com `# [IA]`.
-Esse uso precisa constar na Declaração de Uso de IA (`docs/DECLARACAO_USO_IA_2026-2.docx`).
+<!-- [IA] Claude – aponta para a declaração assinada em PDF -->
+Esse uso precisa constar na Declaração de Uso de IA (`docs/DECLARACAO_IA.pdf`).

@@ -23,17 +23,23 @@ def _sem_e_com_observador(func, g, s):
     return sem, com, eventos
 
 
+def _campos(r):
+    """Todos os campos do Resultado do grupo (o observador não pode mudar nenhum)."""
+    return (r.dist, r.pai, r.ordem, r.status, r.ciclo_negativo, r.classes, r.arcos)
+
+
 @pytest.mark.parametrize("arquivo, fonte", CASOS, ids=IDS)
 def test_observador_nao_muda_resultado(arquivo, fonte):
     ge = grafo_estados(ler_mapa(arquivo), fonte_consumivel=fonte)
     g, s = ge.grafo, ge.inicio
 
     a, b, ev = _sem_e_com_observador(bfs, g, s)
-    assert (a.dist, a.pai, a.ordem) == (b.dist, b.pai, b.ordem)
+    assert _campos(a) == _campos(b)
     assert ev
 
-    a, b, ev = _sem_e_com_observador(dfs, ge.sem_alvo, s)
-    assert (a.descoberta, a.termino, a.pai, a.classes, a.arcos) == (b.descoberta, b.termino, b.pai, b.classes, b.arcos)
+    for gg in (ge.sem_alvo, g):
+        a, b, ev = _sem_e_com_observador(dfs, gg, s)
+        assert _campos(a) == _campos(b)
 
     if g.tem_peso_negativo():
         ev = []
@@ -42,10 +48,10 @@ def test_observador_nao_muda_resultado(arquivo, fonte):
         assert ev == []
     else:
         a, b, ev = _sem_e_com_observador(dijkstra, g, s)
-        assert (a.dist, a.pai) == (b.dist, b.pai)
+        assert _campos(a) == _campos(b)
 
     a, b, ev = _sem_e_com_observador(bellman_ford, g, s)
-    assert (a.dist, a.pai, a.ciclo_negativo) == (b.dist, b.pai, b.ciclo_negativo)
+    assert _campos(a) == _campos(b)
 
 
 @pytest.mark.parametrize("arquivo, fonte", CASOS, ids=IDS)
@@ -69,6 +75,7 @@ def test_contagem_de_eventos_consistente(arquivo, fonte):
     assert c["descobre"] == c["encerra"] == len(r["ordem"])
     assert c["olha"] == len(r["arcos"]) == sum(r["classes"].values())
     assert c["descobre"] - 1 == r["classes"]["arvore"]
+    assert r["temCiclo"] == (r["classes"]["retorno"] > 0)
     assert t["grafo"]["alvo"] not in {e.get("v") for e in t["eventos"]}  # DFS roda em sem_alvo
 
     t = traco(m, "DIJKSTRA", fonte)
@@ -88,7 +95,9 @@ def test_contagem_de_eventos_consistente(arquivo, fonte):
     assert [e["k"] for e in fins] == list(range(1, r["passadas"] + 1))
     assert sum(e["relaxados"] for e in fins) == c["relaxa"]
     assert c["ciclo"] == (1 if r["cicloNegativo"] else 0)
-    assert r["passadas"] <= ge.grafo.ordem - 1
+    # a implementação do grupo faz sempre as |V|-1 passadas (sem parada antecipada)
+    assert r["passadas"] == ge.grafo.ordem - 1 and r["parouCedo"] is False
+    assert all(e["mudou"] == (e["relaxados"] > 0) for e in fins)
     assert t["grafo"]["nArcos"] + sum(1 for l in t["grafo"]["adj"] for a in l if a[2] == "ALVO") == n_arcos_total
 
 
@@ -104,6 +113,79 @@ def test_eventos_entra_da_bfs_reproduzem_dist_e_pai(arquivo, fonte):
             dist[e["v"]], pai[e["v"]] = e["d"], e["p"]
     assert dist == t["resultado"]["dist"]
     assert pai == t["resultado"]["pai"]
+
+
+@pytest.mark.parametrize("arquivo, fonte", CASOS, ids=IDS)
+def test_eventos_da_dfs_reproduzem_o_resultado_do_grupo(arquivo, fonte):
+    """Replay dos eventos da DFS × Resultado de dfs() (pai, ordem, classes, arcos) e tempos d/f coerentes."""
+    m = ler_mapa(arquivo)
+    ge = grafo_estados(m, fonte_consumivel=fonte)
+    ref = dfs(ge.sem_alvo, ge.inicio)
+    t = traco(m, "DFS", fonte)
+    rot = t["grafo"]["rotulos"]
+    idx = {v: i for i, v in enumerate(ge.grafo.nos())}
+    n = len(rot)
+    pai, ordem, arcos, classes = [-1] * n, [], [], Counter()
+    d, f, aberto, tempos = [-1] * n, [-1] * n, [], []
+    for e in t["eventos"]:
+        if e["t"] == "descobre":
+            pai[e["v"]], d[e["v"]] = e["p"], e["d"]
+            ordem.append(e["v"])
+            aberto.append(e["v"])
+            tempos.append(e["d"])
+        elif e["t"] == "olha":
+            arcos.append((e["u"], e["v"], e["tipo"]))
+            classes[e["tipo"]] += 1
+            assert aberto[-1] == e["u"]  # olha sempre a partir do topo da pilha
+        elif e["t"] == "encerra":
+            assert aberto.pop() == e["v"]  # encerra na ordem de pilha
+            f[e["v"]] = e["f"]
+            tempos.append(e["f"])
+    assert not aberto
+    assert tempos == list(range(len(tempos)))  # d da origem = 0, depois o relógio sobe de 1 em 1
+    assert pai == [-1 if ref.pai.get(v) is None else idx[ref.pai[v]] for v in ge.grafo.nos()]
+    assert ordem == [idx[v] for v in ref.ordem]
+    assert arcos == [(idx[u], idx[v], tipo) for u, v, tipo in ref.arcos]
+    assert {k: classes[k] for k in ref.classes} == ref.classes
+    assert d == t["resultado"]["descoberta"] and f == t["resultado"]["termino"]
+    # propriedade dos parênteses: filho dentro do intervalo do pai
+    for v in range(n):
+        if pai[v] >= 0:
+            assert d[pai[v]] < d[v] < f[v] < f[pai[v]]
+
+
+@pytest.mark.parametrize("arquivo, fonte", CASOS, ids=IDS)
+def test_eventos_reproduzem_os_resultados_do_grupo(arquivo, fonte):
+    """Replay de BFS/Dijkstra/Bellman-Ford × Resultado devolvido pelas funções do grupo (a verdade é o Python)."""
+    m = ler_mapa(arquivo)
+    ge = grafo_estados(m, fonte_consumivel=fonte)
+    g, s = ge.grafo, ge.inicio
+    nos = g.nos()
+    idx = {v: i for i, v in enumerate(nos)}
+    para_vetor = lambda dic, vazio: [vazio if dic.get(v) is None else dic[v] for v in nos]  # noqa: E731
+    pai_vetor = lambda r: [-1 if r.pai.get(v) is None else idx[r.pai[v]] for v in nos]  # noqa: E731
+
+    ref = bfs(g, s)
+    t = traco(m, "BFS", fonte)
+    assert [e["v"] for e in t["eventos"] if e["t"] in ("inicio", "entra")] == [idx[v] for v in ref.ordem]
+    assert [e["v"] for e in t["eventos"] if e["t"] == "sai"] == [idx[v] for v in ref.ordem]
+    assert t["resultado"]["dist"] == para_vetor(ref.dist, -1) and t["resultado"]["pai"] == pai_vetor(ref)
+
+    t = traco(m, "DIJKSTRA", fonte)
+    if g.tem_peso_negativo():
+        with pytest.raises(PesoNegativoError) as erro:
+            dijkstra(g, s)
+        assert t["resultado"]["recusa"]["mensagem"] == str(erro.value)
+    else:
+        ref = dijkstra(g, s)
+        assert [e["u"] for e in t["eventos"] if e["t"] == "fecha"] == [idx[v] for v in ref.ordem]
+        assert t["resultado"]["dist"] == para_vetor(ref.dist, None) and t["resultado"]["pai"] == pai_vetor(ref)
+
+    ref = bellman_ford(g, s)
+    t = traco(m, "BELLMAN_FORD", fonte)
+    assert t["resultado"]["dist"] == para_vetor(ref.dist, None) and t["resultado"]["pai"] == pai_vetor(ref)
+    ciclo = t["resultado"]["cicloNegativo"]
+    assert ciclo == ([idx[v] for v in ref.ciclo_negativo] if ref.ciclo_negativo else None)
 
 
 @pytest.mark.parametrize("arquivo, fonte", CASOS, ids=IDS)
@@ -159,9 +241,10 @@ def test_m06_ciclo_negativo_e_variante_fonte():
     normal = traco(m, "BELLMAN_FORD")
     assert normal["resultado"]["cicloNegativo"] and normal["eventos"][-1]["t"] == "ciclo"
     assert not normal["resultado"]["parouCedo"]
+    assert normal["resultado"]["passadas"] == grafo_estados(m).grafo.ordem - 1
     fonte = traco(m, "BELLMAN_FORD_FONTE_CONSUMIVEL")
     assert fonte["fonteConsumivel"] is True and fonte["resultado"]["cicloNegativo"] is None
-    assert traco(m, "DIJKSTRA")["resultado"]["recusa"]["mensagem"].startswith("Dijkstra recusado")
+    assert "negativo" in traco(m, "DIJKSTRA")["resultado"]["recusa"]["mensagem"]
 
 
 def test_algoritmo_desconhecido():

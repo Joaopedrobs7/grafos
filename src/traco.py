@@ -50,8 +50,9 @@ def _grafo_json(ge, idx: dict) -> dict:
 
 
 def _observador(idx: dict, eventos: list):
-    """Anota os eventos com os nós trocados por índices. Para o Bellman-Ford também numera as
-    passadas (k) e conta os relaxamentos de cada uma — o algoritmo só avisa início e fim da passada."""
+    """Anota os eventos com os nós trocados por índices. Para o Bellman-Ford também conta os
+    relaxamentos de cada passada (o algoritmo só avisa início e fim da passada): `mudou` = houve
+    relaxamento nela. Isso é contagem de eventos, não lógica do algoritmo."""
     contagem = {"k": 0, "relaxados": 0}
 
     def anotar(ev: dict) -> None:
@@ -68,7 +69,7 @@ def _observador(idx: dict, eventos: list):
             contagem["relaxados"] = 0
             ev["k"] = contagem["k"]
         elif t == "fimPassada":
-            ev = {"t": t, "k": contagem["k"], "mudou": ev["mudou"], "relaxados": contagem["relaxados"]}
+            ev = {"t": t, "k": contagem["k"], "mudou": contagem["relaxados"] > 0, "relaxados": contagem["relaxados"]}
         elif t == "relaxa":
             contagem["relaxados"] += 1
         elif t == "ciclo":
@@ -106,10 +107,18 @@ def traco(mapa: Mapa, alg: str, fonte_consumivel: bool = False) -> dict:
     elif alg == "DFS":
         # como solve.py faz para dfs_classificacao.csv: DFS no grafo sem o nó virtual ALVO
         r = dfs(ge.sem_alvo, ge.inicio, observador=obs)
-        resultado = {"descoberta": _vetor(r.descoberta, idx, n, -1), "termino": _vetor(r.termino, idx, n, -1),
+        # o Resultado do grupo não guarda d/f: os tempos vêm dos eventos 'descobre'/'encerra' (só serialização)
+        descoberta, termino = [-1] * n, [-1] * n
+        for ev in eventos:
+            if ev["t"] == "descobre":
+                descoberta[ev["v"]] = ev["d"]
+            elif ev["t"] == "encerra":
+                termino[ev["v"]] = ev["f"]
+        resultado = {"descoberta": descoberta, "termino": termino,
                      "pai": _vetor(r.pai, idx, n, -1, no), "classes": r.classes,
                      "arcos": [[idx[u], idx[v], tipo] for u, v, tipo in r.arcos],
-                     "ordem": [idx[v] for v in r.descoberta], "temCiclo": r.tem_ciclo, "semAlvo": True}
+                     "ordem": [idx[v] for v in r.ordem], "temCiclo": r.classes.get("retorno", 0) > 0,
+                     "semAlvo": True}
     elif alg == "DIJKSTRA":
         try:
             r = dijkstra(ge.grafo, ge.inicio, observador=obs)
@@ -120,9 +129,9 @@ def traco(mapa: Mapa, alg: str, fonte_consumivel: bool = False) -> dict:
             resultado = {"recusa": {"mensagem": str(e), "negativos": negativos}, "dist": [None] * n, "pai": [-1] * n}
     else:
         r = bellman_ford(ge.grafo, ge.inicio, observador=obs)
-        fins = [ev for ev in eventos if ev["t"] == "fimPassada"]
+        # a implementação do grupo faz sempre as |V|-1 passadas (sem parada antecipada)
         resultado = {"dist": _vetor(r.dist, idx, n, None, _num), "pai": _vetor(r.pai, idx, n, -1, no),
-                     "passadas": len(fins), "parouCedo": bool(fins) and not fins[-1]["mudou"],
+                     "passadas": sum(1 for ev in eventos if ev["t"] == "passada"), "parouCedo": False,
                      "cicloNegativo": [idx[v] for v in r.ciclo_negativo] if r.ciclo_negativo else None}
 
     return {"algoritmo": alg, "fonteConsumivel": fonte_consumivel, "grafo": _grafo_json(ge, idx),

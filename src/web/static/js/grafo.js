@@ -187,7 +187,6 @@
           ev = evs[i];
           if (ev.t === 'relaxa') { res.dist[ev.v] = ev.depois; res.pai[ev.v] = ev.u; }
           else if (ev.t === 'passada') res.passadas = Math.max(res.passadas, ev.k | 0);
-          else if (ev.t === 'fimPassada' && !ev.mudou) res.parouCedo = true;
           else if (ev.t === 'ciclo') { res.cicloNegativo = ev.ciclo; if (ev.u !== undefined && ev.v !== undefined) res.pai[ev.v] = ev.u; }
         }
         if (R.passadas !== undefined) res.passadas = R.passadas;
@@ -404,19 +403,45 @@
       // (Dijkstra: um 'fecha' por coluna, como no slide da AULA 05; Bellman-Ford: uma passada completa por coluna)
       var dij = alg === 'DIJKSTRA', n = T.n;
       var hist = new Array(n), fechadoEm = new Int32Array(n), vertices = [], primeiro = new Int32Array(n).fill(-1), primeiroEv = new Int32Array(n).fill(-1);
-      var col = 0, s = T.inicio, fimColuna = [0], colDoEv = new Int32Array(evs.length + 1);
+      var col = 0, s = T.inicio, fimColuna = [0], colDoEv = new Int32Array(evs.length + 1), mudouCol = [0];
       if (!(dij && res.recusa)) { hist[s] = [[0, 0, -1, -1]]; vertices.push(s); primeiro[s] = 0; }
       for (i = 0; i < evs.length; i++) {
         ev = evs[i];
-        if (dij ? ev.t === 'fecha' : ev.t === 'passada') { col++; if (dij) fechadoEm[ev.u] = col; }
+        if (dij ? ev.t === 'fecha' : ev.t === 'passada') { col++; mudouCol[col] = 0; if (dij) fechadoEm[ev.u] = col; }
         else if (ev.t === 'relaxa') {
+          mudouCol[col] = 1;
           if (!hist[ev.v]) { hist[ev.v] = []; vertices.push(ev.v); primeiro[ev.v] = col; primeiroEv[ev.v] = i; }
           hist[ev.v].push([col, ev.depois, ev.u, i]);
         }
         fimColuna[col] = i + 1;
         colDoEv[i + 1] = col;
       }
-      t = { algoritmo: alg, colunas: col, vertices: vertices, primeiraColuna: primeiro, fimColuna: fimColuna,
+      // Bellman-Ford: o código do grupo faz sempre as |V|−1 passadas (sem parada antecipada). Passadas seguidas sem
+      // nenhum relaxamento viram um bloco só ("Passos 9–2918, nada mudou"); o replay pula o bloco de uma vez.
+      // Dijkstra: um bloco por coluna.
+      var blocos = [{ ini: 0, fim: 0, vazio: false }], blocoDe = new Int32Array(col + 1), ultimaMudanca = 0;
+      for (var j = 1; j <= col; j++) {
+        if (mudouCol[j]) ultimaMudanca = j;
+        var ant = blocos[blocos.length - 1];
+        if (!dij && !mudouCol[j] && ant.vazio && ant.fim === j - 1) ant.fim = j;
+        else blocos.push({ ini: j, fim: j, vazio: !dij && !mudouCol[j] });
+        blocoDe[j] = blocos.length - 1;
+      }
+      var colEv = function (k) { return colDoEv[Math.max(0, Math.min(colDoEv.length - 1, k | 0))]; };
+      t = { algoritmo: alg, colunas: col, vertices: vertices, blocos: blocos, ultimaMudanca: ultimaMudanca,
+        blocoDaColuna: function (j) { return blocos[blocoDe[Math.max(0, Math.min(col, j | 0))]]; },
+        // próximo k do replay a partir de k (dir = +1/−1): pula de uma vez um bloco de passadas sem mudança
+        salto: function (k, dir) {
+          k = k | 0;
+          if (dir > 0) {
+            if (k >= evs.length) return evs.length;
+            var bn = blocos[blocoDe[colEv(k + 1)]];
+            return bn.vazio && bn.fim > bn.ini ? Math.max(k + 1, fimColuna[bn.fim]) : k + 1;
+          }
+          if (k <= 0) return 0;
+          var bp = blocos[blocoDe[colEv(k)]];
+          return bp.vazio && bp.fim > bp.ini ? Math.min(k - 1, fimColuna[bp.ini - 1]) : k - 1;
+        }, primeiraColuna: primeiro, fimColuna: fimColuna,
         fechadoEm: fechadoEm, historico: hist, primeiroEvento: primeiroEv,
         // nº de linhas visíveis até a coluna j (vertices está em ordem de primeiro rótulo); com k, só os vértices
         // rotulados nos k primeiros eventos (a coluna corrente ainda está sendo preenchida)
@@ -442,7 +467,7 @@
           if (x[0] === j && j > 0) for (var q = a - 2; q >= 0; q--) { riscados.unshift(h[q][1]); if (h[q][0] < j) break; }
           return { d: x[1], p: x[2], fechado: false, fechaAqui: dij && fechadoEm[v] === j, mudou: x[0] === j && j > 0, riscados: riscados };
         },
-        colunaDoEvento: function (k) { return colDoEv[Math.max(0, Math.min(colDoEv.length - 1, k | 0))]; } };
+        colunaDoEvento: colEv };
     }
     T._tab = t;
     return t;
@@ -477,7 +502,11 @@
       case 'DIJKSTRA:descarta': return c(ev.u) + ' já estava fechado: descarta.';
       case 'BELLMAN_FORD:passada': return 'Começa a passada ' + ev.k + ' por todos os arcos.';
       case 'BELLMAN_FORD:relaxa': return 'Relaxa o arco ' + c(ev.u) + ' → ' + c(ev.v) + ': d ' + num(ev.antes) + ' → ' + num(ev.depois) + '.';
-      case 'BELLMAN_FORD:fimPassada': return 'Fim da passada ' + ev.k + ': ' + (ev.mudou ? (ev.relaxados != null ? ev.relaxados + ' relaxamento(s).' : 'algo mudou.') : 'nada mudou, para cedo.');
+      case 'BELLMAN_FORD:fimPassada':
+        if (ev.mudou) return 'Fim da passada ' + ev.k + ': ' + (ev.relaxados != null ? ev.relaxados + ' relaxamento(s).' : 'algo mudou.');
+        var bl = tabela(T).blocoDaColuna(ev.k);
+        return bl.fim > bl.ini ? 'Passadas ' + bl.ini + '–' + ev.k + ': nada mudou (o código faz sempre as |V|−1 passadas).'
+          : 'Fim da passada ' + ev.k + ': nada mudou.';
       case 'BELLMAN_FORD:ciclo': return 'A passada extra ainda relaxa: ciclo negativo.';
     }
     return ev.t;

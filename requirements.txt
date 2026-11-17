@@ -1,6 +1,12 @@
 matplotlib>=3.8
+# [IA] Claude – numpy usado em src/viz.py (heatmap)
+numpy>=1.26
 flask>=3.0
 gunicorn>=22.0
 pymysql>=1.1  # aplicação web: acesso ao RDS MySQL
 pytest>=8.0
 networkx>=3.2  # somente em tests/ (oráculo)
+# [IA] Claude – CLI do Kaggle para baixar o dataset da Parte 2 (testado com 2.2.5 e token KGAT_)
+kaggle>=2.2
+# [IA] Claude – shortcut: kaggle 2.2.5 importa six sem declarar; remover quando o pacote corrigir
+six

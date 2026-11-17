@@ -357,9 +357,14 @@
     if (c === 'play') { if (this.tocando) this._pausa(); else { this._largaSinc(); if (this.k >= T.eventos.length) this._vaiPara(0); this._toca(); } return; }
     this._largaSinc(); this._pausa();
     if (c === 'inicio') this._vaiPara(0);
-    else if (c === 'voltar') this._vaiPara(this.k - 1);
-    else if (c === 'avancar') this._vaiPara(this.k + 1);
+    else if (c === 'voltar') this._vaiPara(this._proximo(-1));
+    else if (c === 'avancar') this._vaiPara(this._proximo(1));
     else if (c === 'fim') this._vaiPara(T.eventos.length);
+  };
+  // [IA] Claude – próximo evento do replay; no Bellman-Ford um bloco de passadas sem mudança é pulado de uma vez
+  P._proximo = function (dir) {
+    var tab = this.T ? LAB.traco.tabela(this.T) : null;
+    return tab && tab.salto ? tab.salto(this.k, dir) : this.k + dir;
   };
   P._menu = function (abre) {
     var b = this.t.ctl.querySelector('[data-c="vel"]');
@@ -374,7 +379,7 @@
     var passo = function () {
       if (!self.tocando) return;
       if (self.k >= self.T.eventos.length) { self._pausa(); return; }
-      self._vaiPara(self.k + 1);
+      self._vaiPara(self._proximo(1));
       self._timer = setTimeout(passo, 1000 / (EVENTOS_POR_S * self.vel));
     };
     this._timer = setTimeout(passo, 1000 / (EVENTOS_POR_S * this.vel));
@@ -1216,28 +1221,39 @@
   P._tabColunas = function () {
     var T = this.T, st = this.st, tab = this.tab, dij = T.algoritmo === 'DIJKSTRA', self = this;
     var col = st.coluna || 0, nLin = tab.linhasAte(col, st.k), JC = dij ? 6 : 4;
-    var c0 = Math.max(0, col - JC + 1), cols = [];
-    for (var j = c0; j <= col; j++) cols.push(j);
+    // colunas = blocos da tabela (Bellman-Ford: passadas seguidas sem mudança numa coluna só, cortada no passo atual)
+    var bAgora = tab.blocoDaColuna(col), b1 = tab.blocos.indexOf(bAgora), b0 = Math.max(0, b1 - JC + 1), cols = [];
+    for (var q = b0; q <= b1; q++) {
+      var bl = tab.blocos[q], fimV = Math.min(bl.fim, col);
+      cols.push({ j: fimV, rot: bl.ini === 0 ? 'Início' : bl.vazio ? (fimV > bl.ini ? 'Passos ' + bl.ini + '–' + fimV : 'Passo ' + bl.ini) + '<span class="ev-th-nota">nada mudou</span>' : 'Passo ' + bl.ini,
+        vazio: bl.vazio });
+    }
+    var c0 = b0;
     var foco = st.olhando ? st.olhando[1] : st.atual;
-    var cab = '<th scope="col" class="ev-canto">v</th>' + cols.map(function (j) {
-      return '<th scope="col"' + (j === col ? ' class="ev-col-agora"' : '') + '>' + (j === 0 ? 'Início' : 'Passo ' + j) + '</th>';
+    var cab = '<th scope="col" class="ev-canto">v</th>' + cols.map(function (c, i) {
+      var cls = (i === cols.length - 1 ? 'ev-col-agora' : '') + (c.vazio ? ' ev-col-vazia' : '');
+      return '<th scope="col"' + (cls ? ' class="' + cls.trim() + '"' : '') + '>' + c.rot + '</th>';
     }).join('');
     // [IA] Claude – cabeçalho de uma linha (título + onde estamos); a regra da tabela fica no title/aria do título
     var regra = dij ? 'Cada coluna é um passo: o vértice aberto de menor d é fechado (*) e seus arcos são relaxados.'
-      : 'Cada coluna é uma passada completa por todos os arcos (no máximo |V|−1 = ' + (T.n - 1).toLocaleString('pt-BR') + ').';
+      : 'Cada coluna é uma passada completa por todos os arcos. O código do grupo faz sempre as |V|−1 = ' + (T.n - 1).toLocaleString('pt-BR') +
+        ' passadas; passadas seguidas em que nada mudou aparecem juntas numa coluna só, e o replay as pula de uma vez.';
     var onde;
     if (dij) onde = col ? 'Passo ' + col + (tab.colunas ? ' de ' + tab.colunas.toLocaleString('pt-BR') : '') : 'Antes do primeiro passo';
-    else onde = 'Passada ' + (st.passada || 0) + (st.fim ? (T.res.cicloNegativo ? ': a passada extra ainda relaxou, ciclo negativo' : (T.res.parouCedo ? ': parou cedo, nada mudou na passada ' + T.res.passadas : '')) : ', ' + (st.relaxadosNaPassada || 0) + ' relaxamento(s)');
+    else if (st.fim) onde = T.res.cicloNegativo ? 'Depois de ' + T.res.passadas.toLocaleString('pt-BR') + ' passadas, a passada extra ainda relaxou: ciclo negativo'
+      : T.res.passadas.toLocaleString('pt-BR') + ' passadas (|V|−1); a última mudança foi na passada ' + tab.ultimaMudanca.toLocaleString('pt-BR');
+    else onde = 'Passada ' + (st.passada || 0).toLocaleString('pt-BR') + ' de ' + T.res.passadas.toLocaleString('pt-BR') +
+      (bAgora.vazio && col > bAgora.ini ? ', nada mudou desde a passada ' + (bAgora.ini - 1).toLocaleString('pt-BR') : ', ' + (st.relaxadosNaPassada || 0) + ' relaxamento(s)');
     if (c0 > 0) onde += '; mostrando os últimos ' + cols.length;
     var h = '<section class="ev-bloco"><h4 class="ev-h4 ev-h4--linha" title="' + esc(regra) + '">' + (dij ? 'Tabela do Dijkstra' : 'Tabela do Bellman-Ford') +
       '<span class="ev-h4-nota">' + esc(onde) + '.</span></h4><p class="sr-only">' + esc(regra) + '</p>' +
       '<div class="ev-rola ev-rola--xy" data-virtual="1"><table class="ev-t ev-t--dp"><thead><tr>' + cab + '</tr></thead><tbody data-vbody></tbody></table></div></section>';
-    var celHTML = function (v, j) {
-      var c = tab.celula(v, j, st.k);
+    var celHTML = function (v, cc) {
+      var j = cc.j, c = tab.celula(v, j, st.k);
       if (c === null) return '<td class="ev-desc">–</td>';
       if (c.fechado) return '<td class="ev-fechado">*</td>';
       var risc = c.riscados && c.riscados.length ? c.riscados.map(function (x) { return '<s>' + num(x) + '</s> '; }).join('') : '';
-      var cls = (c.fechaAqui ? 'ev-fecha' : '') + (c.mudou ? ' ev-mudou' : '') + (j === col && v === foco ? ' ev-foco' : '');
+      var cls = (c.fechaAqui ? 'ev-fecha' : '') + (c.mudou ? ' ev-mudou' : '') + (cc.vazio ? ' ev-vazia' : '') + (j === col && v === foco ? ' ev-foco' : '');
       return '<td class="' + cls + '">' + risc + '(' + num(c.d) + ', ' + (c.p >= 0 ? self._nome(c.p) : '–') + ')</td>';
     };
     var ROW = 26; // = altura da linha em estados.css (.ev-t--dp tbody tr)
