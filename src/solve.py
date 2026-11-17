@@ -7,8 +7,9 @@ import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
+# [IA] Claude – remove import não usado (INF)
 from .graphs.algorithms import (
-    INF, PesoNegativoError, alcancaveis, bellman_ford, bfs, caminho, custo_ciclo, dfs, dijkstra,
+    PesoNegativoError, alcancaveis, bellman_ford, bfs, caminho, custo_ciclo, dfs, dijkstra,
 )
 from .graphs.estados import ALVO, GrafoEstados, grafo_estados, grafo_posicoes, rotulo
 from .graphs.io import PORTAS, SAIDA, Mapa, ler_mapa, listar_mapas
@@ -224,7 +225,8 @@ def gerar_tudo(pastas_mapas: list[str], out: str | Path = "out/parte1") -> dict:
                 _json(out / "percurso_m03.json", r)
 
         d = dfs(ge.sem_alvo, ge.inicio)
-        dfs_linhas.append({"mapa": m.nome, **d.classes, "tem_ciclo": d.tem_ciclo})
+        # [IA] Claude – só as 4 classes; ciclo = retorno > 0 (d.tem_ciclo continua disponível)
+        dfs_linhas.append({"mapa": m.nome, **d.classes})
 
         if m.nome[:3] in ("m02", "m03", "m04"):
             comparacao.extend(comparacao_modelagem(m))
@@ -260,6 +262,7 @@ def gerar_tudo(pastas_mapas: list[str], out: str | Path = "out/parte1") -> dict:
     _json(out / "metricas_global.json", metricas_global)
     _json(out / "camadas.json", camadas)
     _csv(out / "solucoes.csv", ["mapa", "algoritmo", "passos", "custo", "status", "caminho"], solucoes)
-    _csv(out / "dfs_classificacao.csv", ["mapa", "arvore", "retorno", "avanco", "cruzamento", "tem_ciclo"], dfs_linhas)
+    # [IA] Claude – cabeçalho de dfs_classificacao.csv sem tem_ciclo
+    _csv(out / "dfs_classificacao.csv", ["mapa", "arvore", "retorno", "avanco", "cruzamento"], dfs_linhas)
     _csv(out / "comparacao_modelagem.csv", ["mapa", "abordagem", "passos", "caminho_valido", "observacao"], comparacao)
     return {"mapas": [m.nome for m in mapas], "out": str(out)}

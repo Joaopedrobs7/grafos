@@ -104,10 +104,9 @@ def dfs(g: Grafo, origem: No) -> Resultado:
                 tipo = "retorno"
             case _:
                 tipo = "avanco" if desc[u] < desc[v] else "cruzamento"
-         r.classes[tipo] += 1
+        r.classes[tipo] += 1
         r.arcos.append((u, v, tipo))
     return r
-
 
 def dijkstra(g: Grafo, origem: No) -> Resultado:
     if g.tem_peso_negativo():
