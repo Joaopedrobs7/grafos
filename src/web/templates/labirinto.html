@@ -1,243 +1,465 @@
 <!doctype html>
-<!-- [IA] Claude – interface do labirinto interativo (HTML/CSS/JS de visualização) -->
+<!-- [IA] Claude – página do Labirinto com Chaves: navbar, hero com diorama 3D emoldurado, área de trabalho do player
+     (janela 3D + coluna de informações com mapa de estados, tabela e métricas), manual, CTA e rodapé. Tema masmorra. -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Labirinto com Chaves</title>
-<style>
-  :root {
-    --bg: #f5f3ef; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b70; --line: #e2dfd8;
-    --accent: #e8590c; --ok: #2b8a3e; --warn: #c92a2a; --trap: rgba(201, 42, 42, .55);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #141416; --panel: #1f1f23; --ink: #f1f1f3; --muted: #9a9aa2; --line: #2e2e34; }
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--line); }
-  h1 { margin: 0; font-size: 18px; letter-spacing: -.01em; }
-  h1 span { color: var(--accent); }
-  .badge { font: 12px ui-monospace, Menlo, monospace; padding: 4px 10px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); color: var(--muted); }
-  .badge b { color: var(--ink); }
-  main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; padding: 16px 20px; }
-  @media (max-width: 860px) { main { grid-template-columns: 1fr; padding: 12px 16px; } }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
-  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 12px; }
-  label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
-  select, button, input[type=range] { font: inherit; }
-  select, button { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
-  button { cursor: pointer; min-width: 38px; }
-  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .canvas-wrap { overflow: auto; }
-  canvas { display: block; max-width: 100%; height: auto; image-rendering: pixelated; border-radius: 6px; }
-  dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; }
-  dt { color: var(--muted); }
-  dd { margin: 0; font-family: ui-monospace, Menlo, monospace; word-break: break-all; }
-  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; }
-  .side { display: grid; gap: 16px; align-content: start; }
-  .status { font-weight: 600; }
-  .status.OK { color: var(--ok); } .status.RECUSA, .status.SEM_SOLUCAO, .status.CICLO_NEGATIVO { color: var(--warn); }
-  .msg { color: var(--muted); font-size: 12px; margin-top: 8px; }
-  .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--muted); margin-top: 10px; }
-  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid #0002; }
-  .row { display: flex; gap: 6px; align-items: center; }
-  table { width: 100%; border-collapse: collapse; font: 11px ui-monospace, Menlo, monospace; }
-  th, td { text-align: left; padding: 3px 4px; border-bottom: 1px solid var(--line); }
-  th { color: var(--muted); font-weight: 500; }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Labirinto com Chaves, grafo de estados</title>
+<meta name="description" content="Um aluno da CESAR School atravessa uma masmorra 3D em pixel art até o baú, pelo caminho que BFS, Dijkstra ou Bellman-Ford calcularam sobre o grafo de estados do mapa.">
+<meta name="theme-color" content="#1A1612">
+<link rel="icon" href="static/favicon.svg" data-inline>
+<link rel="stylesheet" href="static/css/app.css" data-inline>
+<link rel="stylesheet" href="static/css/estados.css" data-inline>
+<script>
+  document.documentElement.classList.add("js");
+  // Pré-carrega a Pixelify Sans quando a página é servida pelo Flask. No arquivo estático
+  // (src/viz.py) o CSS vira <style> com a fonte embutida e este link não existe: nada a fazer.
+  (function () {
+    var css = document.querySelector('link[rel="stylesheet"][data-inline]');
+    if (!css || !window.URL) return;
+    var l = document.createElement("link");
+    l.rel = "preload"; l.as = "font"; l.type = "font/woff2"; l.crossOrigin = "anonymous";
+    l.href = new URL("../fonts/PixelifySans-normal-latin.woff2", css.href).href;
+    document.head.appendChild(l);
+  })();
+</script>
 </head>
 <body>
-<header>
-  <h1>Labirinto com Chaves <span>· grafo de estados</span></h1>
-  <div class="badge" id="servidor">carregando…</div>
+<a class="pular" href="#jogar">Pular para o labirinto</a>
+<div id="anuncio" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ============================================================ navbar -->
+<header class="nav" id="nav">
+  <div class="nav__barra px">
+    <a class="nav__marca" href="#inicio">
+      <span class="nav__icone" id="navIcone" aria-hidden="true">
+        <svg viewBox="0 0 12 7" shape-rendering="crispEdges"><path fill="#FFC23A" d="M1 1h3v1H1zM0 2h1v3H0zM4 2h1v3H4zM1 5h3v1H1zM5 3h6v1H5zM8 4h1v2H8zM10 4h1v1h-1z"/></svg>
+      </span>
+      <span class="nav__nome">Labirinto com Chaves</span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Seções da página">
+      <a href="#jogar">Jogar</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#algoritmos">Algoritmos</a>
+      <p class="pill pill--painel" data-servidor-pill>
+        <span class="pill__ponto" aria-hidden="true"></span>
+        <span class="pill__inst" data-servidor-inst>conectando</span>
+        <span class="pill__zona" data-servidor-zona></span>
+      </p>
+    </nav>
+    <p class="pill pill--barra" data-servidor-pill title="Instância que respondeu à última consulta">
+      <span class="pill__ponto" aria-hidden="true"></span>
+      <span class="pill__inst" data-servidor-inst>conectando</span>
+      <span class="pill__zona" data-servidor-zona></span>
+    </p>
+    <button class="nav__menu" id="btnMenu" type="button" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 8 7" shape-rendering="crispEdges" aria-hidden="true"><path d="M0 0h8v1H0zM0 3h8v1H0zM0 6h8v1H0z"/></svg>
+      <span>Menu</span>
+    </button>
+  </div>
 </header>
-<main>
-  <section class="card">
-    <div class="controls">
-      <label>Mapa <select id="selMapa"></select></label>
-      <label>Algoritmo <select id="selAlg"></select></label>
-      <label>Camada <select id="selCamada"></select></label>
-      <label>Velocidade <input id="vel" type="range" min="1" max="20" value="4"></label>
-      <div class="row">
-        <button id="btnInicio" title="voltar ao início">|◀</button>
-        <button id="btnVoltar" title="passo anterior">◀</button>
-        <button id="btnPlay" class="primary" title="animar">▶</button>
-        <button id="btnAvancar" title="próximo passo">▶|</button>
+
+<main id="conteudo">
+<!-- ============================================================ hero -->
+<section class="hero tela" id="inicio" aria-labelledby="heroTitulo">
+  <div class="hero__poeira" aria-hidden="true"></div>
+  <div class="wrap hero__grade">
+    <div class="hero__conteudo">
+      <p class="hero__selo px"><span class="hero__selo-aluno" data-sprite-rosto aria-hidden="true"></span>Projeto de Teoria dos Grafos da CESAR School</p>
+      <h1 class="hero__titulo" id="heroTitulo">Labirinto<br>com Chaves</h1>
+      <p class="hero__lead">Um aluno da CESAR School atravessa a masmorra até o baú, pelo caminho que o algoritmo calculou. Cada chave que ele pega cria uma nova camada no grafo de estados.</p>
+      <div class="hero__acoes">
+        <a class="btn btn--cesar px" href="#jogar">Escolher um mapa</a>
+        <a class="btn btn--fantasma px" href="#como-funciona">Como o grafo funciona</a>
       </div>
-      <label class="row"><input id="chkTrap" type="checkbox" checked> armadilhas</label>
     </div>
-    <div class="canvas-wrap"><canvas id="cv"></canvas></div>
-    <div class="legend" id="legenda"></div>
-  </section>
-  <aside class="side">
-    <div class="card">
-      <h2>Estado atual</h2>
-      <dl>
-        <dt>passo</dt><dd id="dPasso">–</dd>
-        <dt>rótulo</dt><dd id="dRotulo">–</dd>
-        <dt>posição</dt><dd id="dPos">–</dd>
-        <dt>chaves</dt><dd id="dChaves">–</dd>
-        <dt>bônus</dt><dd id="dBonus">–</dd>
-        <dt>custo acum.</dt><dd id="dCusto">–</dd>
-      </dl>
+    <figure class="hero__janela janela px" aria-labelledby="heroMapa">
+      <figcaption class="janela__barra">
+        <span class="janela__icone" aria-hidden="true"><svg viewBox="0 0 11 9" shape-rendering="crispEdges"><path fill="#8A5A34" d="M1 2h9v6H1z"/><path fill="#B07A45" d="M2 3h7v1H2zM2 5h7v2H2z"/><path fill="#F2C14E" d="M0 1h11v1H0zM0 4h11v1H0zM5 4h1v2H5zM0 2h1v6H0zM10 2h1v6h-1zM0 8h11v1H0z"/><path fill="#FFE9A3" d="M1 1h3v1H1z"/></svg></span>
+        <span class="janela__titulo" id="heroMapa">Masmorra em destaque</span>
+        <span class="janela__sub" id="heroDado"></span>
+      </figcaption>
+      <div class="hero__palco" id="heroPalco" role="img" aria-label="Diorama 3D da masmorra com o aluno andando até o baú pelo caminho calculado">
+        <div class="carregando" data-carregando>
+          <span class="carregando__aluno" data-sprite-andando></span>
+          <span class="carregando__texto">Montando a masmorra</span>
+        </div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================ player: área de trabalho -->
+<!-- [IA] Claude – player como área de trabalho: à esquerda a janela 3D (níveis acima, doca e linha do tempo
+     embaixo); à direita a coluna de informações (estado, resultado, mapa de estados, tabela, métricas). -->
+<section class="jogar tela sec" id="jogar" aria-labelledby="jogarTitulo">
+  <div class="wrap wrap--larga">
+    <div class="area">
+      <div class="area__esq">
+        <div class="sec__cabeca jogar__cabeca">
+          <h2 id="jogarTitulo">Escolha um mapa</h2>
+          <p>O aluno segue o percurso que o algoritmo calculou. O mesmo percurso aparece no mapa de estados e na tabela do algoritmo, passo a passo.</p>
+        </div>
+
+        <div class="faixa">
+          <div class="niveis" id="niveis" role="radiogroup" aria-label="Mapa"></div>
+          <button class="carregar px" id="btnCarregar" type="button" aria-haspopup="dialog" aria-controls="dlgMapa">
+            <svg viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true"><path d="M4 0h1v6H4zM2 2h1v1H2zM3 1h1v1H3zM5 1h1v1H5zM6 2h1v1H6zM0 6h1v3H0zM8 6h1v3H8zM1 8h7v1H1z"/></svg>
+            <span>Carregar mapa</span>
+          </button>
+        </div>
+
+        <div class="algs px" id="algs" role="radiogroup" aria-label="Algoritmo"></div>
+
+        <div class="janela tela3d px" id="tela3d">
+          <div class="janela__barra">
+            <span class="janela__icone" aria-hidden="true"><svg viewBox="0 0 11 9" shape-rendering="crispEdges"><path fill="#8A5A34" d="M1 2h9v6H1z"/><path fill="#B07A45" d="M2 3h7v1H2zM2 5h7v2H2z"/><path fill="#F2C14E" d="M0 1h11v1H0zM0 4h11v1H0zM5 4h1v2H5zM0 2h1v6H0zM10 2h1v6h-1zM0 8h11v1H0z"/><path fill="#FFE9A3" d="M1 1h3v1H1z"/></svg></span>
+            <span class="janela__titulo" id="janelaMapa">Carregando</span>
+            <span class="janela__sub" id="janelaAlg"></span>
+            <p class="chip px" id="hudStatus" data-status=""><span class="chip__ponto" aria-hidden="true"></span><span id="hudStatusTxt">Carregando</span></p>
+          </div>
+          <div class="janela__vista">
+            <div class="tela3d__render" id="playerPalco" tabindex="0" role="application"
+                 aria-roledescription="masmorra 3D" aria-label="Masmorra. Setas esquerda e direita andam um passo, espaço inicia ou pausa, mais e menos mudam a velocidade."></div>
+            <div class="hud" id="hud">
+              <div class="hud__stats px" aria-hidden="true">
+                <p class="hud__stat"><span class="hud__rotulo">Passo</span><span class="hud__num"><b id="hudPasso">0</b><span class="hud__de" id="hudTotal"></span></span></p>
+                <p class="hud__stat"><span class="hud__rotulo">Custo</span><span class="hud__num"><b id="hudCusto">0</b></span></p>
+              </div>
+              <div class="hud__topo-dir">
+                <div class="hud__cam px" role="group" aria-label="Câmera" id="hudCam">
+                  <button type="button" data-cam="seguir" aria-pressed="true">Seguir</button>
+                  <button type="button" data-cam="livre" aria-pressed="false">Livre</button>
+                  <button type="button" data-cam="topo" aria-pressed="false">Topo</button>
+                </div>
+                <div class="hud__camada px" title="Escurece as casas que não existem no grafo com esse conjunto de chaves">
+                  <label for="selCamada">Camada</label>
+                  <select id="selCamada" aria-describedby="notaCamada"></select>
+                </div>
+              </div>
+              <div class="hud__inv px" id="hudInv" role="group" aria-label="Chaves no inventário" hidden></div>
+              <div class="hud__mini px" id="hudMini">
+                <canvas id="minimapa" width="160" height="96" aria-label="Minimapa: clique numa casa do percurso para ir até ela" role="img"></canvas>
+              </div>
+              <div class="hud__dialogo px" id="hudDialogo" role="status" hidden>
+                <p class="hud__dialogo-titulo" id="dialogoTitulo"></p>
+                <p class="hud__dialogo-texto" id="dialogoTexto"></p>
+                <div class="hud__dialogo-acoes" id="dialogoAcoes"></div>
+              </div>
+              <div class="carregando hud__carregando" id="hudCarregando" hidden>
+                <span class="carregando__aluno" data-sprite-andando></span>
+                <span class="carregando__texto" id="hudCarregandoTxt">Carregando o mapa</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tempo" id="tempo">
+          <div class="tempo__marcas" id="tempoMarcas" aria-hidden="true"></div>
+          <input class="tempo__range" id="tempoRange" type="range" min="0" max="0" value="0" step="1" aria-label="Passo do percurso">
+        </div>
+
+        <div class="doca">
+          <div class="doca__transporte" role="group" aria-label="Controles do percurso">
+            <button class="btn-ico px" id="btnInicio" type="button" aria-label="Voltar ao início" title="Voltar ao início">
+              <svg viewBox="0 0 10 8" shape-rendering="crispEdges" aria-hidden="true"><path d="M0 1h1v6H0zM2 3h1v2H2zM3 2h1v4H3zM4 1h1v6H4zM5 3h1v2H5zM6 2h1v4H6zM7 1h1v6H7z"/></svg>
+            </button>
+            <button class="btn-ico px" id="btnVoltar" type="button" aria-label="Passo anterior" title="Passo anterior (seta para a esquerda)">
+              <svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 3h1v2H1zM2 2h1v4H2zM3 1h1v6H3zM5 1h2v6H5z"/></svg>
+            </button>
+            <button class="btn-ico btn-ico--play px" id="btnPlay" type="button" aria-label="Animar o percurso" title="Animar o percurso (espaço)">
+              <svg class="ico-play" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 0h1v8H1zM2 1h1v6H2zM3 2h1v4H3zM4 3h1v2H4z"/></svg>
+              <svg class="ico-pausa" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 1h2v6H1zM5 1h2v6H5z"/></svg>
+            </button>
+            <button class="btn-ico px" id="btnAvancar" type="button" aria-label="Próximo passo" title="Próximo passo (seta para a direita)">
+              <svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 1h2v6H1zM4 1h1v6H4zM5 2h1v4H5zM6 3h1v2H6z"/></svg>
+            </button>
+            <button class="btn-ico px" id="btnFim" type="button" aria-label="Ir para o fim" title="Ir para o fim">
+              <svg viewBox="0 0 10 8" shape-rendering="crispEdges" aria-hidden="true"><path d="M9 1h1v6H9zM7 3h1v2H7zM6 2h1v4H6zM5 1h1v6H5zM4 3h1v2H4zM3 2h1v4H3zM2 1h1v6H2z"/></svg>
+            </button>
+          </div>
+          <div class="vel" id="vel">
+            <button class="vel__botao px" id="btnVel" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="velMenu" title="Velocidade (teclas + e −)">
+              <svg viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true"><path d="M2 0h5v1H2zM1 1h1v1H1zM7 1h1v1H7zM0 2h1v5H0zM8 2h1v5H8zM4 2h1v3H4zM5 4h1v1H5zM6 5h1v1H6zM1 7h1v1H1zM7 7h1v1H7z"/></svg>
+              <span>Velocidade: <b id="velTxt">1×</b></span>
+            </button>
+            <ul class="vel__menu px" id="velMenu" role="listbox" aria-label="Velocidade" tabindex="-1" hidden></ul>
+            <span class="vel__nota" id="velNota">3 passos/s</span>
+          </div>
+          <div class="doca__toggles">
+            <label class="toggle" title="Armadilhas são estados de onde o baú não é mais alcançável"><input id="chkTrap" type="checkbox" checked aria-describedby="notaCamada"><span class="toggle__caixa" aria-hidden="true"></span><span>Armadilhas</span></label>
+            <label class="toggle"><input id="chkRastro" type="checkbox" checked><span class="toggle__caixa" aria-hidden="true"></span><span>Rastro</span></label>
+          </div>
+        </div>
+
+        <p class="sr-only" id="notaCamada">A camada escurece as casas que não existem no grafo com esse conjunto de chaves. Armadilhas são estados de onde o baú não é mais alcançável.</p>
+        <ul class="legenda" id="legenda" aria-label="Legenda das casas deste mapa"></ul>
+
+        <div class="extras">
+          <details class="painel px hist-card metricas" id="cardMetricas" hidden>
+            <summary class="painel__titulo" id="tMetricas">Métricas do grafo</summary>
+            <div id="metricas"></div>
+          </details>
+
+          <details class="painel px hist-card" id="cardHist" hidden>
+            <summary class="painel__titulo" id="tHist">Últimas consultas (RDS)</summary>
+            <div class="hist">
+              <table>
+                <thead><tr><th scope="col">Hora</th><th scope="col">Mapa</th><th scope="col">Algoritmo</th><th scope="col">Custo</th><th scope="col">Instância</th></tr></thead>
+                <tbody id="tbHist"></tbody>
+              </table>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <aside class="info" id="info" aria-label="Informações do mapa">
+        <div class="resumo">
+          <section class="painel painel--compacto px" aria-labelledby="tEstado">
+            <div class="painel__topo">
+              <h3 class="painel__titulo" id="tEstado">Estado atual</h3>
+              <p class="rotulo-estado" id="dRotulo">–</p>
+            </div>
+            <dl class="dados dados--estado">
+              <div><dt>Passo</dt><dd id="dPasso">–</dd></div>
+              <div><dt>Custo acumulado</dt><dd id="dCusto">–</dd></div>
+              <div class="dados__largo"><dt>Posição</dt><dd id="dPos">–</dd></div>
+              <div><dt>Chaves</dt><dd id="dChaves">–</dd></div>
+              <div><dt title="Bônus já usados">Bônus</dt><dd id="dBonus">–</dd></div>
+            </dl>
+          </section>
+          <section class="painel painel--compacto px" aria-labelledby="tResultado">
+            <div class="painel__topo">
+              <h3 class="painel__titulo" id="tResultado">Resultado</h3>
+              <p class="resultado" id="dStatus" data-status="">–</p>
+            </div>
+            <p class="resultado__python" id="dPython">–</p>
+            <p class="resultado__msg" id="dMsg" hidden></p>
+            <dl class="dados dados--duplo">
+              <div><dt>Passos</dt><dd id="dPassos">–</dd></div>
+              <div><dt>Custo</dt><dd id="dCustoTot">–</dd></div>
+              <div><dt>Estados</dt><dd id="dEstados">–</dd></div>
+              <div><dt>Arcos</dt><dd id="dArcos">–</dd></div>
+              <div><dt>Teto</dt><dd id="dTeto">–</dd></div>
+              <div><dt>Armadilhas</dt><dd id="dTrap">–</dd></div>
+            </dl>
+          </section>
+        </div>
+
+        <div class="estados" id="estados">
+          <section class="estados__bloco estados__bloco--mapa" aria-labelledby="tMapaEstados">
+            <h3 class="estados__titulo" id="tMapaEstados">Mapa de estados</h3>
+            <div class="estados__mapa" id="estadosMapa">
+              <p class="estados__vazio">O mapa de estados aparece aqui quando o mapa carregar.</p>
+            </div>
+          </section>
+          <div class="estados__divisor" id="estadosDivisor" role="separator" aria-orientation="horizontal" aria-controls="estadosMapa" aria-label="Dividir mapa e tabela" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50" tabindex="0"><span aria-hidden="true"></span></div>
+          <section class="estados__bloco estados__bloco--tabela" aria-labelledby="tTabela">
+            <h3 class="estados__titulo" id="tTabela">Tabela</h3>
+            <div class="estados__tabela" id="estadosTabela">
+              <p class="estados__vazio">A tabela do algoritmo aparece aqui, no formato das aulas.</p>
+            </div>
+          </section>
+        </div>
+
+      </aside>
     </div>
-    <div class="card">
-      <h2>Resultado</h2>
-      <dl>
-        <dt>status</dt><dd><span id="dStatus" class="status">–</span></dd>
-        <dt>passos</dt><dd id="dPassos">–</dd>
-        <dt>custo</dt><dd id="dCustoTot">–</dd>
-        <dt>estados</dt><dd id="dEstados">–</dd>
-        <dt>arcos</dt><dd id="dArcos">–</dd>
-        <dt>teto</dt><dd id="dTeto">–</dd>
-        <dt>armadilhas</dt><dd id="dTrap">–</dd>
-      </dl>
-      <div class="msg" id="dMsg"></div>
+  </div>
+
+  <dialog class="dlg px" id="dlgMapa" aria-labelledby="dlgTitulo">
+    <form class="dlg__form" id="formMapa" method="dialog">
+      <h3 class="dlg__titulo" id="dlgTitulo">Carregar um mapa</h3>
+      <div class="dlg__servidor" data-so-servidor>
+        <p class="dlg__texto">Cole o texto do mapa ou escolha um arquivo .txt. O servidor roda o código Python do grupo (leitura do mapa, grafo de estados e os três algoritmos) e o mapa entra no player como Personalizado.</p>
+        <label class="dlg__rotulo" for="txtMapa">Texto do mapa</label>
+        <textarea class="dlg__area" id="txtMapa" rows="10" spellcheck="false" autocomplete="off" placeholder="#######&#10;#S..a.#&#10;#.##A.#&#10;#....G#&#10;#######"></textarea>
+        <div class="dlg__arquivo">
+          <label class="btn btn--mini btn--fantasma px" for="arqMapa">Escolher arquivo .txt</label>
+          <input class="sr-only" id="arqMapa" type="file" accept=".txt,text/plain">
+          <span class="dlg__arquivo-nome" id="arqNome">Nenhum arquivo escolhido</span>
+        </div>
+        <p class="dlg__erro" id="dlgErro" role="alert" hidden></p>
+        <div class="dlg__acoes">
+          <button class="btn btn--mini btn--fantasma px" type="button" id="btnDlgCancelar">Cancelar</button>
+          <button class="btn btn--mini btn--cesar px" type="submit" id="btnResolver">Resolver no servidor</button>
+        </div>
+      </div>
+      <div class="dlg__estatico" data-so-estatico hidden>
+        <p class="dlg__texto">Este é o arquivo estático gerado por src/viz.py: não há servidor para resolver um mapa novo. Para rodar um mapa surpresa, use a linha de comando do projeto:</p>
+        <p class="dlg__cmd">python -m src.cli --mapa arquivo.txt --interactive</p>
+        <div class="dlg__acoes">
+          <button class="btn btn--mini btn--fantasma px" type="button" data-fechar>Fechar</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+</section>
+
+<!-- ============================================================ manual: como funciona -->
+<section class="manual sec" id="como-funciona" aria-labelledby="comoTitulo">
+  <div class="wrap manual__grade">
+    <div class="manual__texto">
+      <h2 id="comoTitulo">Como funciona</h2>
+      <p>A masmorra vira um grafo dirigido. Cada vértice é um estado: a casa onde o aluno está, as chaves que ele já tem e os bônus que já usou. Cada arco é um passo para uma casa vizinha e custa o terreno de destino. O objetivo é o baú (a saída, G).</p>
+      <p>Por isso o mesmo corredor aparece várias vezes no grafo. Passar por ali sem chave ou com a chave a são estados diferentes, e uma porta só tem arco de entrada nas camadas que têm a chave dela.</p>
+      <p>As esteiras só deixam sair na direção da seta. A fonte devolve 2 de custo toda vez que o aluno pisa nela, e é assim que aparece um ciclo negativo.</p>
     </div>
-    <div class="card" id="cardHist" hidden>
-      <h2>Últimas consultas (RDS)</h2>
-      <table><thead><tr><th>hora</th><th>mapa</th><th>alg.</th><th>custo</th><th>instância</th></tr></thead>
-      <tbody id="tbHist"></tbody></table>
+
+    <div class="manual__figuras">
+      <figure class="fig fig--estado">
+        <figcaption class="fig__legenda">O estado agora, lido do player</figcaption>
+        <div class="tupla" id="tupla">
+          <div class="tupla__linha" aria-hidden="true">
+            <span class="tupla__tok" id="tPos">(1,1)</span><span class="tupla__sep">|</span><span class="tupla__tok" id="tChaves">-</span><span class="tupla__sep">|</span><span class="tupla__tok" id="tBonus">{}</span>
+          </div>
+          <ol class="tupla__notas" id="tuplaNotas">
+            <li data-alvo="tPos"><b>Posição</b><span id="nPos">linha 1, coluna 1</span></li>
+            <li data-alvo="tChaves"><b>Chaves coletadas</b><span id="nChaves">nenhuma</span></li>
+            <li data-alvo="tBonus"><b>Bônus já usados</b><span id="nBonus">nenhum</span></li>
+          </ol>
+          <svg class="tupla__guias" id="tuplaGuias" aria-hidden="true"></svg>
+        </div>
+        <p class="fig__nota" id="tuplaNota">Mapa m03, passo 0. Dê play no player e veja a tupla mudar.</p>
+      </figure>
+
+      <figure class="fig fig--casas">
+        <figcaption class="fig__legenda">Casas e custos</figcaption>
+        <ul class="catalogo" id="catalogo"></ul>
+      </figure>
+
+      <figure class="fig fig--camadas">
+        <figcaption class="fig__legenda">Camadas</figcaption>
+        <div class="camadas">
+          <div class="camadas__texto">
+            <p>Cada conjunto de chaves é uma cópia do mapa. Pegar uma chave é um arco que sobe de camada.</p>
+            <dl class="contagem">
+              <div><dt>Estados</dt><dd id="cEstados">–</dd></div>
+              <div><dt>Arcos</dt><dd id="cArcos">–</dd></div>
+              <div><dt>Teto teórico</dt><dd id="cTeto">–</dd></div>
+            </dl>
+            <p class="fig__nota">O teto multiplica as casas livres pelas combinações de chaves e de bônus. Só entram no grafo os estados alcançáveis a partir do início.</p>
+          </div>
+          <div class="pilha" id="pilha" role="group" aria-label="Camadas do mapa atual"></div>
+        </div>
+      </figure>
     </div>
-  </aside>
+  </div>
+</section>
+
+<!-- ============================================================ manual: algoritmos -->
+<section class="manual manual--algos sec" id="algoritmos" aria-labelledby="algTitulo">
+  <div class="wrap">
+    <div class="sec__cabeca">
+      <h2 id="algTitulo">Algoritmos</h2>
+      <p id="algIntro">Os três rodam sobre o mesmo grafo de estados. O que muda é o que cada um minimiza e o que ele aceita.</p>
+    </div>
+    <div class="algos">
+      <article class="algo" data-alg="BFS" aria-labelledby="aBFS">
+        <svg class="algo__ico" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path d="M5 5h1v1H5z"/><path opacity=".7" d="M4 3h3v1H4zM3 4h1v3H3zM7 4h1v3H7zM4 7h3v1H4z"/><path opacity=".4" d="M3 1h5v1H3zM1 3h1v5H1zM9 3h1v5H9zM3 9h5v1H3zM2 2h1v1H2zM8 2h1v1H8zM2 8h1v1H2zM8 8h1v1H8z"/></svg>
+        <h3 id="aBFS">BFS</h3>
+        <p class="algo__minimiza">Menos passos</p>
+        <p class="algo__regra">Conta passos e ignora o custo do terreno. Se a água encurta o caminho, ele atravessa a água.</p>
+        <dl class="algo__res">
+          <div><dt>Status</dt><dd data-campo="status">–</dd></div>
+          <div><dt>Passos</dt><dd data-campo="passos">–</dd></div>
+          <div><dt>Custo</dt><dd data-campo="custo">–</dd></div>
+        </dl>
+        <button class="btn btn--tinta px" type="button" data-ver="BFS">Ver no labirinto</button>
+      </article>
+      <article class="algo" data-alg="DIJKSTRA" aria-labelledby="aDIJ">
+        <svg class="algo__ico" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path d="M5 1h1v8H5zM2 9h7v1H2zM1 3h9v1H1z"/><path opacity=".7" d="M1 4h1v2H1zM0 6h3v1H0zM9 4h1v3H9zM8 7h3v1H8z"/></svg>
+        <h3 id="aDIJ">Dijkstra</h3>
+        <p class="algo__minimiza">Menor custo</p>
+        <p class="algo__regra">Soma o custo de cada casa e acha o caminho mais barato, mas recusa o mapa quando existe arco negativo, como bônus e fonte.</p>
+        <dl class="algo__res">
+          <div><dt>Status</dt><dd data-campo="status">–</dd></div>
+          <div><dt>Passos</dt><dd data-campo="passos">–</dd></div>
+          <div><dt>Custo</dt><dd data-campo="custo">–</dd></div>
+        </dl>
+        <button class="btn btn--tinta px" type="button" data-ver="DIJKSTRA">Ver no labirinto</button>
+      </article>
+      <article class="algo" data-alg="BELLMAN_FORD" aria-labelledby="aBF">
+        <svg class="algo__ico" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true"><path d="M3 1h5v1H3zM1 3h1v5H1zM9 3h1v3H9zM3 9h5v1H3zM2 2h1v1H2zM8 2h1v1H8zM2 8h1v1H2z"/><path opacity=".7" d="M7 6h5v1H7zM8 7h3v1H8zM9 8h1v1H9z"/></svg>
+        <h3 id="aBF">Bellman-Ford</h3>
+        <p class="algo__minimiza">Menor custo, com bônus negativo</p>
+        <p class="algo__regra">Aceita bônus negativo e detecta ciclo negativo: se o custo pode cair sem limite, ele mostra o ciclo em vez de um caminho.</p>
+        <dl class="algo__res">
+          <div><dt>Status</dt><dd data-campo="status">–</dd></div>
+          <div><dt>Passos</dt><dd data-campo="passos">–</dd></div>
+          <div><dt>Custo</dt><dd data-campo="custo">–</dd></div>
+        </dl>
+        <button class="btn btn--tinta px" type="button" data-ver="BELLMAN_FORD">Ver no labirinto</button>
+        <div class="algo__variante" id="algoVariante" hidden>
+          <p class="algo__variante-titulo">Com a fonte consumível</p>
+          <p class="algo__variante-texto">Nesta variante a fonte vale uma vez só, como um bônus, e o ciclo some.</p>
+          <dl class="algo__res algo__res--mini">
+            <div><dt>Status</dt><dd data-campo="status">–</dd></div>
+            <div><dt>Passos</dt><dd data-campo="passos">–</dd></div>
+            <div><dt>Custo</dt><dd data-campo="custo">–</dd></div>
+          </dl>
+          <button class="btn btn--tinta btn--mini px" type="button" data-ver="BELLMAN_FORD_FONTE_CONSUMIVEL">Ver no labirinto</button>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ CTA -->
+<section class="cta-faixa manual sec" id="desafio" aria-labelledby="ctaTitulo" hidden>
+  <div class="wrap">
+    <div class="cta">
+      <div class="cta__aluno" id="ctaAluno" aria-hidden="true"></div>
+      <div class="cta__painel px">
+        <h2 class="cta__titulo" id="ctaTitulo">Encare o mapa grande</h2>
+        <p class="cta__linha" id="ctaLinha">O maior mapa do projeto, com um caminho de centenas de passos.</p>
+        <button class="btn btn--cesar btn--grande px" type="button" id="btnM08">Abrir o m08</button>
+      </div>
+    </div>
+  </div>
+</section>
 </main>
+
+<!-- ============================================================ rodapé -->
+<footer class="rodape tela" aria-labelledby="rodapeTitulo">
+  <div class="rodape__trilha" aria-hidden="true"><span class="rodape__andarilho" id="andarilho"></span></div>
+  <div class="wrap rodape__grade">
+    <div class="rodape__projeto">
+      <span class="rodape__logo" id="rodapeLogo" aria-hidden="true"></span>
+      <h2 class="sr-only" id="rodapeTitulo">Sobre o projeto</h2>
+      <p>Projeto de Teoria dos Grafos e AVD da CESAR School, 2026.2. Hospedado na AWS (EC2, Auto Scaling, Load Balancer e RDS) para a disciplina de Cloud.</p>
+    </div>
+    <nav class="rodape__links" aria-label="Links do projeto">
+      <h3 class="rodape__titulo">Links</h3>
+      <ul>
+        <li><a href="https://github.com/Joaopedrobs7/grafos" rel="noopener">Código no GitHub</a></li>
+        <li><a href="https://github.com/Joaopedrobs7/grafos/blob/main/docs/cloud/ARQUITETURA_AWS.md" rel="noopener">Arquitetura na AWS</a></li>
+        <li data-so-servidor><a href="api/info">API: info da instância</a></li>
+      </ul>
+    </nav>
+    <div class="rodape__servidor">
+      <h3 class="rodape__titulo">Servidor</h3>
+      <dl class="servidor" id="rodapeServidor">
+        <div><dt>Instância</dt><dd data-srv="instancia">–</dd></div>
+        <div><dt>Zona</dt><dd data-srv="zona">–</dd></div>
+        <div><dt>IP</dt><dd data-srv="ip">–</dd></div>
+        <div><dt>Versão</dt><dd data-srv="versao">–</dd></div>
+      </dl>
+      <p class="servidor__estatico" id="rodapeEstatico" hidden>Arquivo estático gerado por src/viz.py</p>
+    </div>
+  </div>
+  <p class="rodape__marca" aria-hidden="true">Labirinto com Chaves</p>
+</footer>
+
+<script src="static/vendor/three.min.js" data-inline></script>
+<script src="static/js/pixel.js" data-inline></script>
+<script src="static/js/voxel.js" data-inline></script>
+<script src="static/js/maze3d.js" data-inline></script>
+<script src="static/js/grafo.js" data-inline></script>
+<script src="static/js/estados.js" data-inline></script>
 <script>
 /*__DADOS_EMBUTIDOS__*/
-const CORES = { "#": "#3a3a3a", ".": "#ffffff", "S": "#7fc97f", "G": "#fdbf6f", ",": "#c8a26b", "~": "#7fb2d9",
-  "+": "#a5e3a5", "*": "#ffd54f", "a": "#fff0a0", "b": "#fff0a0", "c": "#fff0a0", "d": "#fff0a0",
-  "A": "#b39ddb", "B": "#b39ddb", "C": "#b39ddb", "D": "#b39ddb", ">": "#d9d9d9", "<": "#d9d9d9", "^": "#d9d9d9", "v": "#d9d9d9" };
-const CORES_CAMADA = ["#d62728", "#1f77b4", "#2ca02c", "#9467bd", "#ff7f0e", "#17becf"];
-const LEGENDA = [["#3a3a3a","parede"],["#ffffff","chão (1)"],["#c8a26b","lama (3)"],["#7fb2d9","água (5)"],
-  ["#fff0a0","chave"],["#b39ddb","porta"],["#d9d9d9","esteira"],["#a5e3a5","bônus (−4)"],["#ffd54f","fonte (−2)"],
-  ["#7fc97f","início"],["#fdbf6f","saída"],["rgba(201,42,42,.55)","estado-armadilha"]];
-const $ = id => document.getElementById(id);
-const EMBUTIDO = typeof window.__DADOS__ !== "undefined";
-let mapa = null, perc = [], idx = 0, timer = null;
-
-$("legenda").innerHTML = LEGENDA.map(([c, t]) => `<span><i style="background:${c}"></i>${t}</span>`).join("");
-
-async function listarMapas() {
-  if (EMBUTIDO) return Object.keys(window.__DADOS__);
-  const r = await fetch("api/mapas"); return (await r.json()).mapas;
-}
-async function carregarMapa(nome) {
-  if (EMBUTIDO) return window.__DADOS__[nome];
-  const r = await fetch("api/mapa/" + encodeURIComponent(nome));
-  const d = await r.json();
-  mostrarServidor(d.servidor);
-  carregarHistorico();
-  return d;
-}
-async function carregarHistorico() {
-  const r = await fetch("api/historico");
-  if (!r.ok) return;  // sem banco configurado: o painel fica escondido
-  $("tbHist").innerHTML = (await r.json()).consultas.map(c =>
-    `<tr><td>${c.criado_em.slice(11, 19)}</td><td>${c.mapa.slice(0, 3)}</td><td>${c.algoritmo}</td>` +
-    `<td>${c.custo ?? c.status}</td><td>${c.instancia}</td></tr>`).join("");
-  $("cardHist").hidden = false;
-}
-function mostrarServidor(s) {
-  if (!s) { $("servidor").innerHTML = "modo estático (arquivo HTML)"; return; }
-  $("servidor").innerHTML = `servido por <b>${s.instancia}</b> · ${s.zona} · ${s.ip}`;
-}
-
-function cel() { return Math.max(8, Math.min(34, Math.floor(1100 / mapa.grade[0].length))); }
-
-function desenhar() {
-  const cv = $("cv"), ctx = cv.getContext("2d"), t = cel();
-  const L = mapa.grade.length, C = mapa.grade[0].length;
-  cv.width = C * t; cv.height = L * t;
-  const camada = $("selCamada").value;
-  const naCamada = new Set((mapa.camadas[camada] || []).map(([r, c]) => r + "," + c));
-  for (let r = 0; r < L; r++) for (let c = 0; c < C; c++) {
-    const ch = mapa.grade[r][c];
-    ctx.fillStyle = CORES[ch] || "#fff"; ctx.fillRect(c * t, r * t, t, t);
-    if (camada !== "todas" && ch !== "#" && !naCamada.has(r + "," + c)) { ctx.fillStyle = "rgba(0,0,0,.45)"; ctx.fillRect(c * t, r * t, t, t); }
-    ctx.strokeStyle = "rgba(0,0,0,.08)"; ctx.strokeRect(c * t, r * t, t, t);
-    if (t >= 14 && !"#.".includes(ch)) { ctx.fillStyle = "#222"; ctx.font = `bold ${Math.floor(t * .5)}px monospace`;
-      ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(ch, c * t + t / 2, r * t + t / 2); }
-  }
-  if ($("chkTrap").checked) {
-    ctx.fillStyle = "rgba(201,42,42,.55)";
-    for (const a of mapa.armadilhas) if (camada === "todas" || a.chaves === camada)
-      ctx.fillRect(a.coluna * t + t * .2, a.linha * t + t * .2, t * .6, t * .6);
-  }
-  ctx.lineWidth = Math.max(2, t / 5); ctx.lineCap = "round";
-  for (let i = 1; i <= idx && i < perc.length; i++) {
-    const a = perc[i - 1], b = perc[i];
-    ctx.strokeStyle = CORES_CAMADA[a.chaves.length % CORES_CAMADA.length];
-    ctx.beginPath(); ctx.moveTo(a.coluna * t + t / 2, a.linha * t + t / 2); ctx.lineTo(b.coluna * t + t / 2, b.linha * t + t / 2); ctx.stroke();
-  }
-  if (perc.length) {
-    const p = perc[Math.min(idx, perc.length - 1)];
-    ctx.fillStyle = "#e8590c"; ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(p.coluna * t + t / 2, p.linha * t + t / 2, t * .36, 0, 7); ctx.fill(); ctx.stroke();
-  }
-  painel();
-}
-
-function painel() {
-  const p = perc[Math.min(idx, perc.length - 1)];
-  $("dPasso").textContent = perc.length ? `${idx} / ${perc.length - 1}` : "–";
-  $("dRotulo").textContent = p ? p.estado : "–";
-  $("dPos").textContent = p ? `(${p.linha}, ${p.coluna}) '${p.casa}'` : "–";
-  $("dChaves").textContent = p ? (p.chaves || "-") : "–";
-  $("dBonus").textContent = p ? `{${p.bonus.join(",")}}` : "–";
-  $("dCusto").textContent = p ? p.custo_acumulado : "–";
-}
-
-function selecionarAlg() {
-  parar();
-  const r = mapa.algoritmos[$("selAlg").value];
-  perc = r.percurso || []; idx = 0;
-  $("dStatus").textContent = r.status; $("dStatus").className = "status " + r.status;
-  $("dPassos").textContent = r.passos ?? "–"; $("dCustoTot").textContent = r.custo ?? "–";
-  $("dMsg").textContent = r.mensagem || "";
-  desenhar();
-}
-
-async function selecionarMapa() {
-  parar();
-  mapa = await carregarMapa($("selMapa").value);
-  $("selAlg").innerHTML = Object.keys(mapa.algoritmos).map(a => `<option>${a}</option>`).join("");
-  $("selCamada").innerHTML = `<option value="todas">todas</option>` + Object.keys(mapa.camadas).map(k => `<option value="${k}">${k}</option>`).join("");
-  $("dEstados").textContent = mapa.estados; $("dArcos").textContent = mapa.arcos; $("dTeto").textContent = mapa.teto;
-  $("dTrap").textContent = mapa.armadilhas.length;
-  selecionarAlg();
-}
-
-function passo(d) { idx = Math.max(0, Math.min(perc.length - 1, idx + d)); desenhar(); }
-function parar() { clearInterval(timer); timer = null; $("btnPlay").textContent = "▶"; }
-function tocar() {
-  if (timer) return parar();
-  if (idx >= perc.length - 1) idx = 0;
-  $("btnPlay").textContent = "⏸";
-  const tick = () => { if (idx >= perc.length - 1) return parar(); passo(1); };
-  timer = setInterval(tick, 1000 / Number($("vel").value));
-}
-
-$("selMapa").onchange = selecionarMapa;
-$("selAlg").onchange = selecionarAlg;
-$("selCamada").onchange = desenhar;
-$("chkTrap").onchange = desenhar;
-$("vel").oninput = () => { if (timer) { parar(); tocar(); } };
-$("btnPlay").onclick = tocar;
-$("btnAvancar").onclick = () => { parar(); passo(1); };
-$("btnVoltar").onclick = () => { parar(); passo(-1); };
-$("btnInicio").onclick = () => { parar(); idx = 0; desenhar(); };
-document.addEventListener("keydown", e => {
-  if (e.key === "ArrowRight") $("btnAvancar").click();
-  if (e.key === "ArrowLeft") $("btnVoltar").click();
-  if (e.key === " ") { e.preventDefault(); tocar(); }
-});
-
-(async () => {
-  if (EMBUTIDO) mostrarServidor(null);
-  const nomes = await listarMapas();
-  $("selMapa").innerHTML = nomes.map(n => `<option>${n}</option>`).join("");
-  await selecionarMapa();
-})();
 </script>
+<script src="static/js/app.js" data-inline></script>
 </body>
 </html>

@@ -12,6 +12,12 @@ from .graph import Grafo, No
 
 INF = float("inf")
 
+# [IA] Claude – ganchos de observação para a visualização (não alteram o algoritmo)
+# bfs, dfs, dijkstra e bellman_ford aceitam `observador=None` (só por palavra-chave). Quando ele é
+# passado, cada função o chama com um dicionário {"t": evento, ...} nos pontos em que o algoritmo já
+# faz alguma coisa (tira da fila, olha um arco, relaxa...). As linhas `if observador: observador({...})`
+# só leem as variáveis; sem observador o código roda exatamente como antes. Quem usa: src/traco.py.
+
 
 class PesoNegativoError(ValueError):
     """Dijkstra não aceita arcos de peso negativo."""
@@ -45,19 +51,25 @@ class ResultadoBFS:
         return camadas
 
 
-def bfs(g: Grafo, origem: No) -> ResultadoBFS:
+def bfs(g: Grafo, origem: No, *, observador=None) -> ResultadoBFS:
     dist = {origem: 0}
     pai: dict[No, No | None] = {origem: None}
     ordem = [origem]
     fila = deque([origem])
+    # [IA] Claude – ganchos de observação para a visualização (não alteram o algoritmo)
+    if observador: observador({"t": "inicio", "v": origem, "d": 0})
     while fila:
         u = fila.popleft()
+        if observador: observador({"t": "sai", "v": u})
         for a in g.vizinhos(u):
+            if observador: observador({"t": "olha", "u": u, "v": a.destino, "novo": a.destino not in dist})
             if a.destino not in dist:
                 dist[a.destino] = dist[u] + 1
                 pai[a.destino] = u
                 ordem.append(a.destino)
                 fila.append(a.destino)
+                if observador: observador({"t": "entra", "v": a.destino, "d": dist[a.destino], "p": u})
+        if observador: observador({"t": "encerra", "v": u})
     return ResultadoBFS(dist, pai, ordem)
 
 
@@ -79,7 +91,7 @@ class ResultadoDFS:
         return self.classes["retorno"] > 0
 
 
-def dfs(g: Grafo, origem: No) -> ResultadoDFS:
+def dfs(g: Grafo, origem: No, *, observador=None) -> ResultadoDFS:
     """DFS iterativa (mapas grandes estourariam a recursão) que classifica cada arco
     em árvore, retorno, avanço ou cruzamento usando tempos de descoberta/término."""
     branco, cinza, preto = 0, 1, 2
@@ -98,6 +110,8 @@ def dfs(g: Grafo, origem: No) -> ResultadoDFS:
     cor[origem] = cinza
     res.descoberta[origem] = t
     t += 1
+    # [IA] Claude – ganchos de observação para a visualização (não alteram o algoritmo)
+    if observador: observador({"t": "descobre", "v": origem, "d": res.descoberta[origem], "p": None})
     pilha: list[tuple[No, int]] = [(origem, 0)]
     while pilha:
         u, i = pilha[-1]
@@ -108,17 +122,20 @@ def dfs(g: Grafo, origem: No) -> ResultadoDFS:
             tipo = classificar(u, v)
             res.classes[tipo] += 1
             res.arcos.append((u, v, tipo))
+            if observador: observador({"t": "olha", "u": u, "v": v, "tipo": tipo})
             if tipo == "arvore":
                 cor[v] = cinza
                 res.pai[v] = u
                 res.descoberta[v] = t
                 t += 1
+                if observador: observador({"t": "descobre", "v": v, "d": res.descoberta[v], "p": u})
                 pilha.append((v, 0))
         else:
             pilha.pop()
             cor[u] = preto
             res.termino[u] = t
             t += 1
+            if observador: observador({"t": "encerra", "v": u, "f": res.termino[u]})
     return res
 
 
@@ -133,7 +150,7 @@ class ResultadoCaminho:
         return caminho(self.pai, destino) if self.dist.get(destino, INF) < INF else []
 
 
-def dijkstra(g: Grafo, origem: No) -> ResultadoCaminho:
+def dijkstra(g: Grafo, origem: No, *, observador=None) -> ResultadoCaminho:
     negativos = [a for a in g.arcos() if a.peso < 0]
     if negativos:
         a = negativos[0]
@@ -148,12 +165,16 @@ def dijkstra(g: Grafo, origem: No) -> ResultadoCaminho:
     fechados: set[No] = set()
     while heap:
         d, _, u = heapq.heappop(heap)
+        # [IA] Claude – ganchos de observação para a visualização (não alteram o algoritmo)
         if u in fechados:
+            if observador: observador({"t": "descarta", "u": u, "d": d})
             continue
         fechados.add(u)
+        if observador: observador({"t": "fecha", "u": u, "d": d})
         for a in g.vizinhos(u):
             nd = d + a.peso
             if nd < dist.get(a.destino, INF):
+                if observador: observador({"t": "relaxa", "u": u, "v": a.destino, "antes": dist.get(a.destino, INF), "depois": nd})
                 dist[a.destino] = nd
                 pai[a.destino] = u
                 heapq.heappush(heap, (nd, next(desempate), a.destino))
@@ -161,7 +182,7 @@ def dijkstra(g: Grafo, origem: No) -> ResultadoCaminho:
 
 
 # ---------------------------------------------------------------- Bellman-Ford
-def bellman_ford(g: Grafo, origem: No) -> ResultadoCaminho:
+def bellman_ford(g: Grafo, origem: No, *, observador=None) -> ResultadoCaminho:
     """Relaxa |V|-1 vezes (com parada antecipada). Se a |V|-ésima rodada ainda relaxa
     algum arco, existe ciclo negativo alcançável: ele é reconstruído pelos pais."""
     arcos = list(g.arcos())
@@ -170,12 +191,17 @@ def bellman_ford(g: Grafo, origem: No) -> ResultadoCaminho:
     n = g.ordem
     for _ in range(n - 1):
         mudou = False
+        # [IA] Claude – ganchos de observação para a visualização (não alteram o algoritmo)
+        # (o número da passada e a contagem de relaxamentos são somados por quem observa: src/traco.py)
+        if observador: observador({"t": "passada"})
         for a in arcos:
             du = dist.get(a.origem, INF)
             if du < INF and du + a.peso < dist.get(a.destino, INF):
+                if observador: observador({"t": "relaxa", "u": a.origem, "v": a.destino, "antes": dist.get(a.destino, INF), "depois": du + a.peso})
                 dist[a.destino] = du + a.peso
                 pai[a.destino] = a.origem
                 mudou = True
+        if observador: observador({"t": "fimPassada", "mudou": mudou})
         if not mudou:
             return ResultadoCaminho(dist, pai)
 
@@ -192,6 +218,8 @@ def bellman_ford(g: Grafo, origem: No) -> ResultadoCaminho:
                 ciclo.append(y)
                 y = pai[y]
             ciclo.append(x)
+            # [IA] Claude – ganchos de observação para a visualização (não alteram o algoritmo)
+            if observador: observador({"t": "ciclo", "ciclo": ciclo[::-1], "u": a.origem, "v": a.destino})
             return ResultadoCaminho(dist, pai, ciclo_negativo=ciclo[::-1])
     return ResultadoCaminho(dist, pai)
 

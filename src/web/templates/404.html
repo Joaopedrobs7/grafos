@@ -1,0 +1,829 @@
+<!doctype html>
+<!-- [IA] Claude – rodada 2: paleta da masmorra (pedra quente) nos tokens e nas reservas.
+     [IA] Claude – página 404: as paredes do labirinto formam "404" e o aluno da CESAR School não acha a saída -->
+<html lang="pt-BR" class="sem-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1A1612">
+<title>Esse estado não existe | Labirinto com Chaves</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="preload" href="/static/fonts/PixelifySans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+  /* Fontes do projeto (servidas pelo Flask); se faltarem, as pilhas de sistema seguram o layout. */
+  @font-face {
+    font-family: "Pixelify Sans";
+    src: url("/static/fonts/PixelifySans-normal-latin.woff2") format("woff2");
+    font-weight: 400 700; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: "DM Sans";
+    src: url("/static/fonts/DMSans-normal-latin.woff2") format("woff2");
+    font-weight: 300 800; font-style: normal; font-display: swap;
+  }
+
+  :root {
+    --noite: #1A1612; --noite-2: #26201A; --noite-3: #3A3028;
+    --luar: #EFE6D8; --luar-fraco: #B5A895;
+    --cesar: #FF6002; --cesar-escuro: #DD4012; --cesar-claro: #FF7A2B;
+    --fonte-pixel: "Pixelify Sans", ui-rounded, system-ui, sans-serif;
+    --fonte-texto: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { background: var(--noite); }
+  body {
+    margin: 0; min-height: 100vh; min-height: 100dvh;
+    display: flex; flex-direction: column;
+    background: var(--noite); color: var(--luar);
+    font: 400 17px/1.6 var(--fonte-texto);
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  }
+  :focus-visible { outline: 2px solid var(--cesar); outline-offset: 2px; }
+
+  /* Céu estrelado: canvas em baixa resolução ampliado sem suavização */
+  #ceu {
+    position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
+    image-rendering: crisp-edges; image-rendering: pixelated;
+  }
+
+  .topo { width: 100%; max-width: 1240px; margin: 0 auto; padding: 18px 24px 12px; }
+  .marca {
+    display: inline-flex; align-items: center; gap: 10px;
+    color: var(--luar); text-decoration: none;
+    font: 600 18px/1 var(--fonte-pixel);
+  }
+  .marca canvas { width: 32px; height: 26px; image-rendering: crisp-edges; image-rendering: pixelated; }
+  .marca:hover { color: #fff; }
+
+  main {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 0 24px 40px; text-align: center;
+  }
+
+  .cena { margin: 0; display: flex; flex-direction: column; align-items: center; max-width: 100%; }
+  #labirinto {
+    display: block; max-width: 100%;
+    image-rendering: crisp-edges; image-rendering: pixelated;
+    cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .legenda {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 20px;
+    width: 100%; margin-top: 14px;
+    font-size: 14px; line-height: 1.5; color: var(--luar-fraco); text-align: left;
+  }
+  /* rótulo do estado do aluno, no mesmo formato do projeto: (linha,coluna)|chaves|{bônus} */
+  .estado {
+    font: 500 15px/1 var(--fonte-pixel); color: var(--luar);
+    padding: 7px 10px 6px; background: var(--noite-2);
+    box-shadow: inset 0 0 0 2px var(--noite-3);
+    clip-path: polygon(0 4px, 4px 4px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+      100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%,
+      4px calc(100% - 4px), 0 calc(100% - 4px));
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .estado__sep { margin-inline: 0.22em; color: #8A7660; }
+
+  h1 {
+    margin: 36px 0 0; max-width: 18ch;
+    font: 700 clamp(32px, 3.4vw + 14px, 58px)/1 var(--fonte-pixel);
+    letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .texto { margin: 18px 0 0; max-width: 46ch; color: var(--luar-fraco); text-wrap: pretty; }
+  .destino { white-space: nowrap; }                 /* o ponto final não fica sozinho na linha */
+  .caminho {
+    display: inline-block; max-width: calc(100% - 8px); vertical-align: bottom;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    padding: 2px 8px 1px; margin: 0 2px;
+    font: 500 0.94em/1.35 var(--fonte-pixel); color: var(--luar);
+    background: var(--noite-2); box-shadow: inset 0 0 0 2px var(--noite-3);
+    clip-path: polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px,
+      100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%,
+      2px calc(100% - 2px), 0 calc(100% - 2px));
+  }
+
+  /* Botão em pixel art: o recorte em degraus fica nos pseudo-elementos, então o foco não é cortado */
+  .botao {
+    position: relative; isolation: isolate;
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 56px; margin-top: 28px; padding: 0 28px 4px;
+    color: var(--noite); text-decoration: none;
+    font: 600 18px/1 var(--fonte-pixel);
+    transition: transform 80ms steps(2, end);
+  }
+  .botao::before, .botao::after {
+    content: ""; position: absolute; z-index: -1;
+    clip-path: polygon(0 4px, 4px 4px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+      100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%,
+      4px calc(100% - 4px), 0 calc(100% - 4px));
+  }
+  .botao::before { inset: 0; background: var(--cesar-escuro); }                       /* aba de baixo */
+  .botao::after { inset: 0 0 4px; background: var(--cesar);
+                  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3); }                 /* face */
+  .botao:hover { transform: translateY(-2px); }
+  .botao:hover::after { background: var(--cesar-claro); }
+  .botao:active { transform: translateY(2px); }
+  .botao:active::after { inset: 0 0 2px; }
+  .botao:focus-visible { outline-offset: 4px; }
+
+  .sem-js .cena { display: none; }
+  .sem-js h1 { margin-top: 0; }
+
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    .topo { padding: 16px 20px; }
+    main { padding: 0 20px 48px; }
+    h1 { margin-top: 36px; }
+    .legenda { justify-content: center; text-align: center; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .botao, .botao:hover, .botao:active { transition: none; transform: none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="ceu" aria-hidden="true"></canvas>
+
+<header class="topo">
+  <a class="marca" href="/"><canvas id="marca-aluno" width="16" height="13" aria-hidden="true"></canvas>Labirinto com Chaves</a>
+</header>
+
+<main>
+  <figure class="cena">
+    <canvas id="labirinto" role="img" tabindex="0"
+      aria-label="Labirinto em pixel art cujas paredes formam o número 404. Um aluno da CESAR School procura a saída, que ficou presa dentro do zero, sem nenhum caminho até ela."></canvas>
+    <figcaption class="legenda">
+      <span id="dica">Clique no chão ou use as setas para mover o aluno.</span>
+      <span class="estado" id="estado" aria-hidden="true"></span>
+    </figcaption>
+  </figure>
+
+  <h1>Esse estado não existe no grafo</h1>
+  <p class="texto">Nenhum arco leva até <span class="destino"><code class="caminho" id="caminho">este endereço</code>.</span> Volte ao início e escolha um mapa.</p>
+  <a class="botao" href="/">Voltar ao início</a>
+</main>
+
+<script src="/static/js/pixel.js"></script>
+<script>
+(function () {
+  "use strict";
+  var doc = document;
+  doc.documentElement.classList.remove("sem-js");
+
+  /* ------------------------------------------------------------ 1. caminho pedido (só como texto) */
+  (function () {
+    var el = doc.getElementById("caminho"), texto = location.pathname || "/";
+    try { texto = decodeURIComponent(texto); } catch (e) { /* URL malformada: mostra como veio */ }
+    // caminhos longos: reticências no meio, preservando o começo e o fim (o completo fica no title)
+    if (texto.length > 40) { el.title = texto; texto = texto.slice(0, 22) + "…" + texto.slice(-17); }
+    el.textContent = texto;
+  })();
+
+  /* ------------------------------------------------------------ 2. paleta e utilitários de pixel */
+  var PX = (window.LAB && window.LAB.pixel) || null;       // pixel.js do site, quando carregou
+  var PAL = (PX && PX.PALETTE) || {}, TIL = PAL.tiles || {};
+  function hex(v, padrao) { return typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v) ? v : padrao; }
+  var COR = {
+    noite: hex(PAL.noite, "#1A1612"), noite2: hex(PAL.noite2, "#26201A"),
+    luar: hex(PAL.luar, "#EFE6D8"), luarFraco: hex(PAL.luarFraco, "#B5A895"),
+    cesar: hex(PAL.cesar, "#FF6002"), ok: hex(PAL.ok, "#3FCF8E"),
+    chao: hex(TIL.chao, "#4A423A"), chaoAlt: hex(TIL.chaoAlt, "#443C35"),
+    parede: hex(TIL.parede, "#3C342D"), paredeTopo: hex(TIL.paredeTopo, "#7A6C5E")
+  };
+  // mistura com branco (f > 0) ou preto (f < 0): sombras e luzes saem da mesma cor base
+  function tom(h, f) {
+    var n = parseInt(h.slice(1), 16), alvo = f < 0 ? 0 : 255, k = Math.abs(f), s = "#";
+    [n >> 16, n >> 8 & 255, n & 255].forEach(function (v) {
+      s += ("0" + Math.round(v + (alvo - v) * k).toString(16)).slice(-2);
+    });
+    return s;
+  }
+  function tela(w, h, pintar) {
+    var c = doc.createElement("canvas"); c.width = w; c.height = h;
+    var x = c.getContext("2d"); x.imageSmoothingEnabled = false; pintar(x, w, h);
+    return c;
+  }
+  function sorteio(semente) {                          // gerador determinístico (texturas estáveis)
+    return function () { semente = (semente * 1664525 + 1013904223) >>> 0; return semente / 4294967296; };
+  }
+  function pintarMatriz(x, linhas, cores, ox, oy) {
+    for (var r = 0; r < linhas.length; r++) for (var c = 0; c < linhas[r].length; c++) {
+      var ch = linhas[r][c];
+      if (ch !== "." && cores[ch]) { x.fillStyle = cores[ch]; x.fillRect(ox + c, oy + r, 1, 1); }
+    }
+  }
+
+  /* ------------------------------------------------------------ 3. o aluno (sprite do site ou reserva) */
+  // Reserva 16×24 usada só se /static/js/pixel.js não carregar: cabelo cacheado, óculos redondos,
+  // moletom grafite com a marca da CESAR, fones no pescoço, mochila, jeans e tênis brancos.
+  var RESERVA = {
+    front: ["....kk.kk.kk....", "...khHkhhkhhk...", "..khHhhhhHHhhk..", ".khHhhHhhhhhhhk.", ".khhhhhhHhhHhhk.",
+            ".khhhshsshshhhk.", ".khsggssssggshk.", ".khgLLggggLLghk.", ".khsggssssggshk.", ".khSssssssssShk.",
+            "..kSssssssssSk..", "...kSSssssSSk...", "...kpPSSSSPpk...", ".kCCdccccccdCCk.", ".kCCccOwwOccCCk.",
+            ".kCCcOOOOOOcCCk.", ".kCCccOOOOccCCk.", ".kCCccccccccCCk.", ".kssCCCCCCCCssk.", "...kjjjjjjjjk...",
+            "...kjjJkkJjjk...", "...kjjJkkJjjk...", "...knnnkknnnk...", "...kNNNkkNNNk..."],
+    back:  ["....kk.kk.kk....", "...khHkhhkhhk...", "..khHhhhhHHhhk..", ".khHhhHhhhhhhhk.", ".khhhhHhHhhHhhk.",
+            ".khhhhhhhhhhhhk.", ".khhhhhhhhHhhhk.", ".khhHhhhhhhhhhk.", ".khhhhhhhhhhhhk.", ".khhhhhhhhhhhhk.",
+            "..khhhhhhhhhhk..", "...khhSSSShhk...", "...kpPSSSSPpk...", ".kCCdkkkkkkdCCk.", ".kCCkbbbbbbkCCk.",
+            ".kCCkbBBBBbkCCk.", ".kCCkbbbbbbkCCk.", ".kCCkbbbbbbkCCk.", ".kssCkkkkkkCssk.", "...kjjjjjjjjk...",
+            "...kjjJkkJjjk...", "...kjjJkkJjjk...", "...knnnkknnnk...", "...kNNNkkNNNk..."],
+    side:  ["....kk.kk.......", "...khhkhhkk.....", "..khhhhhHhhk....", "..khhHhhhhhhk...", ".khhhhhhhhhhk...",
+            ".khhhhhhhhshk...", ".khhhhhssgggsk..", ".khhhhSSgLLgsk..", ".khhhhSssgggssk.", "..khhhhssssssk..",
+            "..khhhsssssmk...", "...khSSssssk....", "....kpPSSk......", "...kbbCCdcck....", "...kbbCCcccck...",
+            "...kbBCCccOOk...", "...kbbCCccOOk...", "...kbbCCcccck...", "....kkCsCCCk....", ".....kjjjjk.....",
+            ".....kjjJjk.....", ".....kjjJjk.....", ".....knnnnnk....", ".....kNNNNNk...."],
+    passoLado: {
+      1: [".....kjjjjk.....", "....kjjkJjk.....", "...kjjk.kJjk....", "..knnnk.knnnnk..", "..kNNNk.kNNNNk.."],
+      3: [".....kjjjjk.....", ".....kjJkjjk....", "....kJjk.kjjk...", "...knnnnkknnnk..", "...kNNNNkkNNNk.."]
+    },
+    cores: { k: "#15121F", h: "#2B1D18", H: "#4E372D", s: "#9A6440", S: "#76482C", g: "#15121F", L: "#CFE0F5",
+             m: "#6B3524", c: "#2A2838", C: "#1E1C2A", d: "#3B3850", O: "#FF6002", w: "#FFFFFF", p: "#9A97B5",
+             P: "#55526E", j: "#3D5A99", J: "#2C4277", n: "#F1F0F7", N: "#B7B4CC", b: "#6B4433", B: "#8A5B45" }
+  };
+  function spriteReserva(vista, quadro) {
+    var linhas = RESERVA[vista].slice();
+    if (quadro === 1 || quadro === 3) {
+      if (vista === "side") linhas = linhas.slice(0, 19).concat(RESERVA.passoLado[quadro]);
+      else {                                            // frente/costas: uma perna sobe 1 px
+        var c0 = quadro === 1 ? 3 : 8, base = linhas.slice();
+        for (var r = 20; r < 24; r++) {
+          var de = r < 23 ? base[r + 1] : "................";
+          linhas[r] = base[r].slice(0, c0) + de.slice(c0, c0 + 5) + base[r].slice(c0 + 5);
+        }
+      }
+    }
+    return tela(16, 24, function (x) { pintarMatriz(x, linhas, RESERVA.cores, 0, 0); });
+  }
+  var spritesCache = {};
+  function sprite(vista, quadro) {
+    var chave = vista + quadro;
+    if (spritesCache[chave]) return spritesCache[chave];
+    var img = null;
+    if (PX && typeof PX.studentSprite === "function") {
+      try { img = PX.studentSprite(vista, quadro, 1); } catch (e) { img = null; }
+      if ((!img || !img.width) && quadro === "idle") {
+        try { img = PX.studentSprite(vista, 0, 1); } catch (e) { img = null; }
+      }
+    }
+    if (!img || !img.width) img = spriteReserva(vista, quadro === "idle" ? 0 : quadro);
+    return (spritesCache[chave] = img);
+  }
+  // O perfil do sprite olha para o leste (L); para oeste (O) ele é espelhado.
+  var VISTA = { N: "back", S: "front", L: "side", O: "side" };
+
+  /* ------------------------------------------------------------ 4. o labirinto "404" */
+  var T = 16, ALT = 12, TOPO = 30, BASE = 8;   // casa, altura da face da parede, folga no alto, espessura da ilha
+  var DIGITOS = {
+    "4": ["#...#", "#...#", "#...#", "#####", "....#", "....#", "....#"],
+    "0": [".###.", "#...#", "#...#", "#...#", "#...#", "#...#", ".###."]
+  };
+  var DIRS = [{ m: "N", dr: -1, dc: 0 }, { m: "L", dr: 0, dc: 1 }, { m: "S", dr: 1, dc: 0 }, { m: "O", dr: 0, dc: -1 }];
+
+  function montarLabirinto(margem, vao) {
+    var cols = margem * 2 + 15 + vao * 2, rows = margem * 2 + 7, g = [], r, c;
+    for (r = 0; r < rows; r++) { g.push([]); for (c = 0; c < cols; c++) g[r].push("."); }
+    var origens = [margem, margem + 5 + vao, margem + 10 + vao * 2];
+    "404".split("").forEach(function (d, i) {
+      DIGITOS[d].forEach(function (linha, dr) {
+        for (var dc = 0; dc < 5; dc++) if (linha[dc] === "#") g[margem + dr][origens[i] + dc] = "#";
+      });
+    });
+    for (r = 1; r <= 5; r++) for (c = 1; c <= 3; c++) g[margem + r][origens[1] + c] = "i"; // miolo do zero
+    var saida = { r: margem + 3, c: origens[1] + 2 }, inicio = { r: margem + 3, c: 0 };
+    g[saida.r][saida.c] = "G";
+    g[inicio.r][inicio.c] = "S";
+    g[0][0] = g[0][cols - 1] = g[rows - 1][0] = g[rows - 1][cols - 1] = "x";             // cantos da ilha
+    var meio0 = origens[1] + 2;
+    return {
+      cols: cols, rows: rows, g: g, saida: saida, inicio: inicio,
+      // ronda automática: os dois becos sem saída (o vão de cada 4) e os dois lados do zero
+      roteiro: [
+        { r: margem + 1, c: origens[0] + 2, olhar: "S" },
+        { r: margem + 7, c: meio0, olhar: "N" },
+        { r: margem + 1, c: origens[2] + 2, olhar: "S" },
+        { r: margem - 1, c: meio0, olhar: "S" }
+      ]
+    };
+  }
+  var LAB404 = null;
+  function celula(r, c) { return r < 0 || c < 0 || r >= LAB404.rows || c >= LAB404.cols ? "x" : LAB404.g[r][c]; }
+  function andavel(r, c) { var ch = celula(r, c); return ch !== "#" && ch !== "x"; }
+
+  // Passeio guloso (só enfeite da página, não é algoritmo do projeto): a cada passo o aluno vai para a casa
+  // vizinha ainda não pisada que fica mais perto do destino (distância de Manhattan). Sem fila, sem pilha:
+  // se ele se encurrala, para na casa mais próxima do destino a que chegou e fica em dúvida.
+  function manhattan(a, b) { return Math.abs(a.r - b.r) + Math.abs(a.c - b.c); }
+  function passeio(de, alvo) {
+    var pisadas = {}, u = { r: de.r, c: de.c }, rota = [], melhor = 0, dMelhor = manhattan(u, alvo);
+    var limite = 4 * dMelhor + 12;
+    pisadas[u.r + "," + u.c] = true;
+    for (var n = 0; n < limite && (u.r !== alvo.r || u.c !== alvo.c); n++) {
+      var prox = null, dProx = Infinity;
+      for (var k = 0; k < 4; k++) {
+        var v = { r: u.r + DIRS[k].dr, c: u.c + DIRS[k].dc };
+        if (!andavel(v.r, v.c) || pisadas[v.r + "," + v.c]) continue;
+        var dv = manhattan(v, alvo);
+        if (dv < dProx) { prox = v; dProx = dv; }
+      }
+      if (!prox) break;
+      pisadas[prox.r + "," + prox.c] = true;
+      rota.push(prox); u = prox;
+      if (dProx < dMelhor) { dMelhor = dProx; melhor = rota.length; }
+    }
+    rota = rota.slice(0, melhor);                       // corta a volta inútil depois do ponto mais próximo
+    return { rota: rota, chegou: dMelhor === 0 };
+  }
+
+  /* ------------------------------------------------------------ 5. texturas (procedurais, sem imagens) */
+  var texturas = {};
+  function texChao(v) {
+    var chave = "chao" + v;
+    if (texturas[chave]) return texturas[chave];
+    if (PX && typeof PX.tileTexture === "function") {
+      try { var t = PX.tileTexture(".", v); if (t && t.width) return (texturas[chave] = t); } catch (e) { /* reserva */ }
+    }
+    return (texturas[chave] = tela(T, T, function (x) {
+      var rnd = sorteio(v * 7919 + 17), base = v % 2 ? COR.chaoAlt : COR.chao;
+      x.fillStyle = base; x.fillRect(0, 0, T, T);
+      x.fillStyle = tom(base, 0.07); x.fillRect(0, 0, T - 1, 1); x.fillRect(0, 0, 1, T - 1);
+      x.fillStyle = tom(base, -0.28); x.fillRect(0, T - 1, T, 1); x.fillRect(T - 1, 0, 1, T);
+      for (var i = 0; i < 5; i++) {
+        x.fillStyle = tom(base, rnd() < 0.5 ? 0.09 : -0.14);
+        x.fillRect(2 + (rnd() * 11 | 0), 2 + (rnd() * 11 | 0), 1, 1);
+      }
+      if (v === 3) { x.fillStyle = tom(base, -0.22); x.fillRect(4, 9, 3, 1); x.fillRect(7, 8, 2, 1); x.fillRect(9, 7, 1, 1); }
+    }));
+  }
+  function texPad(tipo) {
+    var chave = "pad" + tipo;
+    if (texturas[chave]) return texturas[chave];
+    if (PX && typeof PX.tileTexture === "function") {
+      try { var t = PX.tileTexture(tipo, 0); if (t && t.width) return (texturas[chave] = t); } catch (e) { /* reserva */ }
+    }
+    return (texturas[chave] = tela(T, T, function (x) {
+      x.drawImage(texChao(0), 0, 0);
+      var cor = tipo === "S" ? COR.cesar : COR.ok;
+      for (var y = 0; y < T; y++) for (var c = 0; c < T; c++) {
+        var dx = (c - 7.5) / 7, dy = (y - 7.5) / 6, d = Math.sqrt(dx * dx + dy * dy);
+        // anéis concêntricos (o motivo da marca da CESAR no início; um portal na saída)
+        var anel = d <= 1 && (d > 0.78 || (d > 0.42 && d <= 0.6) || d <= 0.2);
+        if (anel) { x.fillStyle = d > 0.78 ? tom(cor, -0.25) : cor; x.fillRect(c, y, 1, 1); }
+      }
+    }));
+  }
+  function texTijolos(v) {
+    if (!PX || typeof PX.wallTexture !== "function") return null;
+    try { var t = PX.wallTexture("side", v); return t && t.width ? t : null; } catch (e) { return null; }
+  }
+  // bloco de parede (topo + face) com bordas só onde não há parede vizinha: o "404" lê como um sólido
+  function blocoParede(r, c) {
+    var n = celula(r - 1, c) === "#", o = celula(r, c - 1) === "#", l = celula(r, c + 1) === "#";
+    var rnd = sorteio(r * 131 + c * 31 + 7);
+    return tela(T, T + ALT, function (x) {
+      var topo = COR.paredeTopo, face = COR.parede, i;
+      x.fillStyle = topo; x.fillRect(0, 0, T, T);
+      for (i = 0; i < 3; i++) { x.fillStyle = tom(topo, rnd() < 0.5 ? 0.08 : -0.08); x.fillRect(2 + (rnd() * 12 | 0), 2 + (rnd() * 12 | 0), 1, 1); }
+      if (!n) { x.fillStyle = tom(topo, 0.32); x.fillRect(0, 0, T, 1); x.fillStyle = tom(topo, 0.14); x.fillRect(0, 1, T, 1); }
+      if (!o) { x.fillStyle = tom(topo, 0.22); x.fillRect(0, n ? 0 : 1, 1, T - (n ? 0 : 1)); }
+      if (!l) { x.fillStyle = tom(topo, -0.22); x.fillRect(T - 1, 0, 1, T); }
+      // face sul em tijolos: a textura do pixel.js (a mesma do labirinto 3D) ou a reserva
+      var tijolos = texTijolos((r + c) % 2);
+      if (tijolos) x.drawImage(tijolos, 0, 0, T, ALT - 1, 0, T, T, ALT - 1);
+      else {
+        x.fillStyle = face; x.fillRect(0, T, T, ALT);
+        x.fillStyle = tom(face, -0.32);
+        for (var y = 0; y < ALT; y += 4) {
+          x.fillRect(0, T + y + 3, T, 1);
+          for (var bx = (y / 4) % 2 ? 4 : 0; bx < T; bx += 8) x.fillRect(bx, T + y, 1, 3);
+        }
+        x.fillStyle = tom(face, 0.18); x.fillRect(0, T, T, 1);
+      }
+      x.fillStyle = tom(face, -0.55); x.fillRect(0, T + ALT - 1, T, 1);
+      if (!o) { x.fillStyle = tom(face, 0.1); x.fillRect(0, T + 1, 1, ALT - 2); }
+      if (!l) { x.fillStyle = tom(face, -0.4); x.fillRect(T - 1, T, 1, ALT); }
+    });
+  }
+
+  /* ------------------------------------------------------------ 6. cena: canvas, camadas fixas e estado */
+  var canvas = doc.getElementById("labirinto"), ctx = canvas.getContext("2d");
+  var camadaChao = null, blocos = [], W = 0, HT = 0, layout = "";
+  var aluno = null, particulas = [], pegadas = [];
+  var modo = "auto", proximaPartida = 0, ultimoToque = -99, passoRoteiro = 0, agora = 0;
+  var DUR_PASSO = 0.2;                                // 5 casas por segundo
+  var mqReduzido = matchMedia("(prefers-reduced-motion: reduce)"), reduzido = mqReduzido.matches;
+
+  function pintarChao() {
+    var L = LAB404;
+    camadaChao = tela(W, HT, function (x) {
+      var r, c, ch, px, py;
+      for (r = 0; r < L.rows; r++) for (c = 0; c < L.cols; c++) {
+        ch = L.g[r][c]; px = c * T; py = TOPO + r * T;
+        if (ch === "x" || ch === "#") continue;
+        x.drawImage(ch === "S" || ch === "G" ? texPad(ch) : texChao(variacao(r, c)), px, py);
+      }
+      // é noite: o chão recua para as paredes (lidas como o "404") ficarem na frente
+      // (a laje do pixel.js é clara, feita para o 3D com luz; a reserva já nasce escura)
+      x.fillStyle = PX && typeof PX.tileTexture === "function" ? "rgba(16, 12, 9, 0.42)" : "rgba(16, 12, 9, 0.12)";
+      for (r = 0; r < L.rows; r++) for (c = 0; c < L.cols; c++) {
+        ch = L.g[r][c];
+        if (ch === "x" || ch === "#" || ch === "S" || ch === "G") continue;   // as placas brilham
+        x.fillRect(c * T, TOPO + r * T, T, T);
+      }
+      // aresta da ilha pega a luz da lua (norte e laterais)
+      x.fillStyle = "rgba(242, 232, 216, 0.16)";
+      for (r = 0; r < L.rows; r++) for (c = 0; c < L.cols; c++) {
+        if (L.g[r][c] === "x") continue;
+        if (celula(r - 1, c) === "x") x.fillRect(c * T, TOPO + r * T, T, 1);
+        if (celula(r, c - 1) === "x") x.fillRect(c * T, TOPO + r * T, 1, T);
+        if (celula(r, c + 1) === "x") x.fillRect(c * T + T - 1, TOPO + r * T, 1, T);
+      }
+      // o miolo do zero recebe a luz verde da saída
+      x.fillStyle = "rgba(63, 207, 142, 0.12)";
+      for (r = 0; r < L.rows; r++) for (c = 0; c < L.cols; c++) {
+        if (L.g[r][c] === "i") x.fillRect(c * T, TOPO + r * T, T, T);
+      }
+      // espessura da ilha (face sul do chão), por baixo de cada casa sem casa embaixo
+      for (r = 0; r < L.rows; r++) for (c = 0; c < L.cols; c++) {
+        if (L.g[r][c] === "x" || celula(r + 1, c) !== "x") continue;
+        px = c * T; py = TOPO + (r + 1) * T;
+        x.fillStyle = tom(COR.chao, -0.42); x.fillRect(px, py, T, BASE);
+        x.fillStyle = tom(COR.chao, -0.18); x.fillRect(px, py, T, 1);
+        x.fillStyle = tom(COR.chao, -0.6); x.fillRect(px, py + BASE - 1, T, 1);
+        x.fillRect(px + ((c % 2) ? 5 : 11), py + 1, 1, BASE - 2);
+      }
+      // sombras: a lua vem do noroeste, então cada parede escurece o chão a leste e ao sul
+      x.fillStyle = "rgba(10, 8, 6, 0.38)";
+      for (r = 0; r < L.rows; r++) for (c = 0; c < L.cols; c++) {
+        if (L.g[r][c] !== "#") continue;
+        px = c * T; py = TOPO + r * T;
+        if (andavelOuMiolo(r, c + 1)) {
+          x.fillRect(px + T, py, 4, T);
+          for (var y = 0; y < T; y += 2) x.fillRect(px + T + 4, py + y, 1, 1);
+        }
+        if (andavelOuMiolo(r + 1, c)) {
+          x.fillRect(px, py + T, T, 2);
+          for (var xx = 0; xx < T; xx += 2) x.fillRect(px + xx, py + T + 2, 1, 1);
+        }
+      }
+    });
+  }
+  function variacao(r, c) {                           // 60% lisa, o resto com detalhe
+    var h = (r * 73856093) ^ (c * 19349663), v = ((h >>> 0) % 10);
+    return v < 6 ? 0 : v < 8 ? 1 : v < 9 ? 2 : 3;
+  }
+  function andavelOuMiolo(r, c) { var ch = celula(r, c); return ch !== "#" && ch !== "x"; }
+
+  function medir() {
+    var main = doc.querySelector("main"), estilo = getComputedStyle(main);
+    var largura = Math.min(main.clientWidth - parseFloat(estilo.paddingLeft) - parseFloat(estilo.paddingRight), 1180);
+    var novo = largura < 560 ? "estreito" : "largo";
+    if (novo !== layout) {
+      layout = novo;
+      LAB404 = novo === "largo" ? montarLabirinto(2, 2) : montarLabirinto(1, 1);
+      W = LAB404.cols * T; HT = TOPO + LAB404.rows * T + BASE;
+      canvas.width = W; canvas.height = HT;
+      ctx.imageSmoothingEnabled = false;
+      blocos = LAB404.g.map(function (linha, r) {
+        return linha.map(function (ch, c) { return ch === "#" ? blocoParede(r, c) : null; });
+      });
+      pintarChao();
+      reiniciarAluno();
+    }
+    // escala em pixels inteiros de tela (pixel art nítida); no celular de alta densidade a fração
+    // não aparece e o labirinto ganha a largura toda
+    var dpr = window.devicePixelRatio || 1;
+    var alturaMax = Math.max(220, window.innerHeight * 0.56);
+    var k = Math.min(Math.max(largura, 200) / W, alturaMax / HT) * dpr;
+    if (!(layout === "estreito" && dpr >= 2)) k = Math.max(1, Math.floor(k));
+    canvas.style.width = (W * k / dpr) + "px";
+    canvas.style.height = (HT * k / dpr) + "px";
+  }
+
+  function reiniciarAluno() {
+    var L = LAB404, beco = L.roteiro[0];
+    particulas = []; pegadas = []; passoRoteiro = 0; modo = "auto";
+    aluno = { r: L.inicio.r, c: L.inicio.c, rumo: "L", rota: [], prog: 0, tAndar: 0, balao: null, queda: null, aoChegar: null };
+    if (reduzido) {                                   // quadro parado: no beco do primeiro 4, em dúvida
+      aluno.r = beco.r; aluno.c = beco.c; aluno.rumo = beco.olhar;
+      aluno.balao = { t0: -10, ate: Infinity }; passoRoteiro = 1;
+    } else {
+      aluno.queda = { t0: agora, dur: 0.5 };
+      proximaPartida = agora + 1.1;
+    }
+    atualizarRotulo();
+  }
+
+  /* ------------------------------------------------------------ 7. movimento */
+  function rumoEntre(a, b) { return b.r < a.r ? "N" : b.r > a.r ? "S" : b.c > a.c ? "L" : "O"; }
+  function casaBase() { return aluno.rota.length ? aluno.rota[0] : { r: aluno.r, c: aluno.c }; }
+
+  // leva o aluno até a casa pedida; se ela não é alcançável, para na mais próxima e fica em dúvida
+  function irPara(alvo, opcoes) {
+    var base = casaBase(), ida = passeio(base, alvo);
+    var alcancavel = ida.chegou;
+    var destino = ida.rota.length ? ida.rota[ida.rota.length - 1] : base;
+    var olhar = opcoes.olhar || (alcancavel ? null : rumoAte(destino, alvo));
+    var duvida = opcoes.duvida || !alcancavel;
+    aluno.balao = null;
+    if (reduzido) {
+      aluno.r = destino.r; aluno.c = destino.c; aluno.rota = []; aluno.prog = 0;
+      if (olhar) aluno.rumo = olhar;
+      aluno.balao = duvida ? { t0: -10, ate: Infinity } : null;
+      atualizarRotulo(); desenhar(0);
+      return;
+    }
+    var atual = aluno.rota.length ? [aluno.rota[0]] : [];
+    aluno.rota = atual.concat(ida.rota);
+    if (!atual.length && aluno.rota.length) { aluno.rumo = rumoEntre(aluno, aluno.rota[0]); aluno.prog = 0; }
+    aluno.aoChegar = function () {
+      if (olhar) aluno.rumo = olhar;
+      if (duvida) aluno.balao = { t0: agora, ate: agora + 2.6 };
+    };
+    if (!aluno.rota.length) aluno.aoChegar();
+  }
+  function rumoAte(de, para) {
+    var dr = para.r - de.r, dc = para.c - de.c;
+    if (!dr && !dc) return null;
+    return Math.abs(dr) >= Math.abs(dc) ? (dr < 0 ? "N" : "S") : (dc > 0 ? "L" : "O");
+  }
+
+  function seguirRoteiro() {
+    var alvo = LAB404.roteiro[passoRoteiro % LAB404.roteiro.length];
+    passoRoteiro++;
+    irPara(alvo, { olhar: alvo.olhar, duvida: true });
+    proximaPartida = Infinity;                         // a próxima parada é marcada ao chegar
+  }
+
+  function deixarPegada(r, c, rumo) {
+    pegadas.push({ r: r, c: c, rumo: rumo, t0: agora, pe: pegadas.length % 2 });
+    if (pegadas.length > 40) pegadas.shift();
+  }
+
+  function atualizar(dt) {
+    var a = aluno;
+    if (a.queda) {
+      if (agora - a.queda.t0 >= a.queda.dur) {
+        a.queda = null; a.pouso = agora;
+        poeira(a.c * T + T / 2, TOPO + a.r * T + T - 3);
+      }
+      return;
+    }
+    if (a.rota.length) {
+      a.tAndar += dt; a.prog += dt / DUR_PASSO;
+      while (a.prog >= 1 && a.rota.length) {
+        var prox = a.rota.shift();
+        deixarPegada(a.r, a.c, a.rumo);
+        a.r = prox.r; a.c = prox.c; a.prog -= 1;
+        if (a.rota.length) a.rumo = rumoEntre(a, a.rota[0]);
+        atualizarRotulo();
+      }
+      if (!a.rota.length) {
+        a.prog = 0;
+        if (a.aoChegar) { var f = a.aoChegar; a.aoChegar = null; f(); }
+        if (modo === "auto") proximaPartida = agora + 3.1;
+      }
+    } else if (modo === "auto" && agora >= proximaPartida) {
+      seguirRoteiro();
+    } else if (modo === "usuario" && agora - ultimoToque > 8) {
+      modo = "auto"; proximaPartida = agora + 0.4;
+    }
+    // faíscas subindo no feixe da saída
+    if (Math.random() < dt * 9) {
+      var s = LAB404.saida;
+      particulas.push({ x: s.c * T + 5 + Math.random() * 6, y: TOPO + s.r * T + 10, vx: 0, vy: -14 - Math.random() * 10,
+                        g: 0, vida: 1.6, t0: agora, cor: Math.random() < 0.4 ? "#FFFFFF" : tom(COR.ok, 0.4) });
+    }
+    particulas = particulas.filter(function (p) {
+      var idade = agora - p.t0;
+      p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+      return idade < p.vida;
+    });
+  }
+  function poeira(x, y) {
+    for (var i = 0; i < 8; i++) {
+      var lado = i % 2 ? 1 : -1;
+      particulas.push({ x: x + lado * 4, y: y - 1, vx: lado * (14 + Math.random() * 18), vy: -10 - Math.random() * 14,
+                        g: 60, vida: 0.45, t0: agora, cor: tom(COR.chao, 0.35) });
+    }
+  }
+
+  function atualizarRotulo() {
+    // o "|" da Pixelify Sans lembra um "l": as barras ganham respiro e um tom mais apagado
+    var est = doc.getElementById("estado");
+    est.textContent = "(" + aluno.r + "," + aluno.c + ")";
+    ["-", "{}"].forEach(function (parte) {
+      var sep = doc.createElement("span");
+      sep.className = "estado__sep";
+      sep.textContent = "|";
+      est.appendChild(sep);
+      est.appendChild(doc.createTextNode(parte));
+    });
+  }
+
+  /* ------------------------------------------------------------ 8. desenho */
+  var BALAO = ["..kkkkkkkkk..", ".kwwwwwwwwwk.", "kwwwwOOOwwwwk", "kwwwOwwwOwwwk", "kwwwwwwwOwwwk",
+               "kwwwwwwOwwwwk", "kwwwwwOwwwwwk", "kwwwwwwwwwwwk", "kwwwwwOwwwwwk", ".kWWWWWWWWWk.",
+               "..kkwwkkkkk..", "...kwk.......", "...kk........"];
+  var BALAO_PEQUENO = ["..kkkkk..", ".kwwwwwk.", "kwwwwwwwk", ".kWWWWWk.", "..kwkkk..", "..kk....."];
+
+  function posicaoAluno() {
+    var a = aluno, prox = a.rota[0], p = Math.min(a.prog, 1);
+    var fr = prox ? a.r + (prox.r - a.r) * p : a.r, fc = prox ? a.c + (prox.c - a.c) * p : a.c;
+    var y = TOPO + fr * T + T - 3, dy = 0;
+    if (a.queda) { var q = Math.min(1, (agora - a.queda.t0) / a.queda.dur); dy = -(1 - q * q) * 70; }
+    return { fr: fr, x: Math.round(fc * T + T / 2), y: Math.round(y + dy), noAr: !!a.queda };
+  }
+
+  function desenharAluno(pos) {
+    var a = aluno, andando = a.rota.length > 0;
+    var quadro = andando ? Math.floor(a.tAndar * 9) % 4 : "idle";
+    var img = sprite(VISTA[a.rumo], quadro);
+    var w = img.width, h = img.height, x = pos.x - Math.round(w / 2), y = pos.y - h;
+    // sombra no chão (some enquanto ele cai)
+    if (!pos.noAr) {
+      ctx.fillStyle = "rgba(10, 8, 6, 0.5)";
+      ctx.fillRect(pos.x - 5, pos.y - 1, 10, 2); ctx.fillRect(pos.x - 4, pos.y + 1, 8, 1);
+    }
+    var amassado = a.pouso && agora - a.pouso < 0.12;   // "squash" ao pousar: perde 3 linhas
+    ctx.save();
+    if (a.rumo === "O") { ctx.translate(x + w, 0); ctx.scale(-1, 1); x = 0; }
+    if (amassado) ctx.drawImage(img, 0, 0, w, h, x - 1, y + 3, w + 2, h - 3);
+    else ctx.drawImage(img, x, y);
+    ctx.restore();
+  }
+
+  function desenharFeixe() {
+    var s = LAB404.saida, cx = s.c * T + T / 2, base = TOPO + s.r * T + 12;
+    var pisca = reduzido ? 0 : Math.floor(agora * 6) % 2;
+    var faixas = [[7, 0.10], [5, 0.16], [3, 0.26], [1, 0.5]];
+    faixas.forEach(function (f) {
+      var meia = f[0], alfa = f[1] + (pisca ? 0.03 : 0), y, passo = 6;
+      ctx.fillStyle = tom(COR.ok, 0.25);
+      // o feixe some em degraus perto do topo
+      for (y = base; y > 0; y -= passo) {
+        var fade = Math.min(1, y / 40);
+        ctx.globalAlpha = alfa * (fade > 0.66 ? 1 : fade > 0.33 ? 0.6 : 0.3);
+        ctx.fillRect(cx - meia, Math.max(0, y - passo), meia * 2, Math.min(passo, y));
+      }
+    });
+    ctx.globalAlpha = 1;
+    // pulso na base (anel que abre)
+    if (!reduzido) {
+      var fase = (agora % 1.2) / 1.2, raio = 2 + Math.floor(fase * 5);
+      ctx.globalAlpha = fase < 0.5 ? 0.7 : 0.35;
+      ctx.fillStyle = tom(COR.ok, 0.3);
+      ctx.fillRect(cx - raio, base - 4 - raio, raio * 2, 1); ctx.fillRect(cx - raio, base - 4 + raio, raio * 2, 1);
+      ctx.fillRect(cx - raio, base - 4 - raio, 1, raio * 2); ctx.fillRect(cx + raio - 1, base - 4 - raio, 1, raio * 2 + 1);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function desenharBalao(pos) {
+    var b = aluno.balao;
+    if (!b || agora > b.ate) return;
+    var idade = agora - b.t0, cores = { k: COR.noite, w: COR.luar, W: tom(COR.luar, -0.16), O: COR.cesar };
+    var topoCabeca = pos.y - 22;
+    if (idade < 0.09) { pintarMatriz(ctx, BALAO_PEQUENO, cores, pos.x + 1, topoCabeca - 7); return; }
+    var bob = reduzido ? 0 : Math.floor(agora * 2.5) % 2;
+    pintarMatriz(ctx, BALAO, cores, Math.min(pos.x - 1, W - BALAO[0].length), topoCabeca - 14 - bob + (idade < 0.18 ? 2 : 0));
+  }
+
+  function desenharPegadas() {
+    pegadas.forEach(function (p) {
+      var idade = agora - p.t0;
+      if (idade > 3) return;
+      var x = p.c * T + T / 2, y = TOPO + p.r * T + T / 2 + 2, vertical = p.rumo === "N" || p.rumo === "S";
+      ctx.globalAlpha = idade < 1.5 ? 0.45 : idade < 2.4 ? 0.28 : 0.14;
+      ctx.fillStyle = COR.luar;
+      if (vertical) { ctx.fillRect(x - 3, y, 2, 1); ctx.fillRect(x + 1, y - 2, 2, 1); }
+      else { ctx.fillRect(x - 1, y - 2, 2, 1); ctx.fillRect(x + 1, y + 1, 2, 1); }
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  function desenhar() {
+    var L = LAB404, pos = posicaoAluno(), linhaAluno = Math.floor(pos.fr + 1e-6);
+    ctx.clearRect(0, 0, W, HT);
+    ctx.drawImage(camadaChao, 0, 0);
+    desenharPegadas();
+    // pintor por linha: parede de trás, depois o que está naquela linha, depois a próxima linha da frente
+    for (var r = 0; r < L.rows; r++) {
+      for (var c = 0; c < L.cols; c++) if (blocos[r][c]) ctx.drawImage(blocos[r][c], c * T, TOPO + r * T - ALT);
+      if (r === L.saida.r) desenharFeixe();
+      if (r === linhaAluno) desenharAluno(pos);
+    }
+    particulas.forEach(function (p) {
+      var resta = 1 - (agora - p.t0) / p.vida;
+      ctx.globalAlpha = resta > 0.5 ? 1 : 0.5; ctx.fillStyle = p.cor;
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1);
+    });
+    ctx.globalAlpha = 1;
+    desenharBalao(pos);
+  }
+
+  /* ------------------------------------------------------------ 9. céu e marca */
+  var ceu = doc.getElementById("ceu"), cceu = ceu.getContext("2d"), estrelas = [], ultimoCeu = -1;
+  function montarCeu() {
+    var w = Math.ceil(window.innerWidth / 3), h = Math.ceil(window.innerHeight / 3), rnd = sorteio(404);
+    ceu.width = w; ceu.height = h; estrelas = [];
+    for (var i = 0, n = Math.round(w * h / 1500); i < n; i++) {
+      estrelas.push({ x: rnd() * w | 0, y: rnd() * h | 0, fase: rnd() * 6.28, vel: 0.6 + rnd() * 1.4,
+                      cor: rnd() < 0.72 ? COR.luarFraco : COR.luar, cruz: rnd() < 0.06 });
+    }
+    pintarCeu();
+  }
+  function pintarCeu() {
+    cceu.clearRect(0, 0, ceu.width, ceu.height);
+    estrelas.forEach(function (e) {
+      var brilho = reduzido ? 0.7 : 0.5 + 0.5 * Math.sin(agora * e.vel + e.fase);
+      cceu.globalAlpha = brilho > 0.66 ? 0.85 : brilho > 0.33 ? 0.5 : 0.22;
+      cceu.fillStyle = e.cor;
+      cceu.fillRect(e.x, e.y, 1, 1);
+      if (e.cruz && brilho > 0.5) { cceu.fillRect(e.x - 1, e.y, 3, 1); cceu.fillRect(e.x, e.y - 1, 1, 3); }
+    });
+    cceu.globalAlpha = 1;
+  }
+  function pintarMarca() {
+    var c = doc.getElementById("marca-aluno"), x = c.getContext("2d");
+    x.imageSmoothingEnabled = false; x.clearRect(0, 0, 16, 13);
+    x.drawImage(sprite("front", "idle"), 0, 0, 16, 13, 0, 0, 16, 13);
+  }
+
+  /* ------------------------------------------------------------ 10. entrada: ponteiro e teclado */
+  function assumirControle() { modo = "usuario"; ultimoToque = agora; proximaPartida = Infinity; }
+
+  function casaNoPonto(ev) {
+    var ret = canvas.getBoundingClientRect();
+    var ax = (ev.clientX - ret.left) / ret.width * W, ay = (ev.clientY - ret.top) / ret.height * HT;
+    var c = Math.floor(ax / T), r = Math.floor((ay - TOPO) / T);
+    // o topo de uma parede é desenhado ALT px acima da casa: clique ali é na parede de baixo
+    if (celula(r + 1, c) === "#" && ay - TOPO >= (r + 1) * T - ALT) r += 1;
+    if (r < 0 || c < 0 || r >= LAB404.rows || c >= LAB404.cols) return null;
+    return { r: r, c: c };
+  }
+  canvas.addEventListener("pointerdown", function (ev) {
+    var alvo = casaNoPonto(ev);
+    if (!alvo) return;
+    assumirControle();
+    irPara(alvo, {});
+  });
+
+  var TECLAS = { ArrowUp: 0, ArrowRight: 1, ArrowDown: 2, ArrowLeft: 3, w: 0, d: 1, s: 2, a: 3, W: 0, D: 1, S: 2, A: 3 };
+  doc.addEventListener("keydown", function (ev) {
+    if (!(ev.key in TECLAS) || ev.altKey || ev.ctrlKey || ev.metaKey) return;
+    // as setas só viram controle com o labirinto em foco ou quando a página nem tem rolagem
+    var rola = doc.documentElement.scrollHeight > window.innerHeight + 1;
+    if (doc.activeElement !== canvas && (rola || /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName || ""))) return;
+    ev.preventDefault();
+    assumirControle();
+    var d = DIRS[TECLAS[ev.key]], base = casaBase(), v = { r: base.r + d.dr, c: base.c + d.dc };
+    if (!andavel(v.r, v.c)) {                          // esbarrou: vira para a parede e fica em dúvida
+      if (!aluno.rota.length) { aluno.rumo = d.m; aluno.balao = { t0: agora, ate: reduzido ? Infinity : agora + 1.2 }; }
+      if (reduzido) desenhar();
+      return;
+    }
+    if (reduzido) { aluno.r = v.r; aluno.c = v.c; aluno.rumo = d.m; aluno.balao = null; atualizarRotulo(); desenhar(); return; }
+    aluno.balao = null; aluno.aoChegar = null;
+    aluno.rota = aluno.rota.slice(0, 1).concat([v]);
+    if (aluno.rota.length === 1) { aluno.rumo = d.m; aluno.prog = 0; }
+  });
+
+  if (matchMedia("(pointer: coarse)").matches) {
+    doc.getElementById("dica").textContent = "Toque no chão para mover o aluno.";
+  }
+
+  /* ------------------------------------------------------------ 11. laço */
+  var ultimo = 0, raf = 0;
+  function quadroAnimacao(ms) {
+    var t = ms / 1000, dt = Math.min(0.05, ultimo ? t - ultimo : 0);
+    ultimo = t; agora = t;
+    atualizar(dt);
+    desenhar();
+    if (agora - ultimoCeu > 0.25) { ultimoCeu = agora; pintarCeu(); }
+    raf = requestAnimationFrame(quadroAnimacao);
+  }
+  function iniciar() {
+    cancelAnimationFrame(raf); ultimo = 0;
+    agora = performance.now() / 1000;
+    layout = ""; medir(); montarCeu(); pintarMarca();
+    if (reduzido) desenhar();
+    else raf = requestAnimationFrame(quadroAnimacao);
+  }
+
+  var redimensionar = 0;
+  window.addEventListener("resize", function () {
+    cancelAnimationFrame(redimensionar);
+    redimensionar = requestAnimationFrame(function () { medir(); montarCeu(); if (reduzido) desenhar(); });
+  });
+  var aoMudarMovimento = function () { reduzido = mqReduzido.matches; iniciar(); };
+  if (mqReduzido.addEventListener) mqReduzido.addEventListener("change", aoMudarMovimento);
+  else if (mqReduzido.addListener) mqReduzido.addListener(aoMudarMovimento);
+
+  // a fonte pixel muda a altura do texto; reavalia a escala quando ela chegar
+  if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(function () { medir(); if (reduzido) desenhar(); });
+  iniciar();
+})();
+</script>
+</body>
+</html>
