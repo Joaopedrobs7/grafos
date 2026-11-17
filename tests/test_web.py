@@ -22,11 +22,41 @@ def cliente():
 
 
 # ---------------------------------------------------------------- rotas
-def test_pagina_inicial_carrega_o_front(cliente):
+# [IA] Claude – "/" é o menu de projetos; a Parte 1 mora em /parte1 e a Parte 2 (provisória) em /parte2
+def test_raiz_e_o_menu_de_projetos(cliente):
     r = cliente.get("/")
-    assert r.status_code == 200
-    assert r.mimetype == "text/html"
-    assert "static/js/app.js" in r.get_data(as_text=True)
+    assert r.status_code == 200 and r.mimetype == "text/html"
+    html = r.get_data(as_text=True)
+    assert "Escolha o projeto" in html
+    assert 'href="parte1"' in html                       # relativo: funciona atrás de um prefixo de caminho
+    assert 'aria-disabled="true"' in html and "Parte 2" in html
+    assert "static/js/menu.js" in html and "static/js/app.js" not in html
+
+
+def test_parte1_carrega_o_labirinto(cliente):
+    r = cliente.get("/parte1")
+    assert r.status_code == 200 and r.mimetype == "text/html"
+    html = r.get_data(as_text=True)
+    assert "static/js/app.js" in html
+    assert 'class="nav__voltar" href="./"' in html        # volta ao menu
+    # caminhos relativos a partir de /parte1 resolvem na raiz do site
+    assert cliente.get("/static/js/app.js").status_code == 200
+
+
+def test_parte2_e_a_pagina_provisoria(cliente):
+    r = cliente.get("/parte2")
+    assert r.status_code == 200 and r.mimetype == "text/html"
+    html = r.get_data(as_text=True)
+    assert "Parte 2 em construção" in html and 'href="./"' in html
+
+
+@pytest.mark.parametrize("antigo, destino", [
+    ("/labirinto", "/parte1"), ("/labirinto/", "/parte1"), ("/parte1/", "/parte1"), ("/parte2/", "/parte2"),
+])
+def test_enderecos_antigos_redirecionam(cliente, antigo, destino):
+    r = cliente.get(antigo)
+    assert r.status_code == 302
+    assert r.headers["Location"].endswith(destino)
 
 
 @pytest.mark.parametrize("arquivo", ["js/app.js", "vendor/three.min.js", "css/app.css"])
@@ -56,7 +86,8 @@ def test_favicon_ico_serve_o_svg(cliente, tmp_path, monkeypatch):
     assert r.data.startswith(b"<svg")
 
 
-@pytest.mark.parametrize("caminho", ["/nao-existe", "/um/caminho/profundo", "/static/js/nao-existe.js"])
+@pytest.mark.parametrize("caminho", ["/nao-existe", "/um/caminho/profundo", "/static/js/nao-existe.js",
+                                     "/parte3", "/parte1/x"])
 def test_404_do_site_usa_a_pagina_propria(cliente, caminho):
     r = cliente.get(caminho)
     assert r.status_code == 404

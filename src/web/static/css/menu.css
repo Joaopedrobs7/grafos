@@ -1,0 +1,217 @@
+/* [IA] Claude – tela de seleção de projeto (menu "de videogame") e página provisória da Parte 2.
+   Usa os tokens, as fontes, .px, .btn e .pill do app.css; aqui só o que é desta tela. */
+
+.menu {
+  position: relative;
+  display: flex; flex-direction: column;
+  min-height: 100vh; min-height: 100svh;
+  overflow: hidden;
+}
+
+/* Parede de pedra da masmorra: canvas em resolução de texel, ampliado sem suavização e bem escurecido. */
+.menu__parede {
+  position: fixed; inset: 0; z-index: -2;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  opacity: 0; transition: opacity 400ms steps(4);
+}
+.menu__parede.is-pronta { opacity: 1; }
+
+.menu__topo {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  width: 100%; max-width: calc(var(--largura) + 2 * var(--gutter));
+  margin-inline: auto; padding: 20px var(--gutter) 0;
+}
+.menu__topo .pill { margin-left: auto; font-size: 13px; padding: 6px 10px; }
+.menu__voltar {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 8px 4px;
+  font: 600 16px/1 var(--f-pixel); color: var(--luar-fraco); text-decoration: none;
+}
+.menu__voltar svg { width: 8px; height: 14px; }
+.menu__voltar:hover { color: var(--luar); }
+
+.menu__palco {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 100%; padding: 32px var(--gutter) 56px;
+}
+
+/* ---------------------------------------------------------------- título com as duas tochas */
+.menu__cabeca {
+  display: grid; grid-template-columns: auto minmax(0, auto) auto; align-items: center;
+  column-gap: clamp(28px, 5vw, 72px);
+  text-align: center;
+}
+.menu__titulo {
+  font: 700 clamp(44px, 7.4vw, 104px)/0.92 var(--f-pixel);
+  letter-spacing: -0.01em;
+  color: var(--luar);
+  text-shadow: 0 4px 0 var(--fundo-fundo);
+}
+.menu__sub {
+  grid-column: 1 / -1;
+  margin-top: 20px;
+  color: var(--luar-fraco);
+  font-size: 17px;
+}
+
+.tocha { position: relative; width: 30px; height: 80px; }
+.tocha svg { position: relative; z-index: 1; width: 30px; height: 80px; }
+.tocha__luz {
+  position: absolute; left: 50%; top: 6px; z-index: 0;
+  width: 240px; height: 240px; margin: -120px 0 0 -120px;
+  background: radial-gradient(closest-side, rgba(255, 179, 71, 0.2), rgba(255, 179, 71, 0.06) 55%, transparent);
+  animation: luz 1.6s steps(1) infinite;
+}
+.tocha .chama-b { visibility: hidden; }
+.tocha .chama-a { animation: chama-a 0.5s steps(1) infinite; }
+.tocha .chama-b { animation: chama-b 0.5s steps(1) infinite; }
+.tocha--dir .tocha__luz, .tocha--dir .chama-a, .tocha--dir .chama-b { animation-delay: -0.23s; }
+@keyframes chama-a { 50% { visibility: hidden; } }
+@keyframes chama-b { 50% { visibility: visible; } }
+@keyframes luz { 0% { opacity: 1; } 30% { opacity: 0.82; } 55% { opacity: 0.95; } 80% { opacity: 0.76; } }
+
+/* ---------------------------------------------------------------- lista de projetos (slots) */
+.escolha { width: 100%; max-width: 720px; margin-top: clamp(40px, 7vh, 72px); }
+.escolha__rotulo {
+  margin: 0 0 14px;
+  font: 600 18px/1 var(--f-pixel); letter-spacing: 0;
+  color: var(--luar-fraco);
+}
+.cartuchos { position: relative; display: grid; gap: 14px; }
+
+.cartucho {
+  --px-borda: var(--noite-3);
+  --px-fundo: rgba(26, 22, 18, 0.92);
+  --px-labio: 2px;
+  display: grid; grid-template-columns: 112px minmax(0, 1fr) auto; align-items: center; gap: 20px;
+  min-height: 108px; padding: 14px 20px 16px 14px;
+  color: var(--luar); text-decoration: none;
+  cursor: pointer;
+  user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.cartucho:focus-visible { outline-offset: 4px; }
+.cartucho.is-atual:focus-visible { outline: none; } /* o cursor já marca o foco */
+.cartucho.is-atual { --px-borda: var(--cesar); --px-fundo: var(--noite-2); }
+.cartucho:active:not([aria-disabled="true"]) { transform: translateY(2px); --px-labio: 0px; }
+
+.cartucho__arte {
+  display: grid; place-items: center;
+  width: 112px; height: 76px;
+  background: var(--fundo-fundo);
+  box-shadow: inset 0 0 0 2px var(--noite-3);
+  overflow: hidden;
+}
+.cartucho__arte canvas { image-rendering: pixelated; }
+.cartucho__texto { display: grid; gap: 4px; min-width: 0; }
+.cartucho__parte { font: 600 15px/1.2 var(--f-pixel); color: var(--tocha); }
+.cartucho__nome { font: 700 24px/1.05 var(--f-pixel); letter-spacing: -0.005em; }
+.cartucho__desc { margin-top: 4px; font-size: 15px; line-height: 1.45; color: var(--luar-fraco); }
+.cartucho__acao {
+  align-self: center;
+  font: 600 16px/1 var(--f-pixel); color: var(--luar-fraco);
+  white-space: nowrap;
+}
+.cartucho.is-atual .cartucho__acao { color: var(--cesar); }
+
+/* Parte 2 trancada: apagada, com cadeado; continua focável para ler a explicação. */
+.cartucho--trancado { --px-fundo: rgba(18, 15, 12, 0.88); cursor: not-allowed; }
+.cartucho--trancado .cartucho__nome { color: var(--luar-fraco); }
+.cartucho--trancado .cartucho__parte { color: var(--luar-fraco); }
+.cartucho--trancado .cartucho__desc { color: #9A8E7C; }
+.cartucho--trancado.is-atual { --px-borda: var(--luar-fraco); --px-fundo: rgba(38, 32, 26, 0.92); }
+.cartucho--trancado .cartucho__arte {
+  background:
+    radial-gradient(circle at 1px 1px, var(--noite-3) 1px, transparent 1.5px) 0 0 / 8px 8px,
+    var(--fundo-fundo);
+  color: var(--luar-fraco);
+}
+.cartucho--trancado .cartucho__arte svg { width: 27px; height: 30px; }
+.cartucho--trancado { grid-template-columns: 112px minmax(0, 1fr); }
+.cartucho__parte { display: flex; align-items: center; gap: 14px; }
+.cartucho__selo {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 8px 4px;
+  font: 600 13px/1 var(--f-pixel); color: var(--luar-fraco);
+  box-shadow: inset 0 0 0 2px var(--noite-3);
+}
+.cartucho__selo svg { width: 9px; height: 10px; }
+.nw { white-space: nowrap; }
+.cartucho.is-piscando { --px-borda: var(--luar); --px-fundo: var(--noite-3); }
+.cartucho.is-negado { animation: negar 0.36s steps(6); }
+@keyframes negar { 0%, 100% { transform: none; } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+/* Cursor: seta em pixel + o aluno da CESAR ao lado do slot escolhido (só com JS). */
+.cursor {
+  position: absolute; left: -132px; top: 0; z-index: 2;
+  display: none; align-items: center; gap: 14px;
+  height: 108px;
+  pointer-events: none;
+  transition: transform 120ms steps(3);
+}
+.js .cursor { display: flex; }
+.cursor__aluno { width: 64px; height: 96px; }
+.cursor__seta { width: 16px; height: 28px; color: var(--cesar); animation: seta 1s steps(1) infinite; }
+.cursor.is-saindo .cursor__seta { visibility: hidden; }
+@keyframes seta { 50% { transform: translateX(4px); } }
+
+.escolha__aviso { min-height: 24px; margin-top: 14px; font-size: 15px; color: var(--tocha); }
+
+.dicas {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 22px;
+  margin-top: 18px;
+  font-size: 14px; color: var(--luar-fraco);
+}
+.dicas span { display: inline-flex; align-items: center; gap: 6px; }
+.dicas kbd {
+  display: inline-grid; place-items: center;
+  min-width: 26px; height: 26px; padding: 0 6px 2px;
+  font: 600 14px/1 var(--f-pixel); color: var(--luar);
+  background: var(--noite-2);
+  box-shadow: inset 0 0 0 2px var(--noite-3), inset 0 -4px 0 var(--noite-3);
+}
+
+/* Transição de saída: a tela escurece em degraus antes de abrir o projeto. */
+.menu__cortina {
+  position: fixed; inset: 0; z-index: 90;
+  background: var(--fundo-fundo);
+  opacity: 0; pointer-events: none;
+  transition: opacity 240ms steps(4);
+}
+.menu__cortina.is-fechando { opacity: 1; pointer-events: auto; }
+
+/* ---------------------------------------------------------------- página provisória da Parte 2 */
+.obra { display: grid; justify-items: center; gap: 22px; max-width: 640px; text-align: center; }
+.obra__cena { display: flex; align-items: flex-end; gap: 20px; height: 120px; }
+.obra__cena canvas { width: 64px; height: 96px; }
+.obra__cadeado { width: 54px; height: 60px; color: var(--luar-fraco); margin-bottom: 6px; }
+.obra h1 { font: 700 clamp(40px, 6vw, 72px)/0.95 var(--f-pixel); }
+.obra p { color: var(--luar-fraco); max-width: 52ch; }
+.obra .btn { margin-top: 8px; }
+
+/* ---------------------------------------------------------------- telas pequenas */
+@media (max-width: 1000px) {
+  .escolha { max-width: 640px; }
+  .cursor { display: none !important; }
+}
+@media (max-width: 640px) {
+  .menu__topo { padding-top: 14px; }
+  .menu__palco { justify-content: flex-start; padding-top: 48px; }
+  .menu__cabeca { grid-template-columns: minmax(0, 1fr); }
+  .tocha { display: none; }
+  .menu__sub { margin-top: 14px; font-size: 16px; }
+  .cartucho { grid-template-columns: 64px minmax(0, 1fr); gap: 14px; padding: 12px 14px 14px 12px; min-height: 0; }
+  .cartucho__arte { width: 64px; height: 64px; align-self: start; }
+  .cartucho--trancado .cartucho__arte svg { width: 18px; height: 20px; }
+  .cartucho__nome { font-size: 22px; }
+  .cartucho__desc { font-size: 14px; }
+  .cartucho__acao { grid-column: 2; justify-self: start; margin-top: 2px; }
+  .cartucho--trancado { grid-template-columns: 64px minmax(0, 1fr); }
+}
+@media (hover: none) { .dicas { display: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tocha__luz, .tocha .chama-a, .tocha .chama-b, .cursor__seta { animation: none; }
+  .cursor, .menu__cortina, .menu__parede { transition: none; }
+}

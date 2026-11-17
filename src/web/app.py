@@ -2,7 +2,9 @@
 """Servidor web do Labirinto com Chaves.
 
 Rotas:
-  /                    labirinto interativo (calcula os caminhos no servidor)
+  /                    menu de projetos (Parte 1 liberada, Parte 2 trancada até existir)
+  /parte1              labirinto interativo (calcula os caminhos no servidor); /labirinto redireciona para cá
+  /parte2              Parte 2 (dataset e comparação de algoritmos); por enquanto, página provisória
   /health              health check do Target Group do ALB
   /api/info            identifica a instância EC2 que respondeu (prova do balanceamento)
   /api/mapas           lista de mapas
@@ -24,7 +26,7 @@ import urllib.request
 from functools import lru_cache
 from pathlib import Path
 
-from flask import Flask, Response, abort, jsonify, request, send_from_directory
+from flask import Flask, Response, abort, jsonify, redirect, request, send_from_directory, url_for
 
 from ..graphs.estados import grafo_estados
 from ..graphs.io import Mapa, MapaInvalido, ler_mapa, listar_mapas, parse_mapa
@@ -83,9 +85,34 @@ def cabecalho_servidor(resp):
     return resp
 
 
+# [IA] Claude – menu de projetos em "/" e uma rota por parte. As páginas usam caminhos relativos
+# ("static/...", "api/..."), que resolvem igual a partir de "/", "/parte1" e "/parte2" (sem barra final).
 @app.get("/")
 def index():
+    return send_from_directory(TEMPLATES, "menu.html")
+
+
+@app.get("/parte1")
+def parte1():
     return send_from_directory(TEMPLATES, "labirinto.html")
+
+
+@app.get("/parte2")
+def parte2():
+    return send_from_directory(TEMPLATES, "parte2.html")
+
+
+@app.get("/parte1/")
+@app.get("/labirinto")
+@app.get("/labirinto/")
+def labirinto_antigo():
+    # links antigos e a barra final (que quebraria os caminhos relativos) vão para /parte1
+    return redirect(url_for("parte1"), 302)
+
+
+@app.get("/parte2/")
+def parte2_barra():
+    return redirect(url_for("parte2"), 302)
 
 
 @app.get("/favicon.ico")

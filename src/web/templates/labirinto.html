@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="static/css/estados.css" data-inline>
 <script>
   document.documentElement.classList.add("js");
+  if (location.protocol === "file:") document.documentElement.classList.add("arquivo"); // [IA] Claude – sem menu de projetos
   // Pré-carrega a Pixelify Sans quando a página é servida pelo Flask. No arquivo estático
   // (src/viz.py) o CSS vira <style> com a fonte embutida e este link não existe: nada a fazer.
   (function () {
@@ -32,6 +33,11 @@
 <!-- ============================================================ navbar -->
 <header class="nav" id="nav">
   <div class="nav__barra px">
+    <!-- [IA] Claude – volta ao menu de projetos ("/"); some no arquivo estático, que não tem menu -->
+    <a class="nav__voltar" href="./" data-so-servidor aria-label="Voltar ao menu de projetos" title="Menu de projetos">
+      <svg viewBox="0 0 4 7" shape-rendering="crispEdges" aria-hidden="true"><path d="M3 0h1v7H3zM2 1h1v5H2zM1 2h1v3H1zM0 3h1v1H0z"/></svg>
+      <span>Projetos</span>
+    </a>
     <a class="nav__marca" href="#inicio">
       <span class="nav__icone" id="navIcone" aria-hidden="true">
         <svg viewBox="0 0 12 7" shape-rendering="crispEdges"><path fill="#FFC23A" d="M1 1h3v1H1zM0 2h1v3H0zM4 2h1v3H4zM1 5h3v1H1zM5 3h6v1H5zM8 4h1v2H8zM10 4h1v1h-1z"/></svg>

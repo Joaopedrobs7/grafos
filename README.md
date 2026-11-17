@@ -59,9 +59,18 @@ python -m src.web.app                 # http://localhost:8000
 PORT=8765 python -m src.web.app       # outra porta
 ```
 
+<!-- [IA] Claude – menu de projetos e uma rota por parte -->
+`/` abre o menu de projetos (estilo tela de seleção de videogame: ↑/↓ ou W/S escolhem, Enter abre).
+A Parte 1 fica em `/parte1` (`/labirinto` redireciona para lá) e a Parte 2 em `/parte2`, por
+enquanto uma página provisória que a branch `entrega2` substitui.
+
 ```
-src/web/templates/labirinto.html    página: navbar, hero, player, manual, CTA e rodapé
+src/web/templates/menu.html         menu de projetos em "/" (Parte 1 liberada, Parte 2 trancada)
+src/web/templates/labirinto.html    Parte 1 em "/parte1": navbar, hero, player, manual, CTA e rodapé
+src/web/templates/parte2.html       Parte 2 em "/parte2" (provisória)
 src/web/templates/404.html          página 404 independente
+src/web/static/js/menu.js           cursor do menu, parede de pedra e pill do servidor (menu e Parte 2)
+src/web/static/css/menu.css         estilos do menu e da página da Parte 2
 src/web/static/vendor/three.min.js  Three.js r159 (global THREE)
 src/web/static/js/pixel.js          paleta, texturas procedurais, marca da CESAR e sprite 2D do aluno (LAB.pixel)
 src/web/static/js/voxel.js          aluno, chaves, portas, bônus e saída em voxels (LAB.voxel)
@@ -127,6 +136,19 @@ push na `main` e, no console, **Auto Scaling Group → Atualização da instânc
 `/api/info` mostra a versão em execução (`main@<commit>`).
 
 
+<!-- [IA] Claude – branches e de onde cada ambiente puxa o código -->
+## Branches e deploy
+
+| Branch | Papel |
+|---|---|
+| `main` | integração: Parte 1 + Parte 2, com o menu de projetos em `/`. É o que vai para produção. |
+| `entrega1-parcial` | entrega da Parte 1 (fica congelada como foi entregue) |
+| `entrega2` | desenvolvimento da Parte 2 (a criar); entra na `main` por merge |
+
+- **AWS:** o Auto Scaling Group faz deploy da `main` (`deploy/boot.sh`, `BRANCH=main`); `/api/info`
+  mostra a versão em execução (`main@<commit>`).
+- **Vercel:** a branch de produção do projeto deve ser a `main` (Settings → Git → Production Branch).
+
 <!-- [IA] Claude – configuração do token e download do dataset da Parte 2 (Kaggle) -->
 ## Parte 2 — dataset (Kaggle)
 
@@ -165,7 +187,7 @@ src/solve.py         orquestração e arquivos de out/parte1/
 src/traco.py         cola de visualização: eventos dos algoritmos em JSON para o front (sem lógica de algoritmo)
 src/viz.py           figuras (matplotlib) e montagem do HTML interativo
 src/cli.py           linha de comando
-src/web/             aplicação Flask (API + labirinto interativo + identificação da instância EC2)
+src/web/             aplicação Flask (menu de projetos, API, labirinto interativo, identificação da instância EC2)
 deploy/              user data, systemd, Apache e script de atualização para EC2
 tests/               pytest (algorithms, bfs, dfs, dijkstra, bellman_ford, estados, io, traco, web)
 out/parte1/          saídas geradas

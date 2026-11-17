@@ -238,6 +238,17 @@ h2 { font-size: 48px; line-height: 1; }
   font: 700 19px/1 var(--f-pixel);
   white-space: nowrap;
 }
+/* [IA] Claude – link discreto de volta ao menu de projetos ("/"), antes da marca */
+.nav__voltar {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-right: -12px; padding: 8px 14px 8px 4px;
+  font: 500 15px/1 var(--f-texto); color: var(--luar-fraco); text-decoration: none;
+  box-shadow: inset -1px 0 0 var(--noite-3);
+  white-space: nowrap;
+}
+.nav__voltar svg { width: 6px; height: 11px; }
+.nav__voltar:hover { color: var(--luar); }
+.arquivo .nav__voltar { display: none; }
 .nav__icone { display: grid; place-items: center; width: 32px; height: 32px; }
 .nav__icone svg { width: 24px; height: 14px; }
 .nav__icone canvas { width: 32px; height: auto; }
@@ -1064,6 +1075,8 @@ h2 { font-size: 48px; line-height: 1; }
   .nav { inset: 8px 0 auto; padding-inline: 8px; }
   .nav__barra { --px-borda: transparent; --px-fundo: rgba(26, 22, 18, 0.94); gap: 12px; padding-inline: 8px; }
   .nav__menu { display: inline-flex; }
+  .nav__voltar span { display: none; }
+  .nav__voltar { padding-right: 12px; margin-right: -4px; }
   .pill--barra { display: none; }
   .nav__links {
     position: absolute; top: calc(100% + 8px); left: 0; right: 0;

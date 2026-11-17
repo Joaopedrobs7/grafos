@@ -1,0 +1,103 @@
+<!doctype html>
+<!-- [IA] Claude – tela de seleção de projeto, no estilo do menu de um videogame: a Parte 1 (labirinto) está
+     liberada e a Parte 2 (dataset e comparação de algoritmos) aparece trancada até existir. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teoria dos Grafos, escolha o projeto</title>
+<meta name="description" content="Projeto final de Teoria dos Grafos e AVD na CESAR School. Parte 1: labirinto com chaves resolvido sobre o grafo de estados. Parte 2: dataset maior e comparação de algoritmos.">
+<meta name="theme-color" content="#1A1612">
+<link rel="icon" href="static/favicon.svg">
+<link rel="preload" href="static/fonts/PixelifySans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="static/css/app.css">
+<link rel="stylesheet" href="static/css/menu.css">
+<script>document.documentElement.classList.add("js");</script>
+</head>
+<body class="menu">
+<canvas class="menu__parede" id="parede" aria-hidden="true"></canvas>
+
+<header class="menu__topo">
+  <p class="pill" data-servidor-pill title="Instância que respondeu">
+    <span class="pill__ponto" aria-hidden="true"></span>
+    <span class="pill__inst" data-servidor-inst>conectando</span>
+    <span class="pill__zona" data-servidor-zona></span>
+  </p>
+</header>
+
+<main class="menu__palco">
+  <div class="menu__cabeca">
+    <span class="tocha tocha--esq" aria-hidden="true">
+      <span class="tocha__luz"></span>
+      <svg viewBox="0 0 6 16" shape-rendering="crispEdges">
+        <g class="chama-a"><path fill="#E07B24" d="M2 0h1v1H2zM1 1h3v1H1zM1 2h4v1H1zM0 3h6v3H0z"/><path fill="#FFB347" d="M2 2h2v1H2zM1 3h4v3H1z"/><path fill="#FFF1C1" d="M2 4h2v2H2z"/></g>
+        <g class="chama-b"><path fill="#E07B24" d="M3 0h1v1H3zM2 1h3v1H2zM1 2h4v1H1zM0 3h6v3H0z"/><path fill="#FFB347" d="M2 2h2v1H2zM1 3h4v3H1zM2 1h1v1H2z"/><path fill="#FFF1C1" d="M2 3h2v3H2z"/></g>
+        <path fill="#4A3E33" d="M0 6h6v1H0zM1 7h4v1H1z"/>
+        <path fill="#6B4A2E" d="M2 8h2v8H2z"/>
+        <path fill="#2A241F" d="M1 11h4v1H1z"/>
+      </svg>
+    </span>
+    <h1 class="menu__titulo">Teoria<br>dos Grafos</h1>
+    <span class="tocha tocha--dir" aria-hidden="true">
+      <span class="tocha__luz"></span>
+      <svg viewBox="0 0 6 16" shape-rendering="crispEdges">
+        <g class="chama-a"><path fill="#E07B24" d="M2 0h1v1H2zM1 1h3v1H1zM1 2h4v1H1zM0 3h6v3H0z"/><path fill="#FFB347" d="M2 2h2v1H2zM1 3h4v3H1z"/><path fill="#FFF1C1" d="M2 4h2v2H2z"/></g>
+        <g class="chama-b"><path fill="#E07B24" d="M3 0h1v1H3zM2 1h3v1H2zM1 2h4v1H1zM0 3h6v3H0z"/><path fill="#FFB347" d="M2 2h2v1H2zM1 3h4v3H1zM2 1h1v1H2z"/><path fill="#FFF1C1" d="M2 3h2v3H2z"/></g>
+        <path fill="#4A3E33" d="M0 6h6v1H0zM1 7h4v1H1z"/>
+        <path fill="#6B4A2E" d="M2 8h2v8H2z"/>
+        <path fill="#2A241F" d="M1 11h4v1H1z"/>
+      </svg>
+    </span>
+    <p class="menu__sub">Projeto final de Teoria dos Grafos e AVD, CESAR School 2026.2</p>
+  </div>
+
+  <section class="escolha" aria-labelledby="escolhaTitulo">
+    <h2 class="escolha__rotulo" id="escolhaTitulo">Escolha o projeto</h2>
+    <div class="cartuchos" id="slots">
+      <span class="cursor" id="cursor" aria-hidden="true">
+        <canvas class="cursor__aluno" id="cursorAluno" width="64" height="96"></canvas>
+        <svg class="cursor__seta" viewBox="0 0 4 7" shape-rendering="crispEdges"><path d="M0 0h1v7H0zM1 1h1v5H1zM2 2h1v3H2zM3 3h1v1H3z"/></svg>
+      </span>
+
+      <a class="cartucho px is-atual" href="parte1" data-slot aria-describedby="slot1Desc">
+        <span class="cartucho__arte" id="arteParte1" aria-hidden="true"></span>
+        <span class="cartucho__texto">
+          <span class="cartucho__parte">Parte 1</span>
+          <span class="cartucho__nome">Labirinto com Chaves</span>
+          <span class="cartucho__desc" id="slot1Desc">Grafo de estados com chaves e portas. BFS, DFS, Dijkstra e <span class="nw">Bellman-Ford</span> guiam o aluno até o baú.</span>
+        </span>
+        <span class="cartucho__acao" aria-hidden="true">Jogar</span>
+      </a>
+
+      <a class="cartucho cartucho--trancado px" role="link" tabindex="0" aria-disabled="true" data-slot data-trancado
+         aria-describedby="slot2Desc">
+        <span class="cartucho__arte" aria-hidden="true">
+          <svg viewBox="0 0 9 10" shape-rendering="crispEdges"><path d="M2 0h5v1H2zM1 1h1v3H1zM7 1h1v3H7zM0 4h9v6H0z"/><path fill="#120F0C" d="M4 6h1v2H4z"/></svg>
+        </span>
+        <span class="cartucho__texto">
+          <span class="cartucho__parte">Parte 2
+            <span class="cartucho__selo">
+              <svg viewBox="0 0 9 10" shape-rendering="crispEdges" aria-hidden="true"><path d="M2 0h5v1H2zM1 1h1v3H1zM7 1h1v3H7zM0 4h9v6H0z"/></svg>
+              Em breve
+            </span>
+          </span>
+          <span class="cartucho__nome">Dataset e comparação de algoritmos</span>
+          <span class="cartucho__desc" id="slot2Desc">Um grafo maior, o benchmark dos algoritmos e a análise dos dados. Ainda em construção.</span>
+        </span>
+      </a>
+    </div>
+    <p class="escolha__aviso" id="aviso" role="status" aria-live="polite"></p>
+  </section>
+
+  <p class="dicas" aria-hidden="true">
+    <span><kbd>↑</kbd><kbd>↓</kbd> escolher</span>
+    <span><kbd>Enter</kbd> abrir</span>
+  </p>
+</main>
+
+<div class="menu__cortina" id="cortina" aria-hidden="true"></div>
+
+<script src="static/js/pixel.js"></script>
+<script src="static/js/menu.js"></script>
+</body>
+</html>

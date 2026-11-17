@@ -11,7 +11,9 @@ Auto Scaling adiciona uma segunda instância.
 
 | Rota | Uso |
 |---|---|
-| `/` | interface do labirinto interativo |
+| `/` | menu de projetos (Parte 1 e Parte 2) <!-- [IA] Claude --> |
+| `/parte1` | interface do labirinto interativo (`/labirinto` redireciona para cá) |
+| `/parte2` | Parte 2 (provisória até a branch `entrega2` entrar na `main`) |
 | `/health` | health check do Target Group |
 | `/api/info` | instance-id, AZ e IP privado de quem respondeu (via IMDSv2) |
 | `/api/mapa/<nome>` | grade, caminhos, armadilhas e camadas de um mapa |
