@@ -207,3 +207,10 @@ o deploy web. Pendente: PDF (manual + técnica, prova do m05, discussões, matri
 Partes deste código foram geradas com apoio de IA (Claude) e estão marcadas com `# [IA]`.
 <!-- [IA] Claude – aponta para a declaração assinada em PDF -->
 Esse uso precisa constar na Declaração de Uso de IA (`docs/DECLARACAO_IA.pdf`).
+
+- Declaração em edição (Google Docs): <https://docs.google.com/document/d/114ikHSDgZ674UKYB-E7fYnSYn1WqNbiF/edit>
+- Versão final assinada: `docs/DECLARACAO_IA.pdf`.
+- A primeira versão de `io.py`, `estados.py`, `graph.py` e `algorithms.py` (25/10) foi um protótipo gerado com IA só
+  para validar o funcionamento do projeto; em 17/11 o grupo reescreveu esses arquivos à mão (branch `entrega1-parcial`).
+  Em `algorithms.py` restam apenas os ganchos de visualização `observador=None`, marcados com `# [IA]`, que não alteram
+  a lógica.
