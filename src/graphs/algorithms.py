@@ -1,6 +1,3 @@
-# [IA] Claude – implementação de BFS, DFS, Dijkstra e Bellman-Ford (revisar e explicar em grupo)
-"""Algoritmos próprios (sem networkx): BFS, DFS com classificação de arcos,
-Dijkstra (recusa pesos negativos) e Bellman-Ford (detecta e devolve ciclo negativo)."""
 from __future__ import annotations
 
 import heapq
@@ -8,192 +5,156 @@ from collections import deque
 from dataclasses import dataclass, field
 from itertools import count
 
-from .graph import Grafo, No
+from .graph import Arco, Grafo, No
 
 INF = float("inf")
 
 
 class PesoNegativoError(ValueError):
-    """Dijkstra não aceita arcos de peso negativo."""
+    pass
 
 
-def caminho(pai: dict[No, No | None], destino: No) -> list[No]:
-    if destino not in pai:
-        return []
-    seq = []
-    v: No | None = destino
-    while v is not None:
-        seq.append(v)
-        v = pai[v]
-    return seq[::-1]
-
-
-# ---------------------------------------------------------------- BFS
 @dataclass
-class ResultadoBFS:
-    dist: dict[No, int]
-    pai: dict[No, No | None]
-    ordem: list[No]
+class Resultado:
+    dist: dict = field(default_factory=dict)
+    pai: dict = field(default_factory=dict)
+    ordem: list = field(default_factory=list)
+    status: str = "OK"
+    ciclo_negativo: list | None = None
+    classes: dict = field(default_factory=dict)
+    arcos: list = field(default_factory=list)
+
+    @property
+    def tem_ciclo(self) -> bool:
+        return self.classes.get("retorno", 0) > 0
+
+    def caminho_ate(self, v: No) -> list[No]:
+        return caminho(self.pai, v)
 
     def niveis(self) -> list[list[No]]:
-        camadas: list[list[No]] = []
+        if not self.dist:
+            return []
+        n = [[] for _ in range(max(self.dist.values()) + 1)]
         for v in self.ordem:
-            d = self.dist[v]
-            while len(camadas) <= d:
-                camadas.append([])
-            camadas[d].append(v)
-        return camadas
+            n[self.dist[v]].append(v)
+        return n
 
 
-def bfs(g: Grafo, origem: No) -> ResultadoBFS:
-    dist = {origem: 0}
-    pai: dict[No, No | None] = {origem: None}
-    ordem = [origem]
+def caminho(pai: dict, alvo: No) -> list[No]:
+    if alvo not in pai:
+        return []
+    cam = [alvo]
+    while pai[cam[-1]] is not None:
+        cam.append(pai[cam[-1]])
+    return cam[::-1]
+
+
+def _melhora(r: Resultado, a: Arco) -> bool:
+    return r.dist.get(a.origem, INF) + a.peso < r.dist.get(a.destino, INF)
+
+
+def _relaxa(r: Resultado, a: Arco) -> None:
+    r.dist[a.destino] = r.dist[a.origem] + a.peso
+    r.pai[a.destino] = a.origem
+
+
+def bfs(g: Grafo, origem: No) -> Resultado:
+    r = Resultado(dist={origem: 0}, pai={origem: None}, ordem=[origem])
     fila = deque([origem])
     while fila:
         u = fila.popleft()
         for a in g.vizinhos(u):
-            if a.destino not in dist:
-                dist[a.destino] = dist[u] + 1
-                pai[a.destino] = u
-                ordem.append(a.destino)
+            if a.destino not in r.dist:
+                r.dist[a.destino] = r.dist[u] + 1
+                r.pai[a.destino] = u
+                r.ordem.append(a.destino)
                 fila.append(a.destino)
-    return ResultadoBFS(dist, pai, ordem)
+    return r
 
 
 def alcancaveis(g: Grafo, origem: No) -> set[No]:
     return set(bfs(g, origem).dist)
 
 
-# ---------------------------------------------------------------- DFS
-@dataclass
-class ResultadoDFS:
-    descoberta: dict[No, int]
-    termino: dict[No, int]
-    pai: dict[No, No | None]
-    classes: dict[str, int] = field(default_factory=lambda: {"arvore": 0, "retorno": 0, "avanco": 0, "cruzamento": 0})
-    arcos: list[tuple[No, No, str]] = field(default_factory=list)
-
-    @property
-    def tem_ciclo(self) -> bool:
-        return self.classes["retorno"] > 0
-
-
-def dfs(g: Grafo, origem: No) -> ResultadoDFS:
-    """DFS iterativa (mapas grandes estourariam a recursão) que classifica cada arco
-    em árvore, retorno, avanço ou cruzamento usando tempos de descoberta/término."""
-    branco, cinza, preto = 0, 1, 2
-    cor: dict[No, int] = {}
-    res = ResultadoDFS({}, {}, {origem: None})
-    t = 0
-
-    def classificar(u: No, v: No) -> str:
-        c = cor.get(v, branco)
-        if c == branco:
-            return "arvore"
-        if c == cinza:
-            return "retorno"
-        return "avanco" if res.descoberta[u] < res.descoberta[v] else "cruzamento"
-
-    cor[origem] = cinza
-    res.descoberta[origem] = t
-    t += 1
-    pilha: list[tuple[No, int]] = [(origem, 0)]
+def dfs(g: Grafo, origem: No) -> Resultado:
+    r = Resultado(pai={origem: None}, ordem=[origem], classes=dict.fromkeys(("arvore", "retorno", "avanco", "cruzamento"), 0))
+    desc = {origem: 0}
+    fim: dict = {}
+    tempo = 1
+    pilha = [(origem, 0)]
     while pilha:
         u, i = pilha[-1]
-        viz = g.vizinhos(u)
-        if i < len(viz):
-            pilha[-1] = (u, i + 1)
-            v = viz[i].destino
-            tipo = classificar(u, v)
-            res.classes[tipo] += 1
-            res.arcos.append((u, v, tipo))
-            if tipo == "arvore":
-                cor[v] = cinza
-                res.pai[v] = u
-                res.descoberta[v] = t
-                t += 1
-                pilha.append((v, 0))
-        else:
+        vizinhos = g.vizinhos(u)
+        if i == len(vizinhos):
+            fim[u] = tempo
+            tempo += 1
             pilha.pop()
-            cor[u] = preto
-            res.termino[u] = t
-            t += 1
-    return res
+            continue
+        pilha[-1] = (u, i + 1)
+        v = vizinhos[i].destino
+        match (v in desc, v in fim):
+            case (False, _):
+                tipo = "arvore"
+                desc[v] = tempo
+                tempo += 1
+                r.pai[v] = u
+                r.ordem.append(v)
+                pilha.append((v, 0))
+            case (True, False):
+                tipo = "retorno"
+            case _:
+                tipo = "avanco" if desc[u] < desc[v] else "cruzamento"
+         r.classes[tipo] += 1
+        r.arcos.append((u, v, tipo))
+    return r
 
 
-# ---------------------------------------------------------------- Dijkstra
-@dataclass
-class ResultadoCaminho:
-    dist: dict[No, float]
-    pai: dict[No, No | None]
-    ciclo_negativo: list[No] | None = None
-
-    def caminho_ate(self, destino: No) -> list[No]:
-        return caminho(self.pai, destino) if self.dist.get(destino, INF) < INF else []
-
-
-def dijkstra(g: Grafo, origem: No) -> ResultadoCaminho:
-    negativos = [a for a in g.arcos() if a.peso < 0]
-    if negativos:
-        a = negativos[0]
-        raise PesoNegativoError(
-            f"Dijkstra recusado: o grafo tem {len(negativos)} arco(s) de peso negativo "
-            f"(ex.: {a.origem} -> {a.destino} com peso {a.peso}). Use Bellman-Ford."
-        )
-    dist: dict[No, float] = {origem: 0}
-    pai: dict[No, No | None] = {origem: None}
-    desempate = count()  # nós podem não ser comparáveis entre si
-    heap = [(0, next(desempate), origem)]
-    fechados: set[No] = set()
+def dijkstra(g: Grafo, origem: No) -> Resultado:
+    if g.tem_peso_negativo():
+        raise PesoNegativoError("Dijkstra não aceita peso negativo. Use Bellman-Ford.")
+    r = Resultado(dist={origem: 0}, pai={origem: None})
+    desempate = count(1)
+    heap = [(0, 0, origem)]
     while heap:
         d, _, u = heapq.heappop(heap)
-        if u in fechados:
+        if d > r.dist[u]:
             continue
-        fechados.add(u)
+        r.ordem.append(u)
         for a in g.vizinhos(u):
-            nd = d + a.peso
-            if nd < dist.get(a.destino, INF):
-                dist[a.destino] = nd
-                pai[a.destino] = u
-                heapq.heappush(heap, (nd, next(desempate), a.destino))
-    return ResultadoCaminho(dist, pai)
+            if _melhora(r, a):
+                _relaxa(r, a)
+                heapq.heappush(heap, (r.dist[a.destino], next(desempate), a.destino))
+    return r
 
 
-# ---------------------------------------------------------------- Bellman-Ford
-def bellman_ford(g: Grafo, origem: No) -> ResultadoCaminho:
-    """Relaxa |V|-1 vezes (com parada antecipada). Se a |V|-ésima rodada ainda relaxa
-    algum arco, existe ciclo negativo alcançável: ele é reconstruído pelos pais."""
+def _extrair_ciclo(g: Grafo, pai: dict, x: No) -> list[No]:
+    for _ in range(g.ordem):
+        x = pai[x]
+    ciclo = [x]
+    v = pai[x]
+    while v != x:
+        ciclo.append(v)
+        v = pai[v]
+    ciclo.reverse()
+    ciclo.append(ciclo[0])
+    return ciclo
+
+
+def bellman_ford(g: Grafo, origem: No) -> Resultado:
     arcos = list(g.arcos())
-    dist: dict[No, float] = {origem: 0}
-    pai: dict[No, No | None] = {origem: None}
-    n = g.ordem
-    for _ in range(n - 1):
-        mudou = False
+    r = Resultado(dist={origem: 0}, pai={origem: None})
+    for _ in range(g.ordem - 1):
         for a in arcos:
-            du = dist.get(a.origem, INF)
-            if du < INF and du + a.peso < dist.get(a.destino, INF):
-                dist[a.destino] = du + a.peso
-                pai[a.destino] = a.origem
-                mudou = True
-        if not mudou:
-            return ResultadoCaminho(dist, pai)
-
-    for a in arcos:
-        du = dist.get(a.origem, INF)
-        if du < INF and du + a.peso < dist.get(a.destino, INF):
-            pai[a.destino] = a.origem
-            x = a.destino
-            for _ in range(n):  # anda n vezes para garantir que caiu dentro do ciclo
-                x = pai[x]
-            ciclo = [x]
-            y = pai[x]
-            while y != x:
-                ciclo.append(y)
-                y = pai[y]
-            ciclo.append(x)
-            return ResultadoCaminho(dist, pai, ciclo_negativo=ciclo[::-1])
-    return ResultadoCaminho(dist, pai)
+            if _melhora(r, a):
+                _relaxa(r, a)
+    match next((a for a in arcos if _melhora(r, a)), None):
+        case None:
+            return r
+        case a:
+            r.pai[a.destino] = a.origem
+            r.ciclo_negativo = _extrair_ciclo(g, r.pai, a.destino)
+            r.status = "CICLO_NEGATIVO"
+            return r
 
 
 def custo_ciclo(g: Grafo, ciclo: list[No]) -> float:

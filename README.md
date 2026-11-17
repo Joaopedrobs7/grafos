@@ -33,7 +33,6 @@ python -m src.cli --mapa ./data/mapas/m03_tres_chaves.txt --interactive --out ./
 # testes
 pytest -q
 
-# aplicação web local (http://localhost:8000)
 python -m src.web.app
 ```
 
