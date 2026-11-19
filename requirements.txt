@@ -12,3 +12,5 @@ kaggle>=2.2
 six
 # [IA] Claude – DVC versiona o dataset da Parte 2 (dvc.yaml/dvc.lock)
 dvc[gdrive]>=3.50
+# [IA] Claude – dvc-gdrive quebra com pyOpenSSL antigo + cryptography nova (GEN_EMAIL)
+pyopenssl>=24.2
