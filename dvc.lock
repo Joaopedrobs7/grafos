@@ -1,0 +1,15 @@
+schema: '2.0'
+stages:
+  baixar:
+    cmd: python -m src.parte2.baixar
+    deps:
+    - path: src/parte2/baixar.py
+      hash: md5
+      md5: 3ef3481862c5205f7d8b2ab071b0c337
+      size: 3186
+    outs:
+    - path: data/dataset_parte2/raw
+      hash: md5
+      md5: 9eaf817d2bb09f440c40a43af7d480a2.dir
+      size: 47980493
+      nfiles: 5
