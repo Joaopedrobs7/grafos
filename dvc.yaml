@@ -5,3 +5,12 @@ stages:
     - src/parte2/baixar.py
     outs:
     - data/dataset_parte2/raw
+  preparar:
+    cmd: python -m src.parte2.preparar
+    deps:
+    - data/dataset_parte2/raw
+    - src/parte2/preparar.py
+    params:
+    - preparar
+    outs:
+    - data/dataset_parte2/processed

@@ -13,3 +13,32 @@ stages:
       md5: 9eaf817d2bb09f440c40a43af7d480a2.dir
       size: 47980493
       nfiles: 5
+  preparar:
+    cmd: python -m src.parte2.preparar
+    deps:
+    - path: data/dataset_parte2/raw
+      hash: md5
+      md5: 9eaf817d2bb09f440c40a43af7d480a2.dir
+      size: 47980493
+      nfiles: 5
+    - path: src/parte2/preparar.py
+      hash: md5
+      md5: 407792e3e80174c9e0a8a532e7ce1bdb
+      size: 6451
+    params:
+      params.yaml:
+        preparar:
+          tipos:
+          - 2
+          - 4
+          - 5
+          - 6
+          temporada_min: 1946
+          temporada_max: 2026
+          sinal_peso: -1
+    outs:
+    - path: data/dataset_parte2/processed
+      hash: md5
+      md5: 0d35b4d54041de43bf13505dc7c78bd0.dir
+      size: 8097099
+      nfiles: 3
