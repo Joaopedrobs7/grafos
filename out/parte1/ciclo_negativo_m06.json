@@ -1,9 +1,9 @@
 {
   "status": "CICLO_NEGATIVO",
   "ciclo": [
-    "(3,5)|-|{}",
     "(3,6)|-|{}",
-    "(3,5)|-|{}"
+    "(3,5)|-|{}",
+    "(3,6)|-|{}"
   ],
   "custo_ciclo": -1.0,
   "correcao_fonte_consumivel": {
