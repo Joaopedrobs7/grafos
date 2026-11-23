@@ -1,3 +1,4 @@
+# [IA] Claude – ajuste de rótulos, legenda e margens dos gráficos de comparação
 from __future__ import annotations
 
 import json
