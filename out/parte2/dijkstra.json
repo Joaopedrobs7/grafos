@@ -1,71 +1,80 @@
 {
-  "transformacao": "w' = w - min(w da temporada do arco)",
+  "transformacao": "w' = -log P(vitória) = log(1 + exp(w / s)), s = 13,712 · √3 / π ≈ 7,56",
   "recusa_pesos_originais": "Dijkstra não aceita peso negativo. Use Bellman-Ford.",
   "pares": [
     {
       "temporada": 2000,
-      "minimo_temporada": -28.5,
       "origem": "ATL|2000",
-      "destino": "SAN|2000",
+      "destino": "ORL|2000",
       "caminho": [
         "ATL|2000",
-        "SAN|2000"
+        "LAC|2000",
+        "ORL|2000"
       ],
-      "n_arcos": 1,
-      "custo_transformado": 50.0,
-      "custo_original": 21.5
+      "n_arcos": 2,
+      "custo_transformado": 1.1208983345929684,
+      "probabilidade_cadeia": 0.325986817811848,
+      "custo_original": -5.0
     },
     {
       "temporada": 2006,
-      "minimo_temporada": -35.5,
       "origem": "ATL|2006",
-      "destino": "UTA|2006",
+      "destino": "SAN|2006",
       "caminho": [
         "ATL|2006",
-        "UTA|2006"
+        "GSW|2006",
+        "DAL|2006",
+        "SEA|2006",
+        "MIL|2006",
+        "SAN|2006"
       ],
-      "n_arcos": 1,
-      "custo_transformado": 51.5,
-      "custo_original": 16.0
+      "n_arcos": 5,
+      "custo_transformado": 0.8114048083305798,
+      "probabilidade_cadeia": 0.4442335646607878,
+      "custo_original": -70.08333333333333
     },
     {
       "temporada": 2013,
-      "minimo_temporada": -31.5,
       "origem": "ATL|2013",
-      "destino": "POR|2013",
+      "destino": "SAN|2013",
       "caminho": [
         "ATL|2013",
-        "POR|2013"
+        "LAC|2013",
+        "HOU|2013",
+        "SAN|2013"
       ],
-      "n_arcos": 1,
-      "custo_transformado": 51.0,
-      "custo_original": 19.5
+      "n_arcos": 3,
+      "custo_transformado": 0.9069812907040254,
+      "probabilidade_cadeia": 0.4037411635197269,
+      "custo_original": -25.25
     },
     {
       "temporada": 2019,
-      "minimo_temporada": -41.0,
       "origem": "BKN|2019",
-      "destino": "DAL|2019",
+      "destino": "BOS|2019",
       "caminho": [
         "BKN|2019",
-        "DAL|2019"
+        "SAC|2019",
+        "BOS|2019"
       ],
-      "n_arcos": 1,
-      "custo_transformado": 53.0,
-      "custo_original": 12.0
+      "n_arcos": 2,
+      "custo_transformado": 0.8068849402989706,
+      "probabilidade_cadeia": 0.4462459862622836,
+      "custo_original": -16.0
     },
     {
       "temporada": 2025,
-      "minimo_temporada": -39.0,
       "origem": "ATL|2025",
-      "destino": "HOU|2025",
+      "destino": "SAN|2025",
       "caminho": [
         "ATL|2025",
-        "HOU|2025"
+        "CLE|2025",
+        "SAN|2025"
       ],
-      "n_arcos": 1,
-      "custo_transformado": 59.0,
-      "custo_original": 20.0
+      "n_arcos": 2,
+      "custo_transformado": 0.650687484590023,
+      "probabilidade_cadeia": 0.5216870016745087,
+      "custo_original": -16.25
     }
   ]
 }

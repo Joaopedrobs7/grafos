@@ -1,0 +1,29 @@
+{
+  "recorte": {
+    "tipos": [
+      2
+    ],
+    "temporada_min": 2000,
+    "temporada_max": 2025,
+    "sinal_peso": -1
+  },
+  "alvo": "margem",
+  "jogos_completo": 73557,
+  "jogos_recorte": 31246,
+  "linhas_time_jogo": 62492,
+  "linhas_fantasma_removidas": 2,
+  "cobertura_minima_time_temporada": 0.8,
+  "times_temporada": 776,
+  "arquivos": {
+    "faltantes.csv": 109,
+    "faltantes_por_temporada.csv": 1853,
+    "estatisticas.csv": 46,
+    "outliers_iqr.csv": 46,
+    "maiores_margens.csv": 20,
+    "time_temporada.csv": 776,
+    "nos_grafo.csv": 776,
+    "pesos_por_temporada.csv": 26,
+    "correlacoes_alvo.csv": 84,
+    "casa_fora.csv": 2
+  }
+}

@@ -25,7 +25,7 @@ def _dataset(ap: argparse.ArgumentParser, args: argparse.Namespace, out: Path) -
     from .parte2 import desempenho
     from .parte2.bellman import subgrafo_temporada
     from .parte2.buscas import carregar, temporada
-    from .parte2.caminhos import transformar
+    from .parte2.caminhos import TRANSFORMACAO, transformar
 
     caminho = Path(args.dataset)
     # [IA] Claude – aceita a pasta do dataset, como no comando do enunciado
@@ -59,11 +59,10 @@ def _dataset(ap: argparse.ArgumentParser, args: argparse.Namespace, out: Path) -
         res.update(ordem=r.ordem, classes=r.classes, tem_ciclo=r.tem_ciclo)
         print(f"DFS: visitados={len(r.ordem)} classes={r.classes} tem_ciclo={r.tem_ciclo}")
     elif args.alg == "DIJKSTRA":
-        h, minimo = transformar(g)
+        h = transformar(g)
         r = dijkstra(h, s)
-        res["minimo_temporada"] = minimo[temporada(s)]
-        print(f"DIJKSTRA: pesos deslocados por temporada (mínimo da temporada = {minimo[temporada(s)]}), "
-              f"alcançados={len(r.dist)}")
+        res["transformacao"] = TRANSFORMACAO
+        print(f"DIJKSTRA: {TRANSFORMACAO}; alcançados={len(r.dist)}")
     else:
         sub = subgrafo_temporada(g, temporada(s))
         r = bellman_ford(sub, s)
