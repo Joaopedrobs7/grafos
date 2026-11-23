@@ -24,11 +24,15 @@ def temporada(no: No) -> int:
     return int(str(no).rsplit("|", 1)[1])
 
 
+def maior_grau_saida(graus: dict, t: int) -> No:
+    return min((v for v in graus if temporada(v) == t), key=lambda v: (-graus[v][1], v))
+
+
 def fontes(g: Grafo) -> list[tuple[int, No]]:
     graus = g.graus()
     temps = sorted({temporada(v) for v in graus})
     escolhidas = dict.fromkeys((temps[0], temps[len(temps) // 2], temps[-1]))
-    return [(t, min((v for v in graus if temporada(v) == t), key=lambda v: (-graus[v][1], v))) for t in escolhidas]
+    return [(t, maior_grau_saida(graus, t)) for t in escolhidas]
 
 
 def buscar(g: Grafo, s: No) -> dict:
