@@ -1,0 +1,21 @@
+gameId,gameDate,temporada,hometeamCity,hometeamName,homeScore,awayteamCity,awayteamName,awayScore,margem_abs
+22100330,2021-12-02 20:00:00,2021,Memphis,Grizzlies,152,Oklahoma City,Thunder,79,73
+22300529,2024-01-11 20:00:00,2023,Oklahoma City,Thunder,139,Portland,Trail Blazers,77,62
+21701072,2018-03-22 19:00:00,2017,Charlotte,Hornets,140,Memphis,Grizzlies,79,61
+22301068,2024-03-29 20:00:00,2023,Miami,Heat,142,Portland,Trail Blazers,82,60
+22400571,2025-01-15 22:30:00,2024,Los Angeles,Clippers,126,Brooklyn,Nets,67,59
+22000963,2021-05-01 20:00:00,2020,Oklahoma City,Thunder,95,Indiana,Pacers,152,57
+22201230,2023-04-09 15:30:00,2022,Portland,Trail Blazers,101,Golden State,Warriors,157,56
+21800383,2018-12-08 20:00:00,2018,Chicago,Bulls,77,Boston,Celtics,133,56
+22500547,2026-01-10 21:30:00,2025,Utah,Jazz,95,Charlotte,Hornets,150,55
+21000560,2011-01-11 22:30:00,2010,Los Angeles,Lakers,112,Cleveland,Cavaliers,57,55
+22500810,2026-02-20 22:00:00,2025,Portland,Trail Blazers,103,Denver,Nuggets,157,54
+22500622,2026-01-21 19:30:00,2025,New York,Knicks,120,Brooklyn,Nets,66,54
+22400449,2024-12-31 15:00:00,2024,Boston,Celtics,125,Toronto,Raptors,71,54
+22500704,2026-02-01 18:00:00,2025,Detroit,Pistons,130,Brooklyn,Nets,77,53
+22401061,2025-03-27 19:00:00,2024,Washington,Wizards,109,Indiana,Pacers,162,53
+22400810,2025-02-22 22:00:00,2024,Portland,Trail Blazers,141,Charlotte,Hornets,88,53
+22300335,2023-12-16 19:00:00,2023,Charlotte,Hornets,82,Philadelphia,76ers,135,53
+22100717,2022-01-25 19:30:00,2021,Boston,Celtics,128,Sacramento,Kings,75,53
+22000737,2021-04-02 19:00:00,2020,Toronto,Raptors,130,Golden State,Warriors,77,53
+21400120,2014-11-13 20:30:00,2014,Dallas,Mavericks,123,Philadelphia,76ers,70,53
