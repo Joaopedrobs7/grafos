@@ -1,3 +1,4 @@
+# [IA] Claude – testes da Parte 2 com dados sintéticos
 import csv
 
 import pytest
