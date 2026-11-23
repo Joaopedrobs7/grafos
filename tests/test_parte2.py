@@ -3,6 +3,7 @@ import csv
 
 import pytest
 
+from src.cli import main
 from src.graphs.algorithms import alcancaveis
 from src.parte2.buscas import carregar, temporada
 from src.parte2.preparar import preparar
@@ -79,3 +80,20 @@ def test_no_em_texto_time_ano(dataset):
     assert all(isinstance(v, str) for v in g.nos())
     assert temporada("AAA|2001") == 2001
     assert alcancaveis(g, "AAA|2000") == {"AAA|2000", "BBB|2000", "CCC|2000"}
+
+
+# [IA] Claude – o comando do enunciado passa a pasta do dataset, não o CSV
+def test_cli_aceita_pasta_do_dataset(tmp_path, capsys):
+    pasta = tmp_path / "dataset"
+    pasta.mkdir()
+    (pasta / "arestas.csv").write_text(
+        "origem,destino,peso,temporada\nAAA|2000,BBB|2000,-3.0,2000\nBBB|2000,AAA|2000,3.0,2000\n",
+        encoding="utf-8",
+    )
+    assert main(["--dataset", str(pasta), "--out", str(tmp_path / "out")]) == 0
+    assert "|V|=2 |E|=2" in capsys.readouterr().out
+
+
+def test_cli_pasta_sem_arestas_da_erro_claro(tmp_path, capsys):
+    assert main(["--dataset", str(tmp_path), "--out", str(tmp_path / "out")]) == 1
+    assert "arquivo não encontrado" in capsys.readouterr().err

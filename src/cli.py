@@ -28,6 +28,9 @@ def _dataset(ap: argparse.ArgumentParser, args: argparse.Namespace, out: Path) -
     from .parte2.caminhos import transformar
 
     caminho = Path(args.dataset)
+    # [IA] Claude – aceita a pasta do dataset, como no comando do enunciado
+    if caminho.is_dir():
+        caminho = caminho / "arestas.csv"
     if not caminho.is_file():
         print(f"Erro: arquivo não encontrado: {caminho}", file=sys.stderr)
         return 1
@@ -92,7 +95,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--interactive", action="store_true", help="gera out/parte1/labirinto_interativo.html")
     ap.add_argument("--todos", action="store_true", help="gera todas as saídas obrigatórias da Parte 1")
     ap.add_argument("--viz", action="store_true", help="gera as figuras PNG da Parte 1")
-    ap.add_argument("--dataset", help="Parte 2: CSV de arcos (ex.: data/dataset_parte2/arestas.csv)")
+    ap.add_argument("--dataset", help="Parte 2: pasta do dataset (usa arestas.csv) ou CSV de arcos")
     ap.add_argument("--source", help="Parte 2: nó de origem, formato TIME|ano (ex.: ATL|2000)")
     ap.add_argument("--target", help="Parte 2: nó de destino, formato TIME|ano")
     ap.add_argument("--benchmark", action="store_true", help="Parte 2: tempos e escalabilidade (parte2_report.json)")
