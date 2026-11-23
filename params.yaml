@@ -1,0 +1,6 @@
+# [IA] Claude – parâmetros da preparação do dataset da Parte 2 (o grupo decide e justifica no PDF)
+preparar:
+  tipos: [2]
+  temporada_min: 2000
+  temporada_max: 2025
+  sinal_peso: -1

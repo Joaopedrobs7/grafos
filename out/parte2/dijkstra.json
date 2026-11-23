@@ -1,0 +1,71 @@
+{
+  "transformacao": "w' = w - min(w da temporada do arco)",
+  "recusa_pesos_originais": "Dijkstra não aceita peso negativo. Use Bellman-Ford.",
+  "pares": [
+    {
+      "temporada": 2000,
+      "minimo_temporada": -28.5,
+      "origem": "ATL|2000",
+      "destino": "SAN|2000",
+      "caminho": [
+        "ATL|2000",
+        "SAN|2000"
+      ],
+      "n_arcos": 1,
+      "custo_transformado": 50.0,
+      "custo_original": 21.5
+    },
+    {
+      "temporada": 2006,
+      "minimo_temporada": -35.5,
+      "origem": "ATL|2006",
+      "destino": "UTA|2006",
+      "caminho": [
+        "ATL|2006",
+        "UTA|2006"
+      ],
+      "n_arcos": 1,
+      "custo_transformado": 51.5,
+      "custo_original": 16.0
+    },
+    {
+      "temporada": 2013,
+      "minimo_temporada": -31.5,
+      "origem": "ATL|2013",
+      "destino": "POR|2013",
+      "caminho": [
+        "ATL|2013",
+        "POR|2013"
+      ],
+      "n_arcos": 1,
+      "custo_transformado": 51.0,
+      "custo_original": 19.5
+    },
+    {
+      "temporada": 2019,
+      "minimo_temporada": -41.0,
+      "origem": "BKN|2019",
+      "destino": "DAL|2019",
+      "caminho": [
+        "BKN|2019",
+        "DAL|2019"
+      ],
+      "n_arcos": 1,
+      "custo_transformado": 53.0,
+      "custo_original": 12.0
+    },
+    {
+      "temporada": 2025,
+      "minimo_temporada": -39.0,
+      "origem": "ATL|2025",
+      "destino": "HOU|2025",
+      "caminho": [
+        "ATL|2025",
+        "HOU|2025"
+      ],
+      "n_arcos": 1,
+      "custo_transformado": 59.0,
+      "custo_original": 20.0
+    }
+  ]
+}

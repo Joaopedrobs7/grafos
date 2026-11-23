@@ -249,7 +249,8 @@ def figura_percurso(mapa: Mapa, destino: Path) -> None:
     ax.set_title(f"{mapa.nome}: caminho de menor custo ({r['passos']} passos, custo {r['custo']:g})\n"
                  "a cor do caminho muda a cada chave coletada", fontsize=10)
     fig.tight_layout()
-    fig.savefig(destino, dpi=150)
+    # [IA] Claude – recorte "tight" para o título e a legenda (abaixo do eixo) não ficarem fora da imagem no m08
+    fig.savefig(destino, dpi=150, bbox_inches="tight", pad_inches=0.2)
     plt.close(fig)
 
 

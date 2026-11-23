@@ -1,0 +1,13 @@
+{
+  "tipo": "dirigido e ponderado",
+  "arcos_com_peso_diferente_do_inverso": 22012,
+  "pesos_distintos": 405,
+  "V": 776,
+  "E": 22378,
+  "temporadas": 26,
+  "pesos_negativos": 11006,
+  "pesos_zero": 366,
+  "pesos_positivos": 11006,
+  "peso_min": -45.5,
+  "peso_max": 45.5
+}

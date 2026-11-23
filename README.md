@@ -149,29 +149,43 @@ push na `main` e, no console, **Auto Scaling Group → Atualização da instânc
   mostra a versão em execução (`main@<commit>`).
 - **Vercel:** a branch de produção do projeto deve ser a `main` (Settings → Git → Production Branch).
 
-<!-- [IA] Claude – configuração do token e download do dataset da Parte 2 (Kaggle) -->
-## Parte 2 — dataset (Kaggle)
+<!-- [IA] Claude – dados da Parte 2: download, versionamento com DVC e preparação -->
+## Parte 2 — dataset (NBA, Kaggle + DVC)
 
-Gere um token em kaggle.com → Settings → API → *Create New Token* (começa com `KGAT_`) e grave-o
-fora do repositório (nunca faça commit do token):
+Dataset: [Historical NBA Data and Player Box Scores](https://www.kaggle.com/datasets/eoinamoore/historical-nba-data-and-player-box-scores)
+(licença CC0). Os arquivos não vão para o git: o **DVC** guarda o snapshot usado pelo grupo no drive
+compartilhado do Google Drive (o Kaggle atualiza o dataset todo dia; o `dvc.lock` fixa a versão).
 
-```powershell
-# Windows (PowerShell)
-New-Item -ItemType Directory -Force "$env:USERPROFILE\.kaggle" | Out-Null
-Set-Content -Encoding ascii "$env:USERPROFILE\.kaggle\access_token" "KGAT_seu_token"
-```
+Modelagem (decisão do grupo): **nó = (time, temporada)**, ex. `LAL 2024-25`; **um arco por jogo, do vencedor
+para o perdedor**; **peso = −(margem de pontos)**, sempre negativo (quanto menor, maior a vitória).
 
 ```bash
-# Linux/macOS
-mkdir -p ~/.kaggle && echo KGAT_seu_token > ~/.kaggle/access_token && chmod 600 ~/.kaggle/access_token
+dvc pull            # baixa raw/ e processed/ do drive do grupo (1ª vez abre o login do Google)
+dvc repro           # refaz só o que mudou: baixar (Kaggle) -> preparar (params.yaml)
 ```
 
-Teste e baixe (com o venv ativo):
+| Estágio | Comando | Saída |
+|---|---|---|
+| `baixar` | `python -m src.parte2.baixar` | `data/dataset_parte2/raw/` (CSV do Kaggle + `MANIFESTO.json` com SHA-256) |
+| `preparar` | `python -m src.parte2.preparar` | `data/dataset_parte2/processed/arestas.csv`, `nos.csv`, `relatorio_preparacao.json` |
+
+`params.yaml` controla a limpeza (tipos de jogo, intervalo de temporadas, sinal do peso). A temporada e o tipo
+de jogo vêm do `gameId` (ex.: os playoffs da "bolha" de 2020 pertencem à temporada 2019-20).
+
+**Acesso ao remoto (cada integrante, uma vez):** o e-mail precisa estar em *Usuários de teste* no projeto
+`grafos-dvc` do Google Cloud e como membro do drive compartilhado. Peça o arquivo `client_secret_*.json` a quem
+administra (nunca pelo repositório) e rode:
 
 ```bash
-kaggle competitions list
-kaggle datasets download <dono>/<dataset> -p data/dataset_parte2 --unzip
+python - client_secret_XXXX.json <<'PY'
+import json, subprocess, sys
+c = json.load(open(sys.argv[1]))["installed"]
+for k, v in (("gdrive_client_id", c["client_id"]), ("gdrive_client_secret", c["client_secret"])):
+    subprocess.run(["dvc", "remote", "modify", "--local", "gdrive", k, v], check=True)
+PY
 ```
+
+As credenciais ficam em `.dvc/config.local`, fora do git.
 
 ## Estrutura
 
