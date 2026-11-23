@@ -33,4 +33,7 @@ Thumbs.db
 *.log
 *.tmp
 
+# [IA] Claude – saídas do teste de mapa surpresa não vão para o repositório
+out/surpresa/
+
 # NUNCA ignorar: out/, docs/, data/mapas/, data/mapas_grupo/, deploy/

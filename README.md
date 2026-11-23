@@ -9,6 +9,10 @@ A mesma aplicação também é servida como **aplicação web** (Flask + gunicor
 usada na disciplina de Cloud (EC2 + AMI + Auto Scaling Group + Application Load Balancer).
 Veja [`docs/cloud/ARQUITETURA_AWS.md`](docs/cloud/ARQUITETURA_AWS.md).
 
+<!-- [IA] Claude – resumo da Parte 2 -->
+A Parte 2 aplica os mesmos algoritmos a um grafo dirigido e ponderado da **NBA** (2000 a 2025): 776 nós
+(time + temporada), 22.378 arcos e 11.006 pesos negativos, com benchmark, escalabilidade e tabelas de apoio à AVD.
+
 ## Instalação
 
 <!-- [IA] Claude – ativação do venv no Windows e no Linux/macOS -->
@@ -46,6 +50,43 @@ python -m src.cli --mapa ./data/mapas/m03_tres_chaves.txt --interactive --out ./
 pytest -q
 ```
 
+<!-- [IA] Claude – comandos da Parte 2 -->
+**Parte 2** (o `arestas.csv` já está no repositório; os dados brutos vêm do DVC):
+
+```bash
+python -m src.cli --dataset ./data/dataset_parte2/                                       # |V| e |E|
+python -m src.cli --dataset ./data/dataset_parte2/ --alg BFS --source "ATL|2000"
+python -m src.cli --dataset ./data/dataset_parte2/ --alg DFS --source "ATL|2000"
+python -m src.cli --dataset ./data/dataset_parte2/ --alg DIJKSTRA --source "ATL|2000" --target "SAN|2000"
+python -m src.cli --dataset ./data/dataset_parte2/ --alg BELLMAN_FORD --source "ATL|2000"
+python -m src.cli --dataset ./data/dataset_parte2/ --benchmark --out ./out/parte2/       # tempos e escalabilidade
+
+python -m src.parte2.buscas      # BFS/DFS de 3 fontes        -> out/parte2/bfs_dfs.json
+python -m src.parte2.caminhos    # Dijkstra em 5 pares        -> out/parte2/dijkstra.json
+python -m src.parte2.bellman     # com ciclo e sem ciclo      -> out/parte2/bellman_ford.json
+python -m src.parte2.graficos    # gráficos de comparação     -> out/parte2/graficos/
+python -m src.avd.descricao      # descrição do grafo         -> out/avd/
+python -m src.avd.tabelas        # tabelas de apoio à AVD     -> out/avd/tabelas/ (precisa dos dados brutos)
+```
+
+Nas tabelas de apoio, a média de um time na temporada só é calculada quando o atributo existe em pelo menos 80% dos
+jogos, sem imputação. As colunas de detalhe (quartos, banco, garrafão etc.) faltam em 50,2% das linhas de 2000 e 99,9% de 2021.
+
+<!-- [IA] Claude – roteiro do mapa surpresa, testado em 23/11 -->
+### Mapa surpresa (apresentação)
+
+```bash
+python -m src.cli --mapa surpresa.txt --alg BFS --out ./out/surpresa/
+python -m src.cli --mapa surpresa.txt --alg DIJKSTRA --out ./out/surpresa/
+python -m src.cli --mapa surpresa.txt --alg BELLMAN_FORD --out ./out/surpresa/
+python -m src.cli --mapa surpresa.txt --armadilhas --out ./out/surpresa/
+python -m src.cli --mapa surpresa.txt --interactive --out ./out/surpresa/  # HTML com esse mapa
+```
+
+Na interface, o botão de carregar mapa só resolve com o servidor rodando (`python -m src.web.app`); no HTML
+estático ele mostra o comando acima. O leitor recusa **espaço no fim da linha** e **BOM** (arquivo salvo como
+"UTF-8 com BOM" no Bloco de Notas): se aparecer esse erro, salve o mapa como UTF-8 sem espaços sobrando.
+
 ### Front-end
 
 A página é um jogo e o seu manual: um diorama 3D em pixel art em que um aluno da CESAR School
@@ -62,7 +103,7 @@ PORT=8765 python -m src.web.app       # outra porta
 <!-- [IA] Claude – menu de projetos e uma rota por parte -->
 `/` abre o menu de projetos (estilo tela de seleção de videogame: ↑/↓ ou W/S escolhem, Enter abre).
 A Parte 1 fica em `/parte1` (`/labirinto` redireciona para lá) e a Parte 2 em `/parte2`, por
-enquanto uma página provisória que a branch `entrega2` substitui.
+enquanto uma página provisória; os resultados da Parte 2 ficam em `out/parte2/`.
 
 ```
 src/web/templates/menu.html         menu de projetos em "/" (Parte 1 liberada, Parte 2 trancada)
@@ -143,7 +184,7 @@ push na `main` e, no console, **Auto Scaling Group → Atualização da instânc
 |---|---|
 | `main` | integração: Parte 1 + Parte 2, com o menu de projetos em `/`. É o que vai para produção. |
 | `entrega1-parcial` | entrega da Parte 1 (fica congelada como foi entregue) |
-| `entrega2` | desenvolvimento da Parte 2 (a criar); entra na `main` por merge |
+| `entrega2` | desenvolvimento da Parte 2; entra na `main` por pull request |
 
 - **AWS:** o Auto Scaling Group faz deploy da `main` (`deploy/boot.sh`, `BRANCH=main`); `/api/info`
   mostra a versão em execução (`main@<commit>`).
@@ -156,8 +197,17 @@ Dataset: [Historical NBA Data and Player Box Scores](https://www.kaggle.com/data
 (licença CC0). Os arquivos não vão para o git: o **DVC** guarda o snapshot usado pelo grupo no drive
 compartilhado do Google Drive (o Kaggle atualiza o dataset todo dia; o `dvc.lock` fixa a versão).
 
-Modelagem (decisão do grupo): **nó = (time, temporada)**, ex. `LAL 2024-25`; **um arco por jogo, do vencedor
-para o perdedor**; **peso = −(margem de pontos)**, sempre negativo (quanto menor, maior a vitória).
+<!-- [IA] Claude – descrição do modelo atual e dos casos implementados -->
+Modelagem: **nó = time + temporada**, ex. `LAL|2024` (temporada 2024-25); há **um arco em cada sentido** entre dois
+times que se enfrentaram na temporada; **peso de A para B = −(saldo médio de pontos de A sobre B)**, então é negativo
+quando A leva vantagem no confronto. Recorte: temporada regular de 2000 a 2025.
+
+| Caso | Como é calculado |
+|---|---|
+| Dijkstra (5 pares) | custo `w' = -log P(vitória) = log(1 + exp(w / s))`, com `s = 13,712 · √3 / π ≈ 7,56` |
+| Bellman-Ford com ciclo | subgrafo de cada temporada (ciclo negativo nas 26) |
+| Bellman-Ford sem ciclo | em cada temporada, só arcos do time de maior saldo para o de menor (grafo acíclico) |
+| Escalabilidade | 10%, 50% e 100% das **temporadas** (V = 91, 390, 777; E = 2.613, 11.255, 22.404), com o nó `INICIO` ligado a uma entrada por temporada |
 
 ```bash
 dvc pull            # baixa raw/ e processed/ do drive do grupo (1ª vez abre o login do Google)
@@ -203,8 +253,12 @@ src/viz.py           figuras (matplotlib) e montagem do HTML interativo
 src/cli.py           linha de comando
 src/web/             aplicação Flask (menu de projetos, API, labirinto interativo, identificação da instância EC2)
 deploy/              user data, systemd, Apache e script de atualização para EC2
-tests/               pytest (algorithms, bfs, dfs, dijkstra, bellman_ford, estados, io, traco, web)
-out/parte1/          saídas geradas
+src/parte2/          dataset da NBA: baixar, preparar, buscas, caminhos, bellman, desempenho, graficos
+src/avd/             descrição do grafo e tabelas de apoio à análise exploratória
+tests/               pytest (algorithms, bfs, dfs, dijkstra, bellman_ford, estados, io, traco, web, parte2, avd)
+out/parte1/          saídas geradas da Parte 1
+out/parte2/          parte2_report.json, resultados dos algoritmos e gráficos de comparação
+out/avd/             descrição do grafo e tabelas de apoio (out/avd/tabelas/)
 ```
 
 ## Regras implementadas
@@ -232,11 +286,13 @@ out/parte1/          saídas geradas
 | g01 | 186 | 346 | 42 | 37 (Bellman-Ford) | passa por bônus e esteira |
 | g02 | 94 | 212 | 10 | 10 | 56 de 94 estados são armadilha |
 
-## Status da entrega parcial
+## Status
 
-Feito: Parte 1 (código, saídas obrigatórias, figuras, HTML interativo, mapas do grupo, testes) e
-o deploy web. Pendente: PDF (manual + técnica, prova do m05, discussões, matriz de contribuição),
-`docs/DECLARACAO_IA.pdf` assinada e a Parte 2 inteira (dataset, benchmark, AVD).
+Feito: Parte 1 (código, saídas obrigatórias, figuras, HTML interativo, mapas do grupo, testes), deploy web e, na
+Parte 2, dataset, casos dos 4 algoritmos, benchmark, escalabilidade, gráficos de comparação e tabelas de apoio à AVD.
+
+Pendente: análise exploratória e explanatória (AVD), visualizações e notas analíticas, discussão crítica, PDF (manual +
+técnica, prova do m05, discussões, matriz de contribuição) e `docs/DECLARACAO_IA.pdf` assinada.
 
 ## Uso de IA
 
