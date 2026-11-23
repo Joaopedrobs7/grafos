@@ -183,8 +183,10 @@ push na `main` e, no console, **Auto Scaling Group → Atualização da instânc
 | Branch | Papel |
 |---|---|
 | `main` | integração: Parte 1 + Parte 2, com o menu de projetos em `/`. É o que vai para produção. |
-| `entrega1-parcial` | entrega da Parte 1 (fica congelada como foi entregue) |
 | `entrega2` | desenvolvimento da Parte 2; entra na `main` por pull request |
+
+Versões entregues ficam em **tags** (não em branches): `entrega1` (Parte 1, 17/11/2026) e `ex05-rds`
+(Cloud, Exercício 05). Para ver uma delas: `git checkout entrega1`.
 
 - **AWS:** o Auto Scaling Group faz deploy da `main` (`deploy/boot.sh`, `BRANCH=main`); `/api/info`
   mostra a versão em execução (`main@<commit>`).
@@ -303,6 +305,6 @@ Esse uso precisa constar na Declaração de Uso de IA (`docs/DECLARACAO_IA.pdf`)
 - Declaração em edição (Google Docs): <https://docs.google.com/document/d/114ikHSDgZ674UKYB-E7fYnSYn1WqNbiF/edit>
 - Versão final assinada: `docs/DECLARACAO_IA.pdf`.
 - A primeira versão de `io.py`, `estados.py`, `graph.py` e `algorithms.py` (25/10) foi um protótipo gerado com IA só
-  para validar o funcionamento do projeto; em 17/11 o grupo reescreveu esses arquivos à mão (branch `entrega1-parcial`).
+  para validar o funcionamento do projeto; em 17/11 o grupo reescreveu esses arquivos à mão (commits `58cd061` e `3899ee2`).
   Em `algorithms.py` restam apenas os ganchos de visualização `observador=None`, marcados com `# [IA]`, que não alteram
   a lógica.
