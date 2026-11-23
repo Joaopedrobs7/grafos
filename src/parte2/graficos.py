@@ -74,11 +74,11 @@ def tempo_por_tamanho(rel: dict, destino: Path) -> None:
     ax.set_xticks([t[0] for t in tamanhos], [f"|E|={E}\n|V|={V} ({a:.0%})" for E, V, a in tamanhos])
     ax.set_xlim(0, tamanhos[-1][0] * 1.25)
     ax.set_yscale("log")
-    ax.set_xlabel("tamanho da amostra (fração dos arcos, seed 42)")
+    ax.set_xlabel("tamanho da amostra (fração das temporadas, seed 42)")
     ax.set_ylabel("tempo médio (ms, escala log)")
     _eixos(ax)
-    ax.legend(loc="center right", fontsize=8, frameon=False)
-    ax.set_title("Tempo × tamanho do grafo: uma fonte, grafo amostrado inteiro", fontsize=11)
+    ax.legend(loc="upper left", fontsize=8, frameon=False)
+    ax.set_title("Tempo × tamanho do grafo: temporadas inteiras, uma fonte virtual", fontsize=11)
     _salvar(plt, fig, destino)
 
 
@@ -111,14 +111,15 @@ def caminhos_dijkstra(d: dict, destino: Path) -> None:
     pares = d["pares"]
     y = range(len(pares))
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(12, 4.6), sharey=True, gridspec_kw={"width_ratios": [3, 1]})
-    for desloc, chave, cor, rotulo in ((-0.2, "custo_transformado", CORES["Dijkstra"], "custo com pesos deslocados (o que o Dijkstra minimiza)"),
+    for desloc, chave, cor, rotulo in ((-0.2, "custo_transformado", CORES["Dijkstra"], "custo −log P(vitória) (o que o Dijkstra minimiza)"),
                                        (0.2, "custo_original", CINZA, "custo nos pesos originais (−saldo médio)")):
         vals = [p[chave] for p in pares]
         a1.barh([i + desloc for i in y], vals, height=0.38, color=cor, label=rotulo)
         for i, v in zip(y, vals):
-            a1.annotate(f"{v:g}", (v, i + desloc), xytext=(4 if v >= 0 else -4, 0), textcoords="offset points",
+            a1.annotate(f"{v:.2f}", (v, i + desloc), xytext=(4 if v >= 0 else -4, 0), textcoords="offset points",
                         ha="left" if v >= 0 else "right", va="center", color=TINTA, fontsize=8)
     a1.axvline(0, color=TINTA_2, lw=0.8)
+    a1.margins(x=0.1)
     a1.set_yticks(list(y), [f"{p['temporada']}: {p['origem']} → {p['destino']}" for p in pares])
     a1.invert_yaxis()
     a1.set_xlabel("custo do caminho")
@@ -132,7 +133,7 @@ def caminhos_dijkstra(d: dict, destino: Path) -> None:
     a2.set_xticks(range(max(arcos) + 2))
     a2.set_xlabel("nº de arcos no caminho")
     _eixos(a2, "x")
-    fig.suptitle("Caminhos do Dijkstra nos 5 pares (pesos deslocados por temporada)", fontsize=11)
+    fig.suptitle("Caminhos do Dijkstra nos 5 pares (custo = −log da probabilidade de vitória)", fontsize=11)
     _salvar(plt, fig, destino)
 
 

@@ -1,21 +1,29 @@
 from __future__ import annotations
 
 import json
+import math
 
 from ..graphs.algorithms import PesoNegativoError, Resultado, custo_ciclo, dijkstra
 from ..graphs.graph import Grafo, No
 from .buscas import SAIDA, carregar, maior_grau_saida, temporada
 
 
-def transformar(g: Grafo) -> tuple[Grafo, dict[int, float]]:
-    minimo: dict[int, float] = {}
-    for a in g.arcos():
-        t = temporada(a.origem)
-        minimo[t] = min(minimo.get(t, a.peso), a.peso)
+# [IA] Claude – custo = -log P(vitória), para somar custos equivaler a multiplicar probabilidades.
+# Um deslocamento constante por arco penalizava caminhos longos (86% dos caminhos ficavam com 1 arco).
+DESVIO_MARGEM = 13.712  # desvio-padrão da margem por jogo, temporada regular 2000-2025 (31.246 jogos)
+ESCALA = DESVIO_MARGEM * math.sqrt(3) / math.pi  # escala da logística com esse desvio-padrão
+TRANSFORMACAO = "w' = -log P(vitória) = log(1 + exp(w / s)), s = 13,712 · √3 / π ≈ 7,56"
+
+
+def custo_vitoria(peso: float) -> float:
+    return math.log1p(math.exp(peso / ESCALA))
+
+
+def transformar(g: Grafo) -> Grafo:
     h = Grafo()
     for a in g.arcos():
-        h.add_arco(a.origem, a.destino, a.peso - minimo[temporada(a.origem)])
-    return h, minimo
+        h.add_arco(a.origem, a.destino, custo_vitoria(a.peso))
+    return h
 
 
 def pares(g: Grafo, h: Grafo) -> list[tuple[int, No, No, Resultado]]:
@@ -33,7 +41,7 @@ def pares(g: Grafo, h: Grafo) -> list[tuple[int, No, No, Resultado]]:
 
 def main() -> None:
     g = carregar()
-    h, minimo = transformar(g)
+    h = transformar(g)
     escolhidos = pares(g, h)
     try:
         dijkstra(g, escolhidos[0][1])
@@ -41,16 +49,17 @@ def main() -> None:
     except PesoNegativoError as e:
         recusa = str(e)
     print(f"Dijkstra com pesos originais a partir de {escolhidos[0][1]}: {recusa}")
-    saida = {"transformacao": "w' = w - min(w da temporada do arco)", "recusa_pesos_originais": recusa, "pares": []}
+    saida = {"transformacao": TRANSFORMACAO, "recusa_pesos_originais": recusa, "pares": []}
     for t, s, alvo, r in escolhidos:
         cam = r.caminho_ate(alvo)
         item = {
-            "temporada": t, "minimo_temporada": minimo[t], "origem": s, "destino": alvo,
+            "temporada": t, "origem": s, "destino": alvo,
             "caminho": cam, "n_arcos": len(cam) - 1,
-            "custo_transformado": r.dist[alvo], "custo_original": custo_ciclo(g, cam),
+            "custo_transformado": r.dist[alvo], "probabilidade_cadeia": math.exp(-r.dist[alvo]),
+            "custo_original": custo_ciclo(g, cam),
         }
         saida["pares"].append(item)
-        print(f"{t}: {s} -> {alvo}  min={minimo[t]}  arcos={item['n_arcos']}  "
+        print(f"{t}: {s} -> {alvo}  arcos={item['n_arcos']}  "
               f"custo transf.={item['custo_transformado']:.4f}  custo orig.={item['custo_original']:.4f}")
         print(f"      caminho: {' -> '.join(cam)}")
     SAIDA.mkdir(parents=True, exist_ok=True)

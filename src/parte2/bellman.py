@@ -26,19 +26,35 @@ def por_temporada(g: Grafo) -> list[dict]:
     return res
 
 
-def recorte_par(g: Grafo) -> dict:
-    graus = g.graus()
-    t = min(temporada(v) for v in graus)
-    a = maior_grau_saida(graus, t)
-    b = next(x.destino for x in g.vizinhos(a) if x.peso != 0)
-    sub = g.subgrafo_induzido({a, b})
-    r = bellman_ford(sub, a)
-    return {
-        "temporada": t, "fonte": a, "nos": [a, b],
-        "arcos": [[x.origem, x.destino, x.peso] for x in sub.arcos()],
-        "custo_ciclo_ida_volta": custo_ciclo(sub, [a, b, a]),
-        "status": r.status, "ciclo_negativo": r.ciclo_negativo,
-    }
+# [IA] Claude – recorte sem ciclo: só arcos do time melhor classificado para o pior (grafo acíclico)
+def hierarquia(g: Grafo, t: int) -> tuple[Grafo, str]:
+    sub = subgrafo_temporada(g, t)
+    saldo = {v: -sum(a.peso for a in sub.vizinhos(v)) for v in sub.nos()}
+    posicao = {v: i for i, v in enumerate(sorted(saldo, key=lambda v: (-saldo[v], v)))}
+    dag = Grafo()
+    for v in sorted(posicao, key=posicao.get):
+        dag.add_no(v)
+    for a in sub.arcos():
+        if posicao[a.origem] < posicao[a.destino]:
+            dag.add_arco(a.origem, a.destino, a.peso)
+    return dag, min(posicao, key=posicao.get)
+
+
+def sem_ciclo_por_temporada(g: Grafo) -> list[dict]:
+    res = []
+    for t in sorted({temporada(v) for v in g.nos()}):
+        dag, s = hierarquia(g, t)
+        r = bellman_ford(dag, s)
+        alvo = min(r.dist, key=lambda v: (r.dist[v], v))
+        cam = r.caminho_ate(alvo)
+        res.append({
+            "temporada": t, "fonte": s, "nos": dag.ordem, "arcos": dag.tamanho,
+            "arcos_negativos": sum(a.peso < 0 for a in dag.arcos()),
+            "arcos_positivos": sum(a.peso > 0 for a in dag.arcos()),
+            "status": r.status, "ciclo_negativo": r.ciclo_negativo,
+            "destino": alvo, "caminho": cam, "n_arcos": len(cam) - 1, "custo": r.dist[alvo],
+        })
+    return res
 
 
 def main() -> None:
@@ -48,13 +64,17 @@ def main() -> None:
         print(f"{e['temporada']} fonte={e['fonte']} |V|={e['nos']} |E|={e['arcos']} status={e['status']}")
         if e["ciclo_negativo"]:
             print(f"     ciclo ({len(e['ciclo_negativo']) - 1} arcos, custo {e['custo_ciclo']:.4f}): {' -> '.join(e['ciclo_negativo'])}")
-    par = recorte_par(g)
-    print(f"recorte {par['nos'][0]} <-> {par['nos'][1]}: arcos={par['arcos']} "
-          f"custo ida e volta={par['custo_ciclo_ida_volta']} status={par['status']} ciclo={par['ciclo_negativo']}")
-    print("sem ciclo negativo" if par["status"] == "OK" and par["ciclo_negativo"] is None else "ATENÇÃO: recorte devolveu ciclo")
+    recorte = sem_ciclo_por_temporada(g)
+    for e in recorte:
+        print(f"{e['temporada']} hierarquia: |V|={e['nos']} |E|={e['arcos']} negativos={e['arcos_negativos']} "
+              f"status={e['status']} menor custo={e['custo']:.2f} em {e['n_arcos']} arcos")
+    if any(e["status"] != "OK" for e in recorte):
+        print("ATENÇÃO: recorte devolveu ciclo")
     SAIDA.mkdir(parents=True, exist_ok=True)
     (SAIDA / "bellman_ford.json").write_text(
-        json.dumps({"temporadas": temporadas, "recorte_sem_ciclo": par}, indent=2, ensure_ascii=False), encoding="utf-8")
+        json.dumps({"temporadas": temporadas, "recorte_sem_ciclo": {
+            "regra": "em cada temporada, só arcos do time com maior saldo para o de menor saldo (grafo acíclico)",
+            "temporadas": recorte}}, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"gravado: {SAIDA / 'bellman_ford.json'}")
 
 

@@ -10,13 +10,14 @@ from pathlib import Path
 
 from ..graphs.algorithms import bellman_ford, bfs, dfs, dijkstra
 from ..graphs.graph import Grafo
-from .bellman import recorte_par, subgrafo_temporada
+from .bellman import hierarquia, subgrafo_temporada
 from .buscas import ARESTAS, SAIDA, carregar, fontes, maior_grau_saida, temporada
 from .caminhos import pares, transformar
 
 REPETICOES = 5
 FRACOES = (0.1, 0.5, 1.0)
 SEMENTE = 42
+INICIO = "INICIO"
 COMPLEXIDADE = {
     "BFS": ("O(V+E)", lambda v, e: v + e),
     "DFS": ("O(V+E)", lambda v, e: v + e),
@@ -39,7 +40,7 @@ def tarefas(g: Grafo) -> list[dict]:
     for _, s in fontes(g):
         res.append({"parte": 2, "algoritmo": "BFS", "tarefa": f"fonte {s}", **cronometrar(bfs, g, s)})
         res.append({"parte": 2, "algoritmo": "DFS", "tarefa": f"fonte {s}", **cronometrar(dfs, g, s)})
-    h, _ = transformar(g)
+    h = transformar(g)
     for _, s, alvo, _ in pares(g, h):
         res.append({"parte": 3, "algoritmo": "Dijkstra", "tarefa": f"{s} -> {alvo}", **cronometrar(dijkstra, h, s)})
     graus = g.graus()
@@ -47,17 +48,26 @@ def tarefas(g: Grafo) -> list[dict]:
         s = maior_grau_saida(graus, t)
         res.append({"parte": 4, "algoritmo": "Bellman-Ford", "tarefa": f"temporada {t} fonte {s}",
                     **cronometrar(bellman_ford, subgrafo_temporada(g, t), s)})
-    par = recorte_par(g)
-    res.append({"parte": 4, "algoritmo": "Bellman-Ford", "tarefa": f"recorte {par['nos'][0]} <-> {par['nos'][1]}",
-                **cronometrar(bellman_ford, g.subgrafo_induzido(set(par["nos"])), par["fonte"])})
+        dag, fonte = hierarquia(g, t)
+        res.append({"parte": 4, "algoritmo": "Bellman-Ford", "tarefa": f"hierarquia {t} fonte {fonte}",
+                    **cronometrar(bellman_ford, dag, fonte)})
     return res
 
 
+# [IA] Claude – amostra temporadas inteiras (V e E crescem juntos); o nó INICIO liga uma entrada
+# por temporada, para BFS, DFS e Dijkstra percorrerem toda a amostra a partir de uma única fonte
 def amostra(g: Grafo, fracao: float) -> Grafo:
-    arcos = list(g.arcos())
+    por_temporada: dict[int, list] = {}
+    for a in g.arcos():
+        por_temporada.setdefault(temporada(a.origem), []).append(a)
+    ordem = sorted(por_temporada)
+    random.Random(SEMENTE).shuffle(ordem)
     ga = Grafo()
-    for i in sorted(random.Random(SEMENTE).sample(range(len(arcos)), round(fracao * len(arcos)))):
-        ga.add_arco(arcos[i].origem, arcos[i].destino, arcos[i].peso)
+    ga.add_no(INICIO)
+    for t in sorted(ordem[:max(1, round(fracao * len(ordem)))]):
+        ga.add_arco(INICIO, min(a.origem for a in por_temporada[t]), 0.0)
+        for a in por_temporada[t]:
+            ga.add_arco(a.origem, a.destino, a.peso)
     return ga
 
 
@@ -65,10 +75,9 @@ def escalabilidade(g: Grafo) -> list[dict]:
     res = []
     for fr in FRACOES:
         ga = amostra(g, fr)
-        s = fontes(ga)[0][1]
-        ha, _ = transformar(ga)
+        ha = amostra(transformar(g), fr)
         for nome, f, grafo in (("BFS", bfs, ga), ("DFS", dfs, ga), ("Dijkstra", dijkstra, ha), ("Bellman-Ford", bellman_ford, ga)):
-            res.append({"amostra": fr, "algoritmo": nome, "fonte": s, **cronometrar(f, grafo, s)})
+            res.append({"amostra": fr, "algoritmo": nome, "fonte": INICIO, **cronometrar(f, grafo, INICIO)})
     return res
 
 
