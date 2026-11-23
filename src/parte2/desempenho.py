@@ -6,11 +6,12 @@ import math
 import random
 import statistics
 import time
+from pathlib import Path
 
 from ..graphs.algorithms import bellman_ford, bfs, dfs, dijkstra
 from ..graphs.graph import Grafo
 from .bellman import recorte_par, subgrafo_temporada
-from .buscas import SAIDA, carregar, fontes, maior_grau_saida, temporada
+from .buscas import ARESTAS, SAIDA, carregar, fontes, maior_grau_saida, temporada
 from .caminhos import pares, transformar
 
 REPETICOES = 5
@@ -81,8 +82,8 @@ def tabela(esc: list[dict]) -> list[dict]:
     return linhas
 
 
-def main() -> None:
-    g = carregar()
+def main(caminho: Path = ARESTAS, saida: Path = SAIDA) -> None:
+    g = carregar(caminho)
     tar = tarefas(g)
     for t in tar:
         print(f"P{t['parte']} {t['algoritmo']:12s} {t['tarefa']:34s} V={t['V']:4d} E={t['E']:6d} média={t['media_s'] * 1e3:9.3f} ms")
@@ -91,14 +92,14 @@ def main() -> None:
     for l in linhas:
         print(f"{l['amostra']:4.0%} {l['algoritmo']:12s} V={l['V']:4d} E={l['E']:6d} média={l['tempo_medio_s'] * 1e3:10.3f} ms "
               f"{l['complexidade']:15s} valor={l['valor_teorico']:14.1f} razão={l['razao_tempo_valor']:.3e}")
-    SAIDA.mkdir(parents=True, exist_ok=True)
+    saida.mkdir(parents=True, exist_ok=True)
     rel = {"repeticoes": REPETICOES, "semente": SEMENTE, "tarefas": tar, "escalabilidade": esc}
-    (SAIDA / "parte2_report.json").write_text(json.dumps(rel, indent=2, ensure_ascii=False), encoding="utf-8")
-    with (SAIDA / "complexidade.csv").open("w", encoding="utf-8", newline="") as f:
+    (saida / "parte2_report.json").write_text(json.dumps(rel, indent=2, ensure_ascii=False), encoding="utf-8")
+    with (saida / "complexidade.csv").open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(linhas[0]))
         w.writeheader()
         w.writerows(linhas)
-    print(f"gravado: {SAIDA / 'parte2_report.json'} e {SAIDA / 'complexidade.csv'}")
+    print(f"gravado: {saida / 'parte2_report.json'} e {saida / 'complexidade.csv'}")
 
 
 if __name__ == "__main__":

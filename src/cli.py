@@ -20,25 +20,92 @@ from .solve import armadilhas, gerar_tudo, resolver
 PASTAS_MAPAS = ["data/mapas", "data/mapas_grupo"]
 
 
+def _dataset(ap: argparse.ArgumentParser, args: argparse.Namespace, out: Path) -> int:
+    from .graphs.algorithms import bellman_ford, bfs, custo_ciclo, dfs, dijkstra
+    from .parte2 import desempenho
+    from .parte2.bellman import subgrafo_temporada
+    from .parte2.buscas import carregar, temporada
+    from .parte2.caminhos import transformar
+
+    caminho = Path(args.dataset)
+    if not caminho.is_file():
+        print(f"Erro: arquivo não encontrado: {caminho}", file=sys.stderr)
+        return 1
+    if args.benchmark:
+        desempenho.main(caminho, out)
+        return 0
+    g = carregar(caminho)
+    print(f"{caminho.name}: |V|={g.ordem} |E|={g.tamanho}")
+    if not args.alg:
+        return 0
+    if not args.source:
+        ap.error("--alg com --dataset exige --source (ex.: --source \"ATL|2000\")")
+    for no in filter(None, (args.source, args.target)):
+        if no not in g:
+            print(f"Erro: nó {no!r} não está no grafo (formato TIME|ano, ex.: ATL|2000)", file=sys.stderr)
+            return 1
+
+    s, alvo = args.source, args.target
+    res: dict = {"algoritmo": args.alg, "fonte": s, "destino": alvo}
+    if args.alg == "BFS":
+        r = bfs(g, s)
+        res.update(ordem=r.ordem, camadas=r.niveis())
+        print(f"BFS: visitados={len(r.ordem)} nós por camada={[len(c) for c in res['camadas']]}")
+    elif args.alg == "DFS":
+        r = dfs(g, s)
+        res.update(ordem=r.ordem, classes=r.classes, tem_ciclo=r.tem_ciclo)
+        print(f"DFS: visitados={len(r.ordem)} classes={r.classes} tem_ciclo={r.tem_ciclo}")
+    elif args.alg == "DIJKSTRA":
+        h, minimo = transformar(g)
+        r = dijkstra(h, s)
+        res["minimo_temporada"] = minimo[temporada(s)]
+        print(f"DIJKSTRA: pesos deslocados por temporada (mínimo da temporada = {minimo[temporada(s)]}), "
+              f"alcançados={len(r.dist)}")
+    else:
+        sub = subgrafo_temporada(g, temporada(s))
+        r = bellman_ford(sub, s)
+        res.update(status=r.status, ciclo_negativo=r.ciclo_negativo)
+        print(f"BELLMAN_FORD (temporada {temporada(s)}, |V|={sub.ordem} |E|={sub.tamanho}): status={r.status}")
+        if r.ciclo_negativo:
+            res["custo_ciclo"] = custo_ciclo(sub, r.ciclo_negativo)
+            print(f"ciclo negativo (custo {res['custo_ciclo']:.4f}): {' -> '.join(r.ciclo_negativo)}")
+
+    if alvo and not res.get("ciclo_negativo"):
+        cam = r.caminho_ate(alvo)
+        res.update(caminho=cam, n_arcos=max(len(cam) - 1, 0), custo_original=custo_ciclo(g, cam) if cam else None)
+        if args.alg == "DIJKSTRA" and cam:
+            res["custo_transformado"] = r.dist[alvo]
+        print(f"caminho ({res['n_arcos']} arcos, custo original {res['custo_original']}): {' -> '.join(cam)}"
+              if cam else f"{alvo} inalcançável a partir de {s}")
+    destino = out / f"resultado_{args.alg}_{s.replace('|', '_')}.json"
+    destino.write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"gravado: {destino}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m src.cli", description="Labirinto com chaves (grafo de estados)")
     ap.add_argument("--mapa", help="caminho do mapa .txt")
-    ap.add_argument("--alg", choices=["BFS", "DIJKSTRA", "BELLMAN_FORD"], help="algoritmo de caminho")
+    ap.add_argument("--alg", choices=["BFS", "DFS", "DIJKSTRA", "BELLMAN_FORD"], help="algoritmo (DFS só com --dataset)")
     ap.add_argument("--fonte-consumivel", action="store_true", help="correção do m06: '*' vale -2 só na 1ª vez")
     ap.add_argument("--armadilhas", action="store_true", help="lista estados-armadilha do mapa")
     ap.add_argument("--interactive", action="store_true", help="gera out/parte1/labirinto_interativo.html")
     ap.add_argument("--todos", action="store_true", help="gera todas as saídas obrigatórias da Parte 1")
     ap.add_argument("--viz", action="store_true", help="gera as figuras PNG da Parte 1")
-    ap.add_argument("--dataset", help="(Parte 2 — ainda não implementada)")
-    ap.add_argument("--out", default="out/parte1", help="pasta de saída")
+    ap.add_argument("--dataset", help="Parte 2: CSV de arcos (ex.: data/dataset_parte2/arestas.csv)")
+    ap.add_argument("--source", help="Parte 2: nó de origem, formato TIME|ano (ex.: ATL|2000)")
+    ap.add_argument("--target", help="Parte 2: nó de destino, formato TIME|ano")
+    ap.add_argument("--benchmark", action="store_true", help="Parte 2: tempos e escalabilidade (parte2_report.json)")
+    ap.add_argument("--out", help="pasta de saída (padrão: out/parte1; com --dataset: out/parte2)")
     args = ap.parse_args(argv)
 
-    out = Path(args.out)
+    out = Path(args.out or ("out/parte2" if args.dataset else "out/parte1"))
     out.mkdir(parents=True, exist_ok=True)
 
     if args.dataset:
-        print("Parte 2 ainda não implementada nesta entrega.", file=sys.stderr)
-        return 2
+        return _dataset(ap, args, out)
+    if args.alg == "DFS" or args.source or args.target or args.benchmark:
+        ap.error("--alg DFS, --source, --target e --benchmark exigem --dataset")
 
     if args.todos:
         info = gerar_tudo(PASTAS_MAPAS, out)
