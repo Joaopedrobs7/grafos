@@ -1,9 +1,6 @@
 # [IA] Claude – parâmetros da preparação do dataset da Parte 2 (o grupo decide e justifica no PDF)
 preparar:
-  # tipos de jogo pelo 3º dígito do gameId: 1 pré-temporada, 2 temporada regular, 3 All-Star,
-  # 4 playoffs, 5 play-in, 6 final da NBA Cup
-  tipos: [2, 4, 5, 6]
-  temporada_min: 1946      # ano de início da temporada (1946 = 1946-47)
-  temporada_max: 2026      # 2026 = 2026-27 (temporada em andamento no snapshot)
-  # direção vencedor -> perdedor; peso = -(margem de pontos), sempre < 0
+  tipos: [2]
+  temporada_min: 2000
+  temporada_max: 2025
   sinal_peso: -1
