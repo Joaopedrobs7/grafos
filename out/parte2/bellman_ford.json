@@ -1,0 +1,394 @@
+{
+  "temporadas": [
+    {
+      "temporada": 2000,
+      "fonte": "ATL|2000",
+      "nos": 29,
+      "arcos": 812,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "UTA|2000",
+        "VAN|2000",
+        "WAS|2000",
+        "UTA|2000"
+      ],
+      "custo_ciclo": -4.5
+    },
+    {
+      "temporada": 2001,
+      "fonte": "ATL|2001",
+      "nos": 29,
+      "arcos": 812,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "TOR|2001",
+        "UTA|2001",
+        "WAS|2001",
+        "TOR|2001"
+      ],
+      "custo_ciclo": -21.0
+    },
+    {
+      "temporada": 2002,
+      "fonte": "ATL|2002",
+      "nos": 29,
+      "arcos": 812,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "SAN|2002",
+        "UTA|2002",
+        "WAS|2002",
+        "SAN|2002"
+      ],
+      "custo_ciclo": -22.75
+    },
+    {
+      "temporada": 2003,
+      "fonte": "ATL|2003",
+      "nos": 29,
+      "arcos": 812,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "WAS|2003",
+        "TOR|2003",
+        "UTA|2003",
+        "WAS|2003"
+      ],
+      "custo_ciclo": -12.25
+    },
+    {
+      "temporada": 2004,
+      "fonte": "ATL|2004",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "UTA|2004",
+        "WAS|2004",
+        "TOR|2004",
+        "UTA|2004"
+      ],
+      "custo_ciclo": -16.25
+    },
+    {
+      "temporada": 2005,
+      "fonte": "ATL|2005",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "UTA|2005",
+        "WAS|2005",
+        "SEA|2005",
+        "UTA|2005"
+      ],
+      "custo_ciclo": -28.75
+    },
+    {
+      "temporada": 2006,
+      "fonte": "ATL|2006",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "UTA|2006",
+        "TOR|2006",
+        "WAS|2006",
+        "UTA|2006"
+      ],
+      "custo_ciclo": -5.0
+    },
+    {
+      "temporada": 2007,
+      "fonte": "ATL|2007",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "WAS|2007",
+        "TOR|2007",
+        "UTA|2007",
+        "WAS|2007"
+      ],
+      "custo_ciclo": -8.25
+    },
+    {
+      "temporada": 2008,
+      "fonte": "ATL|2008",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "SAC|2008",
+        "SAN|2008",
+        "WAS|2008",
+        "SAC|2008"
+      ],
+      "custo_ciclo": -22.0
+    },
+    {
+      "temporada": 2009,
+      "fonte": "ATL|2009",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "WAS|2009",
+        "SAC|2009",
+        "UTA|2009",
+        "WAS|2009"
+      ],
+      "custo_ciclo": -23.666666666666668
+    },
+    {
+      "temporada": 2010,
+      "fonte": "ATL|2010",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "SAN|2010",
+        "PHX|2010",
+        "WAS|2010",
+        "UTA|2010",
+        "TOR|2010",
+        "SAN|2010"
+      ],
+      "custo_ciclo": -29.0
+    },
+    {
+      "temporada": 2011,
+      "fonte": "ATL|2011",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "WAS|2011",
+        "TOR|2011",
+        "UTA|2011",
+        "WAS|2011"
+      ],
+      "custo_ciclo": -17.5
+    },
+    {
+      "temporada": 2012,
+      "fonte": "ATL|2012",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "WAS|2012",
+        "POR|2012",
+        "SAN|2012",
+        "WAS|2012"
+      ],
+      "custo_ciclo": -32.166666666666664
+    },
+    {
+      "temporada": 2013,
+      "fonte": "ATL|2013",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "WAS|2013",
+        "TOR|2013",
+        "UTA|2013",
+        "WAS|2013"
+      ],
+      "custo_ciclo": -8.0
+    },
+    {
+      "temporada": 2014,
+      "fonte": "ATL|2014",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "UTA|2014",
+        "WAS|2014",
+        "TOR|2014",
+        "UTA|2014"
+      ],
+      "custo_ciclo": -3.666666666666666
+    },
+    {
+      "temporada": 2015,
+      "fonte": "ATL|2015",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "WAS|2015",
+        "SAC|2015",
+        "TOR|2015",
+        "WAS|2015"
+      ],
+      "custo_ciclo": -18.25
+    },
+    {
+      "temporada": 2016,
+      "fonte": "ATL|2016",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "UTA|2016",
+        "WAS|2016",
+        "TOR|2016",
+        "UTA|2016"
+      ],
+      "custo_ciclo": -12.5
+    },
+    {
+      "temporada": 2017,
+      "fonte": "ATL|2017",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "WAS|2017",
+        "TOR|2017",
+        "UTA|2017",
+        "WAS|2017"
+      ],
+      "custo_ciclo": -27.0
+    },
+    {
+      "temporada": 2018,
+      "fonte": "ATL|2018",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "WAS|2018",
+        "TOR|2018",
+        "UTA|2018",
+        "WAS|2018"
+      ],
+      "custo_ciclo": -13.75
+    },
+    {
+      "temporada": 2019,
+      "fonte": "BKN|2019",
+      "nos": 30,
+      "arcos": 860,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "TOR|2019",
+        "UTA|2019",
+        "NOP|2019",
+        "WAS|2019",
+        "TOR|2019"
+      ],
+      "custo_ciclo": -10.5
+    },
+    {
+      "temporada": 2020,
+      "fonte": "ATL|2020",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "UTA|2020",
+        "SAN|2020",
+        "WAS|2020",
+        "UTA|2020"
+      ],
+      "custo_ciclo": -39.33333333333333
+    },
+    {
+      "temporada": 2021,
+      "fonte": "ATL|2021",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "TOR|2021",
+        "SAC|2021",
+        "WAS|2021",
+        "TOR|2021"
+      ],
+      "custo_ciclo": -32.0
+    },
+    {
+      "temporada": 2022,
+      "fonte": "ATL|2022",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "UTA|2022",
+        "WAS|2022",
+        "SAN|2022",
+        "UTA|2022"
+      ],
+      "custo_ciclo": -12.25
+    },
+    {
+      "temporada": 2023,
+      "fonte": "ATL|2023",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "WAS|2023",
+        "SAC|2023",
+        "UTA|2023",
+        "WAS|2023"
+      ],
+      "custo_ciclo": -30.333333333333332
+    },
+    {
+      "temporada": 2024,
+      "fonte": "ATL|2024",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "WAS|2024",
+        "SAN|2024",
+        "TOR|2024",
+        "WAS|2024"
+      ],
+      "custo_ciclo": -22.5
+    },
+    {
+      "temporada": 2025,
+      "fonte": "ATL|2025",
+      "nos": 30,
+      "arcos": 870,
+      "status": "CICLO_NEGATIVO",
+      "ciclo_negativo": [
+        "UTA|2025",
+        "SAC|2025",
+        "WAS|2025",
+        "UTA|2025"
+      ],
+      "custo_ciclo": -18.75
+    }
+  ],
+  "recorte_sem_ciclo": {
+    "temporada": 2000,
+    "fonte": "ATL|2000",
+    "nos": [
+      "ATL|2000",
+      "CHA|2000"
+    ],
+    "arcos": [
+      [
+        "ATL|2000",
+        "CHA|2000",
+        17.5
+      ],
+      [
+        "CHA|2000",
+        "ATL|2000",
+        -17.5
+      ]
+    ],
+    "custo_ciclo_ida_volta": 0.0,
+    "status": "OK",
+    "ciclo_negativo": null
+  }
+}
