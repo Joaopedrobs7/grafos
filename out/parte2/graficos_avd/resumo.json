@@ -1,0 +1,110 @@
+{
+  "e1_histograma_peso": {
+    "arcos": 21672,
+    "negativos": 10616,
+    "mediana": 0.18380000000000002
+  },
+  "e4_correlacao_spearman": {
+    "n": 2085,
+    "n_completos": 2083,
+    "faltantes": {
+      "impacto": 0,
+      "minutos": 0,
+      "entradas": 0,
+      "altura": 0,
+      "peso": 2,
+      "ano do draft": 0
+    },
+    "matriz": {
+      "impacto": {
+        "impacto": 1.0,
+        "minutos": 0.081,
+        "entradas": -0.001,
+        "altura": 0.005,
+        "peso": -0.005,
+        "ano do draft": -0.014
+      },
+      "minutos": {
+        "impacto": 0.081,
+        "minutos": 1.0,
+        "entradas": 0.719,
+        "altura": 0.029,
+        "peso": 0.055,
+        "ano do draft": 0.055
+      },
+      "entradas": {
+        "impacto": -0.001,
+        "minutos": 0.719,
+        "entradas": 1.0,
+        "altura": -0.058,
+        "peso": -0.038,
+        "ano do draft": 0.073
+      },
+      "altura": {
+        "impacto": 0.005,
+        "minutos": 0.029,
+        "entradas": -0.058,
+        "altura": 1.0,
+        "peso": 0.74,
+        "ano do draft": 0.062
+      },
+      "peso": {
+        "impacto": -0.005,
+        "minutos": 0.055,
+        "entradas": -0.038,
+        "altura": 0.74,
+        "peso": 1.0,
+        "ano do draft": -0.11
+      },
+      "ano do draft": {
+        "impacto": -0.014,
+        "minutos": 0.055,
+        "entradas": 0.073,
+        "altura": 0.062,
+        "peso": -0.11,
+        "ano do draft": 1.0
+      }
+    }
+  },
+  "impacto_x_minutos": {
+    "temporada": 2025,
+    "jogadores": 365,
+    "mediana_minutos": 678.45,
+    "no_quadrante": 103
+  },
+  "x6_times_trocas": {
+    "times": 30,
+    "impacto_por_time": {
+      "SAN": -0.9402,
+      "WAS": -0.9042,
+      "ORL": -0.7847,
+      "DEN": -0.5192,
+      "HOU": -0.5008,
+      "MEM": -0.3953,
+      "CLE": -0.2517,
+      "LAL": -0.2283,
+      "BKN": -0.1943,
+      "MIA": -0.1781,
+      "MIN": -0.1693,
+      "TOR": -0.1432,
+      "BOS": -0.1361,
+      "ATL": -0.0636,
+      "POR": -0.0283,
+      "IND": 0.0152,
+      "DAL": 0.0386,
+      "LAC": 0.125,
+      "CHA": 0.1357,
+      "PHX": 0.2056,
+      "PHI": 0.2075,
+      "MIL": 0.2691,
+      "GSW": 0.3752,
+      "DET": 0.3992,
+      "UTA": 0.7046,
+      "NYK": 0.7684,
+      "NOP": 0.9138,
+      "OKC": 0.9587,
+      "CHI": 1.4315,
+      "SAC": 1.5315
+    }
+  }
+}
