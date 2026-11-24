@@ -4,11 +4,10 @@
       2
     ],
     "temporada_min": 2000,
-    "temporada_max": 2025,
-    "sinal_peso": -1
+    "temporada_max": 2025
   },
   "alvo": "margem",
-  "jogos_completo": 73557,
+  "jogos_completo": 73595,
   "jogos_recorte": 31246,
   "linhas_time_jogo": 62492,
   "linhas_fantasma_removidas": 2,

@@ -23,8 +23,8 @@ stages:
       nfiles: 6
     - path: src/parte2/preparar.py
       hash: md5
-      md5: f9f3411bd9e8bcda464a44c8cf19391c
-      size: 6587
+      md5: 162abfb886efae093226643a6cfb133e
+      size: 6873
     params:
       params.yaml:
         preparar:
@@ -32,12 +32,11 @@ stages:
           - 2
           temporada_min: 2000
           temporada_max: 2025
-          sinal_peso: -1
     outs:
     - path: data/dataset_parte2/processed
       hash: md5
-      md5: 547157bfe20dc70610614be64fd25b83.dir
-      size: 46672
+      md5: 80dd6dd69b78af5a977f3dc454a66345.dir
+      size: 46694
       nfiles: 2
   rotacao:
     cmd: python -m src.parte2.rotacao

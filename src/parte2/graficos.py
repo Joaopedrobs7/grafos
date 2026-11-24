@@ -113,7 +113,7 @@ def caminhos_dijkstra(d: dict, destino: Path) -> None:
     y = range(len(pares))
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(12, 4.6), sharey=True, gridspec_kw={"width_ratios": [3, 1]})
     for desloc, chave, cor, rotulo in ((-0.2, "custo_transformado", CORES["Dijkstra"], "custo −log P(vitória) (o que o Dijkstra minimiza)"),
-                                       (0.2, "custo_original", CINZA, "custo nos pesos originais (−saldo médio)")):
+                                       (0.2, "custo_original", CINZA, "custo nos pesos originais (saldo médio)")):
         vals = [p[chave] for p in pares]
         a1.barh([i + desloc for i in y], vals, height=0.38, color=cor, label=rotulo)
         for i, v in zip(y, vals):
@@ -140,7 +140,7 @@ def caminhos_dijkstra(d: dict, destino: Path) -> None:
 
 def main() -> None:
     GRAFICOS.mkdir(parents=True, exist_ok=True)
-    rel = _ler("parte2_report.json")
+    rel = _ler("partidas_report.json")
     figuras = {
         "tempo_por_algoritmo.png": lambda p: tempo_por_algoritmo(rel, p),
         "tempo_por_tamanho.png": lambda p: tempo_por_tamanho(rel, p),

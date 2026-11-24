@@ -83,9 +83,10 @@ def preparar(params: dict, raw: Path = RAW, saida: Path = SAIDA, arestas_csv: Pa
     ida = jogos[["temporada_inicio", "origem", "destino", "margem"]]
     volta = ida.assign(origem=ida["destino"], destino=ida["origem"], margem=-ida["margem"])
     saldo = pd.concat([ida, volta]).groupby(["temporada_inicio", "origem", "destino"], as_index=False)["margem"].mean()
+    # [IA] Claude – peso = saldo médio de A contra B como vem no dado (+ se A venceu o confronto, − se perdeu)
     arestas = pd.DataFrame({
         "origem": saldo["origem"], "destino": saldo["destino"],
-        "peso": params["sinal_peso"] * saldo["margem"] + 0.0,
+        "peso": saldo["margem"] + 0.0,
         "temporada": saldo["temporada_inicio"],
     })
 
@@ -112,6 +113,8 @@ def preparar(params: dict, raw: Path = RAW, saida: Path = SAIDA, arestas_csv: Pa
         "franquias": int(pd.concat([jogos["vencedor_id"], jogos["perdedor_id"]]).nunique()),
         "jogos_por_tipo": jogos["tipo"].value_counts().to_dict(),
         "peso_min": float(arestas["peso"].min()), "peso_max": float(arestas["peso"].max()),
+        # [IA] Claude – desvio-padrão da margem casa − fora por jogo; caminhos.py usa na escala da logística
+        "desvio_margem_jogo": float((g["homeScore"] - g["awayScore"]).std()),
         "nos_sem_sigla": int(nos["sigla"].isna().sum()),
     })
     (saida / "relatorio_preparacao.json").write_text(json.dumps(rel, indent=2, ensure_ascii=False), encoding="utf-8")

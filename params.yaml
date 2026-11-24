@@ -3,7 +3,6 @@ preparar:
   tipos: [2]
   temporada_min: 2000
   temporada_max: 2025
-  sinal_peso: -1
 
 # [IA] Claude – grafo de rotação (substituições do jogada a jogada); o grupo decide e justifica no PDF
 rotacao:

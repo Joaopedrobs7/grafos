@@ -26,10 +26,11 @@ def por_temporada(g: Grafo) -> list[dict]:
     return res
 
 
-# [IA] Claude – recorte sem ciclo: só arcos do time melhor classificado para o pior (grafo acíclico)
+# [IA] Claude – recorte sem ciclo: só arcos do time melhor classificado para o pior (grafo acíclico).
+# Saldo total do time = soma dos pesos dos arcos de saída (peso = saldo médio contra cada adversário).
 def hierarquia(g: Grafo, t: int) -> tuple[Grafo, str]:
     sub = subgrafo_temporada(g, t)
-    saldo = {v: -sum(a.peso for a in sub.vizinhos(v)) for v in sub.nos()}
+    saldo = {v: sum(a.peso for a in sub.vizinhos(v)) for v in sub.nos()}
     posicao = {v: i for i, v in enumerate(sorted(saldo, key=lambda v: (-saldo[v], v)))}
     dag = Grafo()
     for v in sorted(posicao, key=posicao.get):

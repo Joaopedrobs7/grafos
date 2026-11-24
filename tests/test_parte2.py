@@ -13,7 +13,7 @@ from src.graphs.algorithms import bellman_ford, bfs, dfs, dijkstra
 from src.graphs.graph import Grafo
 from src.parte2.preparar import preparar
 
-PARAMS = {"tipos": [2], "temporada_min": 2000, "temporada_max": 2001, "sinal_peso": -1}
+PARAMS = {"tipos": [2], "temporada_min": 2000, "temporada_max": 2001}
 
 HISTORICO = """teamId,teamCity,teamName,teamAbbrev,seasonFounded,seasonActiveTill,league
 1,Cidade A,Alfa,AAA,1990,2100,NBA
@@ -66,16 +66,24 @@ def test_carga_e_agrupamento_por_temporada_e_par(dataset):
 def test_saldo_medio_calculado_a_mao(dataset):
     _, _, linhas = dataset
     # AAA x BBB em 2000: +10, -2, +1 para AAA -> média 3,0 (playoff de 2000 fica de fora)
-    assert _peso(linhas, "AAA|2000", "BBB|2000") == pytest.approx(-3.0)
-    assert _peso(linhas, "CCC|2000", "AAA|2000") == pytest.approx(-5.0)
-    assert _peso(linhas, "AAA|2001", "BBB|2001") == pytest.approx(-10.0)
+    # [IA] Claude – peso como vem no dado: positivo para quem venceu o confronto
+    assert _peso(linhas, "AAA|2000", "BBB|2000") == pytest.approx(3.0)
+    assert _peso(linhas, "CCC|2000", "AAA|2000") == pytest.approx(5.0)
+    assert _peso(linhas, "AAA|2001", "BBB|2001") == pytest.approx(10.0)
 
 
 def test_direcao_e_sinal_do_arco(dataset):
     _, _, linhas = dataset
     for l in linhas:
         assert float(l["peso"]) == -_peso(linhas, l["destino"], l["origem"])
-    assert _peso(linhas, "AAA|2000", "BBB|2000") < 0 < _peso(linhas, "BBB|2000", "AAA|2000")
+    assert _peso(linhas, "BBB|2000", "AAA|2000") < 0 < _peso(linhas, "AAA|2000", "BBB|2000")
+
+
+def test_relatorio_tem_desvio_da_margem(dataset):
+    rel, _, _ = dataset
+    # margens casa - fora dos 5 jogos do recorte: 10, 2, -1, 5, 10
+    assert rel["desvio_margem_jogo"] == pytest.approx(4.8683, abs=1e-3)
+    assert "sinal_peso" not in rel["parametros"]
 
 
 def test_no_em_texto_time_ano(dataset):
@@ -92,7 +100,7 @@ def test_cli_aceita_pasta_do_dataset(tmp_path, capsys):
     pasta = tmp_path / "dataset"
     pasta.mkdir()
     (pasta / "arestas.csv").write_text(
-        "origem,destino,peso,temporada\nAAA|2000,BBB|2000,-3.0,2000\nBBB|2000,AAA|2000,3.0,2000\n",
+        "origem,destino,peso,temporada\nAAA|2000,BBB|2000,3.0,2000\nBBB|2000,AAA|2000,-3.0,2000\n",
         encoding="utf-8",
     )
     assert main(["--dataset", str(pasta), "--out", str(tmp_path / "out")]) == 0
@@ -107,8 +115,8 @@ def test_cli_pasta_sem_arestas_da_erro_claro(tmp_path, capsys):
 # [IA] Claude – casos das correções de Dijkstra, Bellman-Ford e escalabilidade
 def _temporada_em_ciclo(t=2000):
     g = Grafo()
-    # A vence B, B vence C, C vence A por pouco: ciclo negativo; A tem o maior saldo
-    for u, v, w in (("A", "B", -10.0), ("B", "C", -6.0), ("C", "A", -1.0)):
+    # A vence B, B vence C, C vence A por pouco: ciclo negativo (A -> C -> B -> A); A tem o maior saldo
+    for u, v, w in (("A", "B", 10.0), ("B", "C", 6.0), ("C", "A", 1.0)):
         g.add_arco(f"{u}|{t}", f"{v}|{t}", w)
         g.add_arco(f"{v}|{t}", f"{u}|{t}", -w)
     return g
@@ -116,14 +124,15 @@ def _temporada_em_ciclo(t=2000):
 
 def test_custo_vitoria_positivo_e_monotono():
     assert custo_vitoria(0.0) == pytest.approx(0.6931, abs=1e-3)  # P = 1/2 -> log 2
-    assert 0 < custo_vitoria(-20.0) < custo_vitoria(-5.0) < custo_vitoria(5.0) < custo_vitoria(20.0)
+    # [IA] Claude – peso positivo (vitória no confronto) custa menos que peso negativo
+    assert 0 < custo_vitoria(20.0) < custo_vitoria(5.0) < custo_vitoria(-5.0) < custo_vitoria(-20.0)
 
 
 def test_dijkstra_prefere_cadeia_de_vitorias_ao_arco_ruim():
     g = Grafo()
-    g.add_arco("A|2000", "C|2000", 15.0)    # A perde de C
-    g.add_arco("A|2000", "B|2000", -15.0)   # A vence B
-    g.add_arco("B|2000", "C|2000", -15.0)   # B vence C
+    g.add_arco("A|2000", "C|2000", -15.0)   # A perde de C
+    g.add_arco("A|2000", "B|2000", 15.0)    # A vence B
+    g.add_arco("B|2000", "C|2000", 15.0)    # B vence C
     assert dijkstra(transformar(g), "A|2000").caminho_ate("C|2000") == ["A|2000", "B|2000", "C|2000"]
 
 
