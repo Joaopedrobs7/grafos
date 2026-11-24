@@ -210,7 +210,29 @@ def montar_graficos(arestas: list[dict], jogadores: list[dict], min_entradas: in
         por_time.setdefault("todas" if ano is None else str(ano), []).append([time, _num(soma / oc, 3), oc])
     for v in por_time.values():
         v.sort(key=lambda x: x[1])
-    return {"min_entradas": min_entradas,
+    # [IA] Claude – E1 (histograma do peso) e E4 (Spearman) por temporada, para a versão interativa
+    import pandas as pd
+    arc = pd.DataFrame(arestas).astype({"peso": float, "temporada": int})
+    largura = 2
+    bordas = list(range(-60, 62, largura))
+    def histograma(w):
+        cont, _ = __import__("numpy").histogram(w.clip(-59.999, 59.999), bins=bordas)
+        return {"bordas": bordas, "contagens": [int(c) for c in cont], "n": int(len(w)), "negativos": int((w < 0).sum()),
+                "mediana": _num(float(w.median()), 3)}
+    hist = {"todas": histograma(arc["peso"])}
+    for ano, g in arc.groupby("temporada"):
+        hist[str(ano)] = histograma(g["peso"])
+    from .graficos_avd import dados as _dados_avd
+    _, jog = _dados_avd()
+    cols = {"impacto": "impacto", "minutos_medidos": "minutos", "entradas": "entradas", "altura_cm": "altura",
+            "peso_kg": "peso", "draftYear": "ano do draft"}
+    corr = {}
+    base_tudo = jog[jog["entradas"] >= min_entradas]
+    for chave, base in [("todas", base_tudo)] + [(str(a), g) for a, g in base_tudo.groupby("temporada")]:
+        m = base[list(cols)].rename(columns=cols).corr(method="spearman")
+        corr[chave] = {"variaveis": list(m.columns), "matriz": [[_num(float(v), 3) for v in linha] for linha in m.values],
+                       "n": int(base[list(cols)].dropna().shape[0])}
+    return {"min_entradas": min_entradas, "histograma": hist, "correlacao": corr,
             "colunas_jogadores": ["nome", "time", "temporada", "minutos", "impacto", "entradas"],
             "jogadores": pontos, "colunas_times": ["time", "impacto", "ocorrencias"], "times": por_time,
             "definicoes": {

@@ -346,6 +346,22 @@ def api_parte2_graficos():
     return resp
 
 
+# [IA] Claude – figuras PNG de comparação dos algoritmos (out/parte2/graficos), só nomes conhecidos
+FIGURAS_PARTE2 = {"tempo_por_algoritmo", "tempo_por_tamanho", "bfs_x_dfs", "caminhos_dijkstra"}
+
+
+@app.get("/api/parte2/figura/<nome>.png")
+def api_parte2_figura(nome: str):
+    if nome not in FIGURAS_PARTE2:
+        return _erro("figura desconhecida", 404)
+    pasta = RAIZ / "out" / "parte2" / "graficos"
+    if not (pasta / f"{nome}.png").exists():
+        return _erro("figura não gerada: rode python -m src.parte2.rotacao_graficos", 503)
+    resp = send_from_directory(pasta, f"{nome}.png", mimetype="image/png")
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
+
+
 @app.get("/api/parte2/benchmark")
 def api_parte2_benchmark():
     resp = _parte2_json("benchmark.json")

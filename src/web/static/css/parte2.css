@@ -240,3 +240,16 @@
 .g-barra--cab { color: var(--luar-fraco); font-size: 12px; }
 .g-barra__eixo { display: flex; justify-content: space-between; }
 .p2-tabela th small { display: block; font-weight: 400; font-size: 11px; color: var(--luar-fraco); }
+
+/* [IA] Claude – rótulo do tipo de gráfico, matriz de correlação e figuras dos algoritmos */
+.g-tipo { font: 600 12px/1 var(--f-pixel); color: var(--tocha); margin-bottom: 6px; }
+.p2-painel > .p2-bloco + .p2-bloco { margin-top: 36px; }
+.g-corr { border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px; }
+.g-corr th { font-weight: 600; color: var(--luar-fraco); padding: 6px 10px; text-align: right; white-space: nowrap; }
+.g-corr thead th { text-align: center; }
+.g-corr td { width: 84px; height: 44px; text-align: center; color: #111; font-weight: 600; }
+.g-figuras { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-top: 12px; }
+.g-figuras figure { background: #fff; padding: 8px; }
+.g-figuras img { width: 100%; height: auto; display: block; }
+.g-figuras figcaption { color: #333; font-size: 13px; padding: 8px 4px 2px; }
+@media (max-width: 560px) { .g-figuras { grid-template-columns: 1fr; } }

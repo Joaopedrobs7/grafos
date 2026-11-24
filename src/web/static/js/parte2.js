@@ -639,7 +639,7 @@
   var gTemp = $("gTemporada"), gTime = $("gTime");
 
   function carregarGraficos() {
-    if (graf.dados) { desenharBolinhas(); return; }
+    if (graf.dados) { desenharBolinhas(); desenharHistograma(); return; }
     if (graf.dados === false) return;
     graf.dados = false;
     json("api/parte2/graficos").then(function (d) {
@@ -689,6 +689,8 @@
       (ex[4] >= 0 ? "melhor" : "pior") + " a cada 12 minutos; ele somou " + fmt(ex[3], 0) + " minutos em quadra em " + fmtInt(ex[5]) + " entradas." : "";
     desenharBolinhas();
     montarBarras();
+    desenharHistograma();
+    montarCorrelacao();
   }
   gTemp.addEventListener("change", atualizarGraficos);
   gTime.addEventListener("change", atualizarGraficos);
@@ -816,7 +818,63 @@
     }).join("");
   }
 
-  window.addEventListener("resize", function () { if (graf.dados) desenharBolinhas(); });
+  /* [IA] Claude – E1: histograma do peso das trocas (linha no zero, negativos e positivos em cores diferentes, mediana) */
+  function desenharHistograma() {
+    var chave = gTemp.value, h = graf.dados.histograma[chave];
+    if (!h || paineis[1].hidden) return;
+    var periodo = chave === "todas" ? "de 2020-21 a 2025-26" : "em " + rotuloTemporada(+chave);
+    $("gHistLer").innerHTML = "<b>Como ler:</b> cada barra conta quantas trocas diferentes (arcos X → Y) " + periodo +
+      " têm o peso naquela faixa de 2 pontos. O peso é a mudança no saldo do time a cada 12 minutos depois da troca " +
+      "(negativo, em vermelho = piorou; positivo, em azul = melhorou). São <b>" + fmtInt(h.n) + "</b> trocas, <b>" +
+      fmtInt(h.negativos) + "</b> com peso negativo; a linha tracejada é a mediana (" + fmtSinal(h.mediana, 2) + " pts).";
+    var tela = $("gHist"), area = $("gHistArea"), dpr = window.devicePixelRatio || 1;
+    var larg = area.clientWidth, alt = Math.max(260, Math.min(380, Math.round(larg * 0.32)));
+    tela.width = larg * dpr; tela.height = alt * dpr; tela.style.height = alt + "px";
+    var ctx = tela.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, larg, alt);
+    var mx = { e: 52, d: 12, t: 12, b: 42 }, b = h.bordas, c = h.contagens;
+    var cmax = Math.max.apply(null, c), x0 = b[0], x1 = b[b.length - 1];
+    var X = function (v) { return mx.e + (v - x0) / (x1 - x0) * (larg - mx.e - mx.d); };
+    var Y = function (v) { return mx.t + (1 - v / cmax) * (alt - mx.t - mx.b); };
+    for (var i = 0; i < c.length; i++) {
+      ctx.fillStyle = b[i] < 0 ? "rgb(255,84,112)" : "rgb(53,200,240)";
+      ctx.fillRect(X(b[i]) + 0.5, Y(c[i]), X(b[i + 1]) - X(b[i]) - 1, Y(0) - Y(c[i]));
+    }
+    ctx.strokeStyle = LUAR; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(X(0), mx.t); ctx.lineTo(X(0), Y(0)); ctx.stroke();
+    ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(X(h.mediana), mx.t); ctx.lineTo(X(h.mediana), Y(0)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = LUAR_FRACO; ctx.font = "12px 'DM Sans', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+    for (var v = -60; v <= 60; v += 20) ctx.fillText(fmtSinal(v, 0), X(v), alt - mx.b + 6);
+    ctx.fillText("peso da troca: mudança no saldo do time a cada 12 min (pts)", (mx.e + larg) / 2, alt - 18);
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    var passo = cmax > 1500 ? 500 : cmax > 600 ? 200 : cmax > 150 ? 50 : 10;
+    for (var k = 0; k <= cmax; k += passo) ctx.fillText(fmtInt(k), mx.e - 8, Y(k));
+  }
+
+  /* [IA] Claude – E4: matriz de correlação de Spearman (valor em cada célula, escala divergente −1 a +1) */
+  function corCorr(r) {
+    var t = Math.min(Math.abs(r), 1), alvo = r < 0 ? [214, 96, 77] : [33, 102, 172];
+    var c = [247, 247, 247].map(function (v, i) { return Math.round(v + (alvo[i] - v) * t); });
+    return "rgb(" + c.join(",") + ")";
+  }
+  function montarCorrelacao() {
+    var chave = gTemp.value, m = graf.dados.correlacao[chave];
+    if (!m) return;
+    var periodo = chave === "todas" ? "de 2020-21 a 2025-26" : "em " + rotuloTemporada(+chave);
+    $("gCorrLer").innerHTML = "<b>Como ler:</b> cada célula é a correlação de Spearman entre dois atributos dos jogadores " + periodo +
+      " com ≥ " + graf.dados.min_entradas + " entradas (n = " + fmtInt(m.n) + "). Vai de −1 a +1: perto de +1, quando um sobe o outro tende " +
+      "a subir; perto de −1, quando um sobe o outro tende a descer; perto de 0, não há relação monotônica. Azul = positiva, vermelho = negativa.";
+    var v = m.variaveis;
+    $("gCorr").innerHTML = "<thead><tr><th></th>" + v.map(function (x) { return "<th scope=\"col\">" + esc(x) + "</th>"; }).join("") +
+      "</tr></thead><tbody>" + m.matriz.map(function (linha, i) {
+        return "<tr><th scope=\"row\">" + esc(v[i]) + "</th>" + linha.map(function (r, j) {
+          var cor = Math.abs(r) > 0.6 ? "#fff" : "#111";
+          return '<td style="background:' + corCorr(r) + ";color:" + cor + '" title="' + esc(v[i]) + " × " + esc(v[j]) + ": " +
+            fmt(r, 2) + '">' + fmt(r, 2) + "</td>";
+        }).join("") + "</tr>";
+      }).join("") + "</tbody>";
+  }
+
+  window.addEventListener("resize", function () { if (graf.dados) { desenharBolinhas(); desenharHistograma(); } });
 
   /* ------------------------------------------------------------ início */
   if (location.hash === "#algoritmos") abrirAba(2, false);

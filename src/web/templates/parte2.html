@@ -134,7 +134,23 @@
       <p class="p2-contagem" id="gContagem" aria-live="polite"></p>
     </div>
 
+    <section class="p2-bloco" aria-labelledby="histTitulo">
+      <p class="g-tipo">Exploratório</p>
+      <h2 class="p2-subtitulo" id="histTitulo">Distribuição do peso das trocas</h2>
+      <p class="p2-nota g-como-ler" id="gHistLer"></p>
+      <figure class="p2-quadro"><div class="p2-quadro__area" id="gHistArea">
+        <canvas id="gHist" role="img" aria-label="Histograma do peso das trocas"></canvas></div></figure>
+    </section>
+
+    <section class="p2-bloco" aria-labelledby="corrTitulo">
+      <p class="g-tipo">Exploratório</p>
+      <h2 class="p2-subtitulo" id="corrTitulo">Correlação de Spearman entre os atributos do jogador</h2>
+      <p class="p2-nota g-como-ler" id="gCorrLer"></p>
+      <div class="p2-rolagem"><table class="g-corr" id="gCorr"></table></div>
+    </section>
+
     <section class="p2-bloco" aria-labelledby="bolinhasTitulo">
+      <p class="g-tipo">Explanatório</p>
       <h2 class="p2-subtitulo" id="bolinhasTitulo">Impacto ao entrar × minutos em quadra</h2>
       <p class="p2-nota g-como-ler" id="gComoLer"></p>
       <figure class="p2-quadro">
@@ -151,6 +167,7 @@
     </section>
 
     <section class="p2-bloco" aria-labelledby="timesTitulo">
+      <p class="g-tipo">Explanatório</p>
       <h2 class="p2-subtitulo" id="timesTitulo">Impacto médio das trocas por time</h2>
       <p class="p2-nota" id="gTimesNota"></p>
       <ol class="g-barras" id="gBarras"></ol>
@@ -183,6 +200,21 @@
     <section class="p2-bloco" aria-labelledby="escalaTitulo">
       <h2 class="p2-subtitulo" id="escalaTitulo">Escalabilidade</h2>
       <div id="escalas"></div>
+    </section>
+
+    <!-- [IA] Claude – gráficos de comparação dos algoritmos (os mesmos PNGs do relatório) -->
+    <section class="p2-bloco" aria-labelledby="figTitulo">
+      <h2 class="p2-subtitulo" id="figTitulo">Gráficos de comparação dos algoritmos</h2>
+      <div class="g-figuras">
+        <figure><img src="api/parte2/figura/tempo_por_algoritmo.png" alt="Tempo médio por algoritmo" loading="lazy">
+          <figcaption>Tempo médio por algoritmo e tarefa (média de 5 execuções, em milissegundos).</figcaption></figure>
+        <figure><img src="api/parte2/figura/tempo_por_tamanho.png" alt="Tempo por tamanho do grafo" loading="lazy">
+          <figcaption>Tempo de cada algoritmo com 10%, 50% e 100% dos time-temporadas, ao lado do crescimento previsto pela complexidade.</figcaption></figure>
+        <figure><img src="api/parte2/figura/bfs_x_dfs.png" alt="BFS e DFS nas 3 fontes" loading="lazy">
+          <figcaption>BFS × DFS a partir das 3 fontes: nós por camada da BFS e profundidade e tipos de arco da DFS.</figcaption></figure>
+        <figure><img src="api/parte2/figura/caminhos_dijkstra.png" alt="Caminhos do Dijkstra e do Bellman-Ford" loading="lazy">
+          <figcaption>Os 5 pares: custo do caminho do Dijkstra (com Johnson) e do Bellman-Ford, em pontos de saldo por 12 min.</figcaption></figure>
+      </div>
     </section>
   </section>
 </main>

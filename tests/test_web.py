@@ -415,3 +415,15 @@ def test_parte2_graficos(cliente):
     assert set(d["times"]) >= {"todas", "2025"} and len(d["times"]["todas"]) == 30
     impactos = [t[1] for t in d["times"]["todas"]]
     assert impactos == sorted(impactos)  # ordenado do menor para o maior
+
+
+# [IA] Claude – histograma, correlação e figuras de comparação na página da Parte 2
+def test_parte2_graficos_exploratorios_e_figuras(cliente):
+    d = cliente.get("/api/parte2/graficos").get_json()
+    h = d["histograma"]["todas"]
+    assert sum(h["contagens"]) == h["n"] and len(h["bordas"]) == len(h["contagens"]) + 1
+    c = d["correlacao"]["todas"]
+    assert c["variaveis"][0] == "impacto" and all(abs(c["matriz"][i][i] - 1) < 1e-9 for i in range(len(c["variaveis"])))
+    r = cliente.get("/api/parte2/figura/tempo_por_tamanho.png")
+    assert r.status_code == 200 and r.mimetype == "image/png"
+    assert cliente.get("/api/parte2/figura/nao_existe.png").status_code == 404
