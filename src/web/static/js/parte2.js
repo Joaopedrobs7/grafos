@@ -160,6 +160,7 @@
     estado.dados = d;
     estado.selecionado = null;
     estado.sobre = null;
+    estado.realce = null;
     $("contagem").innerHTML = "<b>" + d.nos.length + "</b> jogadores, <b>" + fmtInt(d.arcos.length) +
       "</b> trocas diferentes (arcos), <b>" + fmtInt(d.arcos_negativos) + "</b> delas com peso negativo";
     var btnDij = document.querySelector('[data-modo="dijkstra"]');
@@ -167,11 +168,57 @@
     if (estado.modo === "dijkstra" && !d.dijkstra) estado.modo = null;
     $("tela").setAttribute("aria-label", "Grafo de rotação de " + d.time + " na temporada " + rotuloTemporada(d.temporada) +
       ": " + d.nos.length + " jogadores e " + d.arcos.length + " arcos. Os mesmos dados estão na tabela de jogadores.");
-    atualizarModos();
+    renderizarLado();
     montarTabela();
     medir();
     desenhar();
   }
+
+  /* ------------------------------------------------------------ fotos dos jogadores */
+  /* [IA] Claude – fotos da CDN pública da NBA (headshots 260x190 por personId), carregadas pelo navegador e nunca
+     gravadas no repositório. Sem foto (id desconhecido ou erro), fica um círculo com as iniciais. */
+  var FOTO_URL = "https://cdn.nba.com/headshots/nba/latest/260x190/";
+  var RECORTE = { x: 50, y: 2, s: 160 }; // quadrado da foto 260x190 em volta do rosto, usado no círculo do canvas
+  var fotos = {}, quadroPendente = 0;
+
+  function urlFoto(no) { return no && no.personId ? FOTO_URL + no.personId + ".png" : null; }
+  function imgFoto(no) {
+    if (!no.personId) return null;
+    var f = fotos[no.personId];
+    if (!f) {
+      f = fotos[no.personId] = { ok: false, img: new Image() };
+      f.img.referrerPolicy = "no-referrer";
+      f.img.onload = function () { f.ok = f.img.naturalWidth > 0; pedirDesenho(); };
+      f.img.src = urlFoto(no);
+    }
+    return f.ok ? f.img : null;
+  }
+  function pedirDesenho() {
+    if (quadroPendente) return;
+    quadroPendente = requestAnimationFrame(function () { quadroPendente = 0; desenhar(); });
+  }
+  function iniciais(nome) {
+    var p = String(nome).replace(/\s+#\d+$/, "").split(/\s+/).filter(Boolean);
+    return ((p[0] || "?").charAt(0) + (p.length > 1 ? p[p.length - 1].charAt(0) : "")).toUpperCase();
+  }
+  // decorativa = a foto fica ao lado do nome escrito (alt vazio para o leitor de tela não repetir o nome)
+  function htmlFoto(no, classe, decorativa) {
+    var url = urlFoto(no);
+    return '<span class="p2-foto ' + (classe || "") + '"' + (decorativa ? ' aria-hidden="true"' : "") +
+      '><span class="p2-foto__ini" aria-hidden="true">' + esc(iniciais(no.nome)) + "</span>" +
+      (url ? '<img src="' + url + '" alt="' + (decorativa ? "" : esc(no.nome)) +
+        '" loading="lazy" decoding="async" referrerpolicy="no-referrer">' : "") + "</span>";
+  }
+  document.addEventListener("error", function (ev) {
+    var t = ev.target, pai = t && t.parentNode;
+    if (t && t.tagName === "IMG" && pai && pai.classList && pai.classList.contains("p2-foto")) pai.removeChild(t);
+  }, true);
+
+  function corImpacto(no) {
+    var v = no.impacto_medio;
+    return v === null || v === undefined || v === 0 ? "#6B5D4F" : v < 0 ? "#FF5470" : "#35C8F0";
+  }
+  function vezes(n) { return fmtInt(n) + (n === 1 ? " vez" : " vezes"); }
 
   /* ------------------------------------------------------------ destaques */
   var botoesModo = Array.prototype.slice.call(document.querySelectorAll("[data-modo]"));
@@ -179,7 +226,8 @@
     b.addEventListener("click", function () {
       var m = b.getAttribute("data-modo");
       estado.modo = estado.modo === m ? null : m;
-      atualizarModos();
+      if (estado.modo) { estado.selecionado = null; estado.realce = null; marcarLinha(); }
+      renderizarLado();
       desenhar();
     });
   });
@@ -195,18 +243,87 @@
 
   function nomeNo(i) { return estado.dados.nos[i].nome; }
 
-  function atualizarModos() {
+  /* [IA] Claude – coluna ao lado do grafo: ficha do jogador escolhido (ou o convite para escolher) em cima,
+     botões de destaque e o detalhe do destaque embaixo; a legenda do grafo acompanha a seleção */
+  function renderizarLado() {
     botoesModo.forEach(function (b) {
       b.setAttribute("aria-pressed", b.getAttribute("data-modo") === estado.modo ? "true" : "false");
     });
-    var d = estado.dados, caixa = $("detalhe");
-    if (!d) { caixa.innerHTML = ""; return; }
-    var html = "";
-    if (estado.selecionado !== null) {
-      html += '<div class="p2-selecionado"><span>Jogador: <b>' + esc(nomeNo(estado.selecionado)) +
-        '</b></span><button type="button" id="limparSel">limpar</button></div>';
+    var d = estado.dados, sel = estado.selecionado;
+    $("detalhe").innerHTML = !d ? "" : sel !== null ? htmlFicha(sel) : estado.modo ? "" : htmlConvite();
+    $("detalheModo").innerHTML = d ? htmlModo() : "";
+    $("lado").classList.toggle("tem-ficha", sel !== null);
+  }
+
+  function htmlConvite() {
+    var d = estado.dados, sugest = d.nos.slice(0, 3).map(function (n, i) {
+      return '<button type="button" class="p2-chip" data-no="' + i + '">' + htmlFoto(n, "p2-foto--p", true) +
+        "<span>" + esc(n.nome) + "</span></button>";
+    }).join("");
+    return '<div class="p2-convite"><p class="p2-convite__titulo">Ficha do jogador</p>' +
+      '<p class="p2-convite__texto"><b>Clique num jogador</b> no grafo ou na tabela para ver o impacto médio dele, ' +
+      "quem entrou no lugar dele e no lugar de quem ele entrou.</p>" +
+      '<p class="p2-convite__rotulo">Mais minutos em quadra:</p><div class="p2-chips">' + sugest + "</div>" +
+      '<p class="p2-convite__teclado">Teclado: Tab até o grafo e use as setas; Esc fecha a ficha.</p></div>';
+  }
+
+  function htmlFicha(i) {
+    var d = estado.dados, n = d.nos[i], imp = n.impacto_medio;
+    var frase = imp === null
+      ? "Ele não entrou no lugar de nenhum jogador nas trocas 1 por 1 medidas nesta temporada."
+      : imp === 0 ? "Quando ele entra, o saldo do time a cada 12 min fica, em média, igual ao de antes da troca."
+      : "Quando ele entra, o saldo do time a cada 12 min fica, em média, <b>" + fmt(Math.abs(imp), 2) + " pontos " +
+        (imp > 0 ? "melhor" : "pior") + "</b> que antes da troca.";
+    return '<article class="p2-ficha" aria-labelledby="fichaNome">' +
+      '<header class="p2-ficha__topo">' + htmlFoto(n, "p2-foto--g") +
+      '<div class="p2-ficha__quem"><h3 class="p2-ficha__nome" id="fichaNome" tabindex="-1">' + esc(n.nome) + "</h3>" +
+      '<p class="p2-ficha__time">' + esc(d.time) + " " + rotuloTemporada(d.temporada) + "</p></div>" +
+      '<button type="button" class="p2-ficha__fechar" id="limparSel" aria-label="Fechar a ficha de ' + esc(n.nome) +
+      '" title="Fechar (Esc)"><span aria-hidden="true">×</span></button></header>' +
+      '<div class="p2-ficha__impacto ' + (imp === null ? "" : classeSinal(imp)) + '">' +
+      '<p class="p2-ficha__rotulo">Impacto médio</p>' +
+      '<p class="p2-ficha__valor">' + (imp === null ? "–" : fmtSinal(imp, 2)) + "<small>pts/12 min</small></p>" +
+      '<p class="p2-ficha__frase">' + frase + "</p></div>" +
+      '<dl class="p2-ficha__nums"><div><dt>Minutos em quadra</dt><dd>' + fmt(n.minutos, 0) + "</dd></div>" +
+      "<div><dt>Entradas</dt><dd>" + fmtInt(n.entradas) + "</dd></div></dl>" +
+      htmlLista(i, "sai") + htmlLista(i, "chega") + "</article>";
+  }
+
+  var LIMITE_LISTA = 5;
+  function htmlLista(i, lado) {
+    var d = estado.dados, sai = lado === "sai";
+    var ks = (sai ? d.saidas[i] : d.chegadas[i]).slice().sort(function (a, b) { return d.arcos[b][2] - d.arcos[a][2]; });
+    var todos = estado.verTodos[lado], mostra = todos ? ks : ks.slice(0, LIMITE_LISTA);
+    var titulo = sai ? "Entraram no lugar dele" : "Ele entrou no lugar de";
+    var sub = sai ? "arcos que saem dele (ele → Y)" : "arcos que chegam nele (X → ele)";
+    var traco = '<svg class="p2-traco' + (sai ? "" : " p2-traco--chega") + '" viewBox="0 0 36 10" aria-hidden="true">' +
+      '<line x1="1" y1="5" x2="27" y2="5"/><path d="M27 1l8 4-8 4z"/></svg>';
+    var corpo;
+    if (!ks.length) {
+      corpo = '<p class="p2-lista__vazio">' + (sai ? "Ninguém entrou no lugar dele" : "Ele não entrou no lugar de ninguém") +
+        " nas trocas 1 por 1 medidas.</p>";
+    } else {
+      corpo = '<div class="p2-lista__cab" aria-hidden="true"><span>jogador e vezes</span><span>peso, pts/12 min</span></div><ul>' +
+        mostra.map(function (k) {
+          var a = d.arcos[k], j = sai ? a[1] : a[0], nj = d.nos[j];
+          var texto = sai ? "<b>" + esc(nj.nome) + "</b> entrou no lugar dele <span>" + vezes(a[3]) + "</span>"
+            : "entrou no lugar de <b>" + esc(nj.nome) + "</b> <span>" + vezes(a[3]) + "</span>";
+          var dica = "Peso " + fmtSinal(a[2], 2) + " pts de saldo a cada 12 min (depois da troca − antes). Abrir a ficha de " + nj.nome + ".";
+          return '<li><button type="button" class="p2-viz" data-no="' + j + '" data-arco="' + k + '" title="' + esc(dica) + '">' +
+            htmlFoto(nj, "p2-foto--p", true) + '<span class="p2-viz__txt">' + texto + "</span>" +
+            '<span class="p2-viz__peso ' + classeSinal(a[2]) + '">' + fmtSinal(a[2], 2) + "</span></button></li>";
+        }).join("") + "</ul>" +
+        (ks.length > LIMITE_LISTA ? '<button type="button" class="p2-lista__mais" data-mais="' + lado + '" aria-expanded="' +
+          (todos ? "true" : "false") + '">' + (todos ? "mostrar menos" : "ver todos os " + ks.length) + "</button>" : "");
     }
-    var h = destaqueAtual();
+    return '<section class="p2-lista p2-lista--' + lado + '" aria-labelledby="lista_' + lado + '">' +
+      '<h4 class="p2-lista__titulo" id="lista_' + lado + '">' + traco + "<span>" + titulo + "</span>" +
+      '<span class="p2-lista__n">' + ks.length + "</span></h4>" +
+      '<p class="p2-lista__sub">' + sub + "</p>" + corpo + "</section>";
+  }
+
+  function htmlModo() {
+    var html = "", h = destaqueAtual();
     if (estado.modo === "ciclo") {
       if (h) {
         html += '<p class="p2-detalhe__texto">Ciclo negativo devolvido pelo Bellman-Ford do grupo a partir de <b>' +
@@ -227,12 +344,8 @@
         ", Bellman-Ford " + fmt(h.custo_bellman_ford, 2) + ". Caminho igual ao do Bellman-Ford: " +
         (h.caminho_igual ? "sim" : "não") + ".</p>";
       html += listaPassos(h.passos) + total("Custo original", h.custo_reconvertido);
-    } else if (!estado.modo && estado.selecionado === null) {
-      html += '<p class="p2-detalhe__texto">Escolha um destaque acima ou clique num jogador (no grafo ou na tabela) para ver só os arcos dele.</p>';
     }
-    caixa.innerHTML = html;
-    var limpar = $("limparSel");
-    if (limpar) limpar.addEventListener("click", function () { selecionar(null); });
+    return html;
   }
 
   function listaPassos(passos) {
@@ -247,12 +360,52 @@
     return '<p class="p2-total"><span>' + rotulo + "</span><span>" + fmtSinal(v, 2) + " pts por 12 min</span></p>";
   }
 
-  function selecionar(i) {
-    estado.selecionado = estado.selecionado === i ? null : i;
-    atualizarModos();
+  function selecionar(i, opc) {
+    opc = opc || {};
+    estado.selecionado = i;
+    estado.realce = null;
+    estado.verTodos = { sai: false, chega: false };
+    if (i !== null && estado.modo) estado.modo = null;
+    renderizarLado();
     marcarLinha();
     desenhar();
+    var d = estado.dados;
+    if (i !== null && d) {
+      var n = d.nos[i];
+      $("aviso").textContent = "Ficha de " + n.nome + ": impacto médio " +
+        (n.impacto_medio === null ? "sem valor" : fmtSinal(n.impacto_medio, 2) + " pontos por 12 minutos") + ". " +
+        d.saidas[i].length + " jogadores entraram no lugar dele; ele entrou no lugar de " + d.chegadas[i].length + ".";
+      if (opc.focarFicha) $("fichaNome").focus({ preventScroll: true });
+    } else {
+      $("aviso").textContent = i === null && opc.avisarFechar ? "Ficha fechada." : "";
+    }
   }
+  estado.verTodos = { sai: false, chega: false };
+  estado.realce = null;
+
+  // cliques na ficha e no convite: escolher outro jogador, fechar, ver todos; passar o mouse realça o arco no grafo
+  var lado = $("lado");
+  lado.addEventListener("click", function (ev) {
+    var fechar = ev.target.closest("#limparSel");
+    if (fechar) { selecionar(null, { avisarFechar: true }); tela.focus({ preventScroll: true }); return; }
+    var mais = ev.target.closest("[data-mais]");
+    if (mais) {
+      var l = mais.getAttribute("data-mais");
+      estado.verTodos[l] = !estado.verTodos[l];
+      renderizarLado();
+      var novo = lado.querySelector('[data-mais="' + l + '"]');
+      if (novo) novo.focus({ preventScroll: true });
+      return;
+    }
+    var b = ev.target.closest("[data-no]");
+    if (b) selecionar(parseInt(b.getAttribute("data-no"), 10), { focarFicha: true });
+  });
+  function realcar(ev) {
+    var b = ev.target.closest && ev.target.closest("[data-arco]");
+    var k = b && (ev.type === "mouseover" || ev.type === "focusin") ? parseInt(b.getAttribute("data-arco"), 10) : null;
+    if (k !== estado.realce) { estado.realce = k; desenhar(); }
+  }
+  ["mouseover", "mouseout", "focusin", "focusout"].forEach(function (t) { lado.addEventListener(t, realcar); });
 
   /* ------------------------------------------------------------ tabela de jogadores */
   var tabela = $("tabelaJogadores");
@@ -285,8 +438,9 @@
       var n = d.nos[i];
       var imp = n.impacto_medio === null ? '<td class="num vazio">–</td>'
         : '<td class="num ' + classeSinal(n.impacto_medio) + '">' + fmtSinal(n.impacto_medio, 2) + "</td>";
-      return '<tr data-i="' + i + '"><th scope="row"><button type="button" data-no="' + i + '">' + esc(n.nome) +
-        "</button></th>" + '<td class="num">' + fmt(n.minutos, 1) + "</td>" +
+      return '<tr data-i="' + i + '"><th scope="row"><button type="button" class="p2-tabela__jog" data-no="' + i + '">' +
+        htmlFoto(n, "p2-foto--p", true) + "<span>" + esc(n.nome) + "</span></button></th>" +
+        '<td class="num">' + fmt(n.minutos, 1) + "</td>" +
         '<td class="num">' + fmtInt(n.entradas) + "</td>" + imp + "</tr>";
     }).join("");
     marcarLinha();
@@ -294,8 +448,9 @@
   tabela.tBodies[0].addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-no]");
     if (!b) return;
-    selecionar(parseInt(b.getAttribute("data-no"), 10));
-    if (window.innerWidth <= 1000) $("area").scrollIntoView({ behavior: "smooth", block: "center" });
+    var i = parseInt(b.getAttribute("data-no"), 10);
+    selecionar(estado.selecionado === i ? null : i);
+    if (estado.selecionado !== null) document.querySelector(".p2-palco").scrollIntoView({ behavior: "smooth", block: "start" });
   });
   function marcarLinha() {
     Array.prototype.forEach.call(tabela.tBodies[0].rows, function (tr) {
@@ -312,7 +467,7 @@
   function medir() {
     var w = area.clientWidth;
     if (!w) return;
-    var h = Math.round(w < 560 ? Math.max(340, w * 1.05) : Math.max(340, Math.min(w * 0.78, 640)));
+    var h = Math.round(w < 560 ? Math.max(360, w * 1.08) : Math.max(380, Math.min(w * 0.78, 660)));
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     tela.width = Math.round(w * dpr);
     tela.height = Math.round(h * dpr);
@@ -321,49 +476,61 @@
     var d = estado.dados;
     if (!d) return;
     var estreito = w < 560;
-    var margem = estreito ? 70 : 140; // espaço dos nomes fora do círculo
-    var Rx = Math.max(60, w / 2 - margem), Ry = Math.max(80, h / 2 - (estreito ? 40 : 48));
+    var margem = estreito ? 84 : 150; // espaço dos nomes fora do círculo
+    var Rx = Math.max(60, w / 2 - margem), Ry = Math.max(80, h / 2 - (estreito ? 44 : 56));
     // tela larga: círculo; tela estreita: elipse em pé, para usar a altura
     var R = Math.min(Rx, Ry);
     if (!estreito) { Rx = R; Ry = R; }
     var cx = w / 2, cy = h / 2, n = d.nos.length;
     var maxMin = d.nos.reduce(function (m, x) { return Math.max(m, x.minutos); }, 1);
+    // nó maior com menos jogadores (há espaço) e menor com muitos (não encostam)
+    var cabe = Math.min(1, 22 / Math.max(n, 1));
     estado.layout = {
       w: w, h: h, cx: cx, cy: cy, R: R, estreito: estreito,
       pos: d.nos.map(function (no, i) {
         var ang = -Math.PI / 2 + (2 * Math.PI * i) / n;
+        var base = estreito ? 5 + 6 * cabe : 8 + 6 * cabe, extra = estreito ? 5 : 8;
         return {
           x: cx + Rx * Math.cos(ang), y: cy + Ry * Math.sin(ang), ang: ang,
-          r: 3.5 + Math.sqrt(no.minutos / maxMin) * (estreito ? 7 : 10)
+          r: base + Math.sqrt(no.minutos / maxMin) * extra
         };
       })
     };
+    estado.layout.raio = estado.layout.pos.map(function (p) { return p.r; });
+  }
+
+  function raioDe(i) {
+    var L = estado.layout;
+    return L.raio && L.raio[i] !== undefined ? L.raio[i] : L.pos[i].r;
   }
 
   // curva do arco u -> v: controle puxado para o centro e deslocado para um lado (u->v e v->u não se sobrepõem)
   function curva(u, v) {
-    var L = estado.layout, a = L.pos[u], b = L.pos[v];
+    var L = estado.layout, a = L.pos[u], b = L.pos[v], ra = raioDe(u), rb = raioDe(v);
     var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
     var dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1;
     var px = -dy / len, py = dx / len;
-    var desvio = Math.min(16, len * 0.12);
+    var desvio = Math.min(18, len * 0.12);
     var cxp = mx + (L.cx - mx) * 0.35 + px * desvio, cyp = my + (L.cy - my) * 0.35 + py * desvio;
     // ponta da seta na borda do nó de destino
     var tx = b.x - cxp, ty = b.y - cyp, tl = Math.hypot(tx, ty) || 1;
-    var ex = b.x - (tx / tl) * (b.r + 2), ey = b.y - (ty / tl) * (b.r + 2);
+    var ex = b.x - (tx / tl) * (rb + 3), ey = b.y - (ty / tl) * (rb + 3);
     var sx0 = a.x - cxp, sy0 = a.y - cyp, sl = Math.hypot(sx0, sy0) || 1;
-    var sx = a.x - (sx0 / sl) * a.r, sy = a.y - (sy0 / sl) * a.r;
+    var sx = a.x - (sx0 / sl) * (ra + 1), sy = a.y - (sy0 / sl) * (ra + 1);
     return { sx: sx, sy: sy, cx: cxp, cy: cyp, ex: ex, ey: ey, ux: tx / tl, uy: ty / tl };
   }
 
-  function tracarArco(u, v, cor, larg, seta) {
+  function tracarArco(u, v, cor, larg, seta, tracejado) {
     var c = curva(u, v);
     ctx.strokeStyle = cor;
     ctx.lineWidth = larg;
+    ctx.lineCap = tracejado ? "butt" : "round";
+    ctx.setLineDash(tracejado ? [7, 5] : []);
     ctx.beginPath();
     ctx.moveTo(c.sx, c.sy);
     ctx.quadraticCurveTo(c.cx, c.cy, c.ex - c.ux * seta * 0.6, c.ey - c.uy * seta * 0.6);
     ctx.stroke();
+    ctx.setLineDash([]);
     if (seta > 0) {
       ctx.fillStyle = cor;
       ctx.beginPath();
@@ -376,75 +543,121 @@
     return c;
   }
 
+  /* [IA] Claude – nó como foto recortada num círculo (ou iniciais), com anel na cor do sinal do impacto médio */
+  function desenharNo(i, r, o) {
+    var no = estado.dados.nos[i], p = estado.layout.pos[i], img = imgFoto(no);
+    ctx.save();
+    ctx.globalAlpha = o.alfa;
+    if (o.brilho) {
+      ctx.beginPath(); ctx.arc(p.x, p.y, r + 7, 0, 2 * Math.PI);
+      ctx.fillStyle = "rgba(255,96,2,0.16)"; ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 2 * Math.PI);
+    ctx.fillStyle = "#3A3028"; ctx.fill();
+    if (img) {
+      ctx.save(); ctx.clip();
+      ctx.drawImage(img, RECORTE.x, RECORTE.y, RECORTE.s, RECORTE.s, p.x - r, p.y - r, 2 * r, 2 * r);
+      ctx.restore();
+    } else if (r >= 8) {
+      ctx.fillStyle = LUAR; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.font = "600 " + Math.round(r * 0.8) + "px 'Pixelify Sans', 'DM Sans', sans-serif";
+      ctx.fillText(iniciais(no.nome), p.x, p.y + 1);
+    }
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 2 * Math.PI);
+    ctx.lineWidth = o.anelLarg; ctx.strokeStyle = o.anel; ctx.stroke();
+    ctx.restore();
+  }
+
   /* ------------------------------------------------------------ canvas: desenho */
   function desenhar() {
     var d = estado.dados, L = estado.layout;
     if (!d || !L || paineis[0].hidden) return;
     ctx.clearRect(0, 0, L.w, L.h);
     var h = destaqueAtual();
-    var foco = estado.selecionado !== null ? estado.selecionado : estado.sobre;
+    var fixo = !h && estado.selecionado !== null; // ficha aberta
+    var foco = h ? null : (estado.selecionado !== null ? estado.selecionado : estado.sobre);
+    var temFoco = foco !== null && foco !== undefined;
     var emCaminho = {}, arcosCaminho = [];
     if (h) {
       var seq = h.ciclo || h.caminho;
       seq.forEach(function (i) { emCaminho[i] = true; });
       h.passos.forEach(function (p) { arcosCaminho.push(p); });
     }
-    var apagado = !!h || foco !== null && foco !== undefined;
+    var fonteH = h ? (h.fonte !== undefined ? h.fonte : h.origem) : null;
+    // vizinhos do jogador em foco: saiDe[j] = arco foco -> j (j entrou no lugar dele); chegaDe[j] = arco j -> foco
+    var saiDe = {}, chegaDe = {};
+    if (temFoco) {
+      d.saidas[foco].forEach(function (k) { saiDe[d.arcos[k][1]] = k; });
+      d.chegadas[foco].forEach(function (k) { chegaDe[d.arcos[k][0]] = k; });
+    }
+    var vizinho = function (i) { return temFoco && (i === foco || saiDe[i] !== undefined || chegaDe[i] !== undefined); };
+    var acesoNo = function (i) { return h ? !!emCaminho[i] : !temFoco || vizinho(i); };
+    var grande = L.estreito ? 9 : 13;
+    L.raio = L.pos.map(function (p, i) {
+      if (fixo && i === foco) return L.estreito ? 21 : 30;
+      if ((fixo && vizinho(i)) || (h && emCaminho[i])) return Math.max(p.r, grande);
+      return p.r;
+    });
+    var apagado = !!h || temFoco;
+    // legenda: com um jogador em foco (clicado ou sob o mouse) explica as duas direções dos arcos
+    Array.prototype.forEach.call(document.querySelectorAll("[data-legenda]"), function (el) {
+      el.hidden = (el.getAttribute("data-legenda") === "sel") !== temFoco;
+    });
 
     // arcos de fundo (do mais fraco para o mais forte, para os fortes ficarem por cima)
     var ordem = d.arcos.map(function (_, k) { return k; });
     ordem.sort(function (a, b) { return Math.abs(d.arcos[a][2]) - Math.abs(d.arcos[b][2]); });
     ordem.forEach(function (k) {
       var a = d.arcos[k], t = Math.min(Math.abs(a[2]) / LIMITE_COR, 1);
-      var ligado = foco !== null && foco !== undefined && (a[0] === foco || a[1] === foco);
-      if (ligado && !h) return; // desenhados depois, por cima
-      var alfa = apagado ? 0.05 : 0.16 + 0.42 * t;
-      tracarArco(a[0], a[1], corPeso(a[2], alfa), apagado ? 1 : 0.8 + 1.2 * t, apagado ? 0 : 4 + 2 * t);
+      if (temFoco && (a[0] === foco || a[1] === foco)) return; // desenhados depois, por cima
+      var alfa = apagado ? (fixo || h ? 0.035 : 0.06) : 0.09 + 0.33 * t;
+      tracarArco(a[0], a[1], corPeso(a[2], alfa), apagado ? 1 : 0.7 + 1.1 * t, apagado ? 0 : 3.5 + 2 * t);
     });
 
-    // arcos do jogador em foco (sem destaque de algoritmo)
-    if (!h && foco !== null && foco !== undefined) {
-      d.saidas[foco].concat(d.chegadas[foco]).forEach(function (k) {
-        var a = d.arcos[k], t = Math.min(Math.abs(a[2]) / LIMITE_COR, 1);
-        tracarArco(a[0], a[1], corPeso(a[2], 0.55 + 0.45 * t), 1.4 + 1.6 * t, 6 + 2 * t);
+    // arcos do jogador em foco: os que chegam nele tracejados, os que saem dele contínuos (por cima)
+    if (temFoco) {
+      [[d.chegadas[foco], true], [d.saidas[foco], false]].forEach(function (par) {
+        par[0].forEach(function (k) {
+          var a = d.arcos[k], t = Math.min(Math.abs(a[2]) / LIMITE_COR, 1);
+          var realce = estado.realce === k, outro = estado.realce !== null && !realce;
+          var larg = (realce ? 3.4 : fixo ? 1.7 : 1.4) + 1.5 * t;
+          if (outro) larg = 1.2;
+          tracarArco(a[0], a[1], "rgba(18,15,12," + (outro ? 0.4 : 0.85) + ")", larg + 3, 0);
+          tracarArco(a[0], a[1], corPeso(a[2], outro ? 0.3 : realce ? 1 : 0.62 + 0.38 * t), larg,
+            (outro ? 5 : 8) + 3 * t, par[1]);
+        });
       });
     }
 
     // arcos do destaque, numerados
     var rotulosPasso = [];
     arcosCaminho.forEach(function (p, k) {
-      ctx.save();
       tracarArco(p.de, p.para, "rgba(18,15,12,0.9)", 7, 0);
-      ctx.restore();
       var c = tracarArco(p.de, p.para, corPeso(p.peso, 1), 3, 11);
       // ponto médio da curva quadrática (t = 0,5)
       rotulosPasso.push({ n: k + 1, x: 0.25 * c.sx + 0.5 * c.cx + 0.25 * c.ex, y: 0.25 * c.sy + 0.5 * c.cy + 0.25 * c.ey });
     });
 
-    // nós
-    d.nos.forEach(function (no, i) {
-      var p = L.pos[i];
-      var vizinho = foco !== null && foco !== undefined &&
-        (i === foco || d.chaveArco[foco + ">" + i] !== undefined || d.chaveArco[i + ">" + foco] !== undefined);
-      var aceso = h ? emCaminho[i] : (foco === null || foco === undefined) ? true : vizinho;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, 2 * Math.PI);
-      ctx.fillStyle = aceso ? "#D9CCB8" : "#4A3E33";
-      ctx.fill();
-      if (h && (i === (h.fonte !== undefined ? h.fonte : h.origem))) {
-        ctx.lineWidth = 3; ctx.strokeStyle = CESAR; ctx.stroke();
-      } else if (h && emCaminho[i]) {
-        ctx.lineWidth = 2.5; ctx.strokeStyle = TOCHA; ctx.stroke();
-      } else if (i === foco) {
-        ctx.lineWidth = 3; ctx.strokeStyle = CESAR; ctx.stroke();
-      }
+    // nós (o jogador em foco por último, por cima)
+    var ordemNos = d.nos.map(function (_, i) { return i; });
+    if (temFoco) ordemNos.sort(function (a, b) { return (a === foco) - (b === foco) || (vizinho(a) - vizinho(b)); });
+    ordemNos.forEach(function (i) {
+      var no = d.nos[i], anel = corImpacto(no), larg = 2;
+      if (h && i === fonteH) { anel = CESAR; larg = 3.5; }
+      else if (h && emCaminho[i]) { anel = TOCHA; larg = 3; }
+      else if (i === foco) { anel = CESAR; larg = fixo ? 3.5 : 3; }
+      else if (fixo && i === estado.sobre) { anel = LUAR; larg = 2.5; }
+      desenharNo(i, L.raio[i], { alfa: acesoNo(i) ? 1 : 0.22, anel: anel, anelLarg: larg, brilho: fixo && i === foco });
     });
 
     // nomes fora do círculo: os acesos primeiro; quem colide sobe um degrau para fora, depois vira abreviação,
     // e por último some (só nomes apagados somem; os do destaque sempre aparecem)
     var alturaTexto = L.estreito ? 13 : 15;
-    ctx.font = (L.estreito ? 11 : 12.5) + "px 'DM Sans', system-ui, sans-serif";
     ctx.textBaseline = "middle";
+    var fonteNome = function (i) {
+      return (i === foco && fixo ? "600 " + (L.estreito ? 12 : 14) + "px" : (L.estreito ? 11 : 12.5) + "px") +
+        " 'DM Sans', system-ui, sans-serif";
+    };
     var postos = [];
     function caixa(texto, x, y, alinh) {
       var w = ctx.measureText(texto).width;
@@ -456,24 +669,22 @@
       return postos.some(function (o) { return c.x0 < o.x1 && c.x1 > o.x0 && c.y0 < o.y1 && c.y1 > o.y0; });
     }
     var ordemNomes = d.nos.map(function (_, i) { return i; });
-    var acesoNo = function (i) {
-      var vizinho = foco !== null && foco !== undefined &&
-        (i === foco || d.chaveArco[foco + ">" + i] !== undefined || d.chaveArco[i + ">" + foco] !== undefined);
-      return h ? !!emCaminho[i] : (foco === null || foco === undefined) ? true : vizinho;
-    };
-    ordemNomes.sort(function (a, b) { return (acesoNo(b) ? 1 : 0) - (acesoNo(a) ? 1 : 0) || a - b; });
+    ordemNomes.sort(function (a, b) {
+      return (b === foco) - (a === foco) || (acesoNo(b) ? 1 : 0) - (acesoNo(a) ? 1 : 0) || a - b;
+    });
     ordemNomes.forEach(function (i) {
-      var no = d.nos[i], p = L.pos[i], aceso = acesoNo(i);
+      var no = d.nos[i], p = L.pos[i], r = L.raio[i], aceso = acesoNo(i);
+      ctx.font = fonteNome(i);
       var cos = Math.cos(p.ang), sin = Math.sin(p.ang);
-      var lado = cos >= 0 ? "left" : "right";
-      var alinhs = Math.abs(cos) < 0.3 ? ["center", lado] : [lado];
+      var ladoT = cos >= 0 ? "left" : "right";
+      var alinhs = Math.abs(cos) < 0.3 ? ["center", ladoT] : [ladoT];
       var alinh = alinhs[0];
-      var textos = L.estreito ? [abreviar(no.nome)] : [no.nome, abreviar(no.nome)];
+      var textos = L.estreito && i !== foco ? [abreviar(no.nome)] : [no.nome, abreviar(no.nome)];
       var escolha = null;
       textos.some(function (t) {
         alinhs.some(function (al) {
           for (var k = 0; k < 6 && !escolha; k++) {
-            var dist = p.r + 7 + k * (al === "center" ? alturaTexto : 6);
+            var dist = r + 7 + k * (al === "center" ? alturaTexto : 6);
             var x = p.x + cos * dist, y = p.y + sin * dist;
             if (al === "center") y += sin * 6;
             var c = caixa(t, x, y, al);
@@ -485,13 +696,13 @@
       });
       if (!escolha) {
         if (!aceso || (h && !emCaminho[i])) return;
-        var dist0 = p.r + 7, t0 = textos[textos.length - 1];
+        var dist0 = r + 7, t0 = textos[textos.length - 1];
         escolha = { t: t0, x: p.x + cos * dist0, y: p.y + sin * dist0 + (alinh === "center" ? sin * 6 : 0) };
         escolha.c = caixa(t0, escolha.x, escolha.y, alinh);
       }
       postos.push(escolha.c);
       ctx.textAlign = alinh;
-      ctx.fillStyle = i === foco ? LUAR : aceso ? (apagado ? LUAR : LUAR_FRACO) : "rgba(181,168,149,0.35)";
+      ctx.fillStyle = i === foco ? LUAR : aceso ? (apagado ? LUAR : LUAR_FRACO) : "rgba(181,168,149,0.3)";
       ctx.fillText(escolha.t, escolha.x, escolha.y);
     });
 
@@ -520,25 +731,30 @@
     var x = ev.clientX - r.left, y = ev.clientY - r.top, melhor = null, md = Infinity;
     L.pos.forEach(function (p, i) {
       var dd = Math.hypot(p.x - x, p.y - y);
-      if (dd < Math.max(p.r + 6, 12) && dd < md) { md = dd; melhor = i; }
+      if (dd < Math.max(raioDe(i) + 5, 12) && dd < md) { md = dd; melhor = i; }
     });
     return melhor;
   }
 
+  /* [IA] Claude – dica compacta ao passar o mouse: foto, nome e impacto médio */
+  var dicaDe = null;
   function mostrarDica(i, ev) {
-    if (i === null) { dica.hidden = true; return; }
+    if (i === null) { dica.hidden = true; dicaDe = null; return; }
     var d = estado.dados, n = d.nos[i];
-    dica.innerHTML = "<strong>" + esc(n.nome) + "</strong><dl>" +
-      "<dt>Minutos em quadra</dt><dd>" + fmt(n.minutos, 1) + "</dd>" +
-      "<dt>Entradas (trocas)</dt><dd>" + fmtInt(n.entradas) + "</dd>" +
-      "<dt>Impacto médio</dt><dd>" + (n.impacto_medio === null ? "–" : fmtSinal(n.impacto_medio, 2) + " pts/12 min") + "</dd>" +
-      "<dt>Arcos que saem</dt><dd>" + d.saidas[i].length + "</dd>" +
-      "<dt>Arcos que chegam</dt><dd>" + d.chegadas[i].length + "</dd></dl>";
+    if (dicaDe !== i) {
+      dicaDe = i;
+      var imp = n.impacto_medio;
+      dica.innerHTML = '<div class="p2-dica__cab">' + htmlFoto(n, "p2-foto--m", true) + "<div><strong>" + esc(n.nome) +
+        '</strong><span class="p2-dica__imp">impacto médio <b class="' + (imp === null ? "" : classeSinal(imp)) + '">' +
+        (imp === null ? "–" : fmtSinal(imp, 2)) + "</b> pts/12 min</span></div></div>" +
+        '<p class="p2-dica__pe">' + fmt(n.minutos, 0) + " min em quadra · " + fmtInt(n.entradas) + (n.entradas === 1 ? " entrada" : " entradas") + "</p>" +
+        (estado.selecionado === i ? "" : '<p class="p2-dica__acao">clique para abrir a ficha</p>');
+    }
     dica.hidden = false;
     var r = area.getBoundingClientRect();
-    var x = ev.clientX - r.left + 14, y = ev.clientY - r.top + 14;
-    if (x + dica.offsetWidth > r.width - 8) x = ev.clientX - r.left - dica.offsetWidth - 14;
-    if (y + dica.offsetHeight > r.height - 8) y = ev.clientY - r.top - dica.offsetHeight - 14;
+    var x = ev.clientX - r.left + 16, y = ev.clientY - r.top + 16;
+    if (x + dica.offsetWidth > r.width - 8) x = ev.clientX - r.left - dica.offsetWidth - 16;
+    if (y + dica.offsetHeight > r.height - 8) y = ev.clientY - r.top - dica.offsetHeight - 16;
     dica.style.left = Math.max(8, x) + "px";
     dica.style.top = Math.max(8, y) + "px";
   }
@@ -550,13 +766,33 @@
     if (i !== estado.sobre) { estado.sobre = i; desenhar(); }
   });
   tela.addEventListener("mouseleave", function () {
-    dica.hidden = true;
+    dica.hidden = true; dicaDe = null;
     if (estado.sobre !== null) { estado.sobre = null; desenhar(); }
   });
   tela.addEventListener("click", function (ev) {
     var i = noEm(ev);
+    dicaDe = null;
     if (i === null) { if (estado.selecionado !== null) selecionar(null); return; }
-    selecionar(i);
+    selecionar(estado.selecionado === i ? null : i);
+    mostrarDica(i, ev);
+  });
+  // teclado: setas percorrem os jogadores na ordem do círculo; Esc fecha a ficha
+  tela.addEventListener("keydown", function (ev) {
+    var d = estado.dados;
+    if (!d) return;
+    var n = d.nos.length, i = estado.selecionado;
+    if (ev.key === "ArrowRight" || ev.key === "ArrowDown") {
+      ev.preventDefault(); selecionar(i === null ? 0 : (i + 1) % n);
+    } else if (ev.key === "ArrowLeft" || ev.key === "ArrowUp") {
+      ev.preventDefault(); selecionar(i === null ? n - 1 : (i - 1 + n) % n);
+    } else if (ev.key === "Escape" && i !== null) {
+      ev.preventDefault(); selecionar(null, { avisarFechar: true });
+    }
+  });
+  lado.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape" && estado.selecionado !== null) {
+      selecionar(null, { avisarFechar: true }); tela.focus({ preventScroll: true });
+    }
   });
 
   var tMedir;

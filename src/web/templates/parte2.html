@@ -60,28 +60,43 @@
       substituição: Y entrou em quadra no lugar de X. O <b>peso</b> da seta é quantos pontos de saldo o time ganhou (+) ou perdeu (−)
       a cada 12 minutos com Y em quadra, comparado ao trecho anterior com X; por exemplo, −5 quer dizer que, depois dessa troca, o
       time passou a ter 5 pontos a menos de saldo a cada 12 minutos. O <b>impacto médio</b> do jogador é a média dos pesos das trocas
-      em que ele entrou.</p>
+      em que ele entrou, ponderada por quantas vezes cada troca aconteceu. <b>Clique num jogador</b> (no grafo ou na tabela) para
+      abrir a ficha dele.</p>
 
     <div class="p2-palco">
       <figure class="p2-quadro">
         <div class="p2-quadro__area" id="area">
-          <canvas id="tela" role="img" aria-label="Grafo de rotação do time-temporada escolhido"></canvas>
+          <canvas id="tela" role="img" tabindex="0" aria-label="Grafo de rotação do time-temporada escolhido"
+                  aria-describedby="telaTeclado"></canvas>
+          <p class="sr-only" id="telaTeclado">Com o grafo em foco, as setas escolhem o jogador seguinte ou o anterior e Esc fecha a ficha.</p>
           <div class="p2-dica" id="dica" hidden></div>
           <p class="p2-carregando" id="carregando">carregando…</p>
         </div>
-        <figcaption class="p2-legenda">
+        <!-- [IA] Claude – legenda que muda com a seleção: com um jogador escolhido, explica as duas direções dos arcos -->
+        <figcaption class="p2-legenda" id="legenda">
           <span class="p2-legenda__item">
             <span class="p2-escala" aria-hidden="true"></span>
             <span><span class="p2-escala__ponta">−20 piora</span> peso da troca (pts de saldo a cada 12 min, depois − antes) <span class="p2-escala__ponta">melhora +20</span></span>
           </span>
-          <span class="p2-legenda__item">X <span aria-hidden="true">→</span><span class="sr-only">para</span> Y: Y entrou no lugar de X</span>
-          <span class="p2-legenda__item">tamanho do nó: minutos em quadra</span>
+          <span class="p2-legenda__item" data-legenda="geral">X <span aria-hidden="true">→</span><span class="sr-only">para</span> Y: Y entrou no lugar de X</span>
+          <span class="p2-legenda__item" data-legenda="sel" hidden>
+            <svg class="p2-traco" viewBox="0 0 36 10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5"/><path d="M27 1l8 4-8 4z"/></svg>
+            <span>sai dele: <b>Y entrou no lugar dele</b></span>
+          </span>
+          <span class="p2-legenda__item" data-legenda="sel" hidden>
+            <svg class="p2-traco p2-traco--chega" viewBox="0 0 36 10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5"/><path d="M27 1l8 4-8 4z"/></svg>
+            <span>chega nele: <b>ele entrou no lugar de X</b></span>
+          </span>
+          <span class="p2-legenda__item"><span class="p2-aneis" aria-hidden="true"><span class="p2-anel"></span><span class="p2-anel p2-anel--neg"></span></span>anel do nó: sinal do impacto médio; tamanho: minutos em quadra</span>
+          <span class="p2-legenda__item p2-legenda__fonte">Fotos: NBA.com (carregadas do site da NBA)</span>
         </figcaption>
       </figure>
 
-      <aside class="p2-lado" aria-labelledby="destacarTitulo">
-        <h2 class="p2-subtitulo" id="destacarTitulo">Destacar</h2>
-        <div class="p2-modos" role="group" aria-label="Destaque no grafo">
+      <aside class="p2-lado" id="lado" aria-label="Ficha do jogador e destaques do grafo">
+        <div class="p2-detalhe" id="detalhe"></div>
+        <p class="sr-only" id="aviso" aria-live="polite"></p>
+        <h2 class="p2-subtitulo p2-lado__titulo" id="destacarTitulo">Destacar</h2>
+        <div class="p2-modos" role="group" aria-labelledby="destacarTitulo">
           <button class="p2-modo" type="button" data-modo="ciclo" aria-pressed="false">
             <span class="p2-modo__nome">Ciclo negativo</span>
             <span class="p2-modo__alg">Bellman-Ford</span>
@@ -95,7 +110,7 @@
             <span class="p2-modo__alg">Johnson no recorte sem ciclo</span>
           </button>
         </div>
-        <div class="p2-detalhe" id="detalhe" aria-live="polite"></div>
+        <div class="p2-detalhe p2-detalhe--modo" id="detalheModo" aria-live="polite"></div>
       </aside>
     </div>
 

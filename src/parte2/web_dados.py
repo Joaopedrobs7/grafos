@@ -30,7 +30,8 @@ SAIDA = RESULTADOS / "web"
 
 DESCRICAO_PESO = ("peso do arco X -> Y (Y entrou no lugar de X) = saldo do time por 12 min com Y em quadra "
                   "menos o saldo por 12 min do trecho anterior, com X em quadra")
-DESCRICAO_IMPACTO = "impacto médio = média dos pesos dos arcos que chegam ao jogador (vezes em que ele entrou)"
+DESCRICAO_IMPACTO = ("impacto médio = média dos pesos dos arcos que chegam ao jogador (vezes em que ele entrou), "
+                     "ponderada pelas ocorrências")
 
 
 def _num(valor, casas: int = 4):
@@ -89,14 +90,23 @@ def montar_componentes(jogadores: list[dict], arestas: list[dict], bellman: dict
         ordem = sorted(nos[(time, ano)], key=lambda v: (-minutos(v), v))
         idx = {v: i for i, v in enumerate(ordem)}
         pesos = {(a["origem"], a["destino"]): float(a["peso"]) for a in arcos[(time, ano)]}
+        # [IA] Claude – impacto médio ponderado pelas ocorrências (arcos que chegam ao jogador) e personId (foto)
+        chega: dict[str, list[float]] = defaultdict(lambda: [0.0, 0])
+        for a in arcos[(time, ano)]:
+            oc = int(float(a.get("ocorrencias") or 0))
+            chega[a["destino"]][0] += float(a["peso"]) * oc
+            chega[a["destino"]][1] += oc
         lista_nos = []
         for v in ordem:
             j = info.get(v, {})
+            soma, ent = chega.get(v, (0.0, 0))
+            pid = str(j.get("personId") or "").strip()
             lista_nos.append({
                 "id": v, "nome": j.get("nome") or v.split("|")[0],
+                "personId": int(float(pid)) if pid else None,
                 "minutos": _num(j.get("minutos_medidos"), 2) or 0.0,
-                "entradas": int(float(j.get("entradas") or 0)),
-                "impacto_medio": _num(j.get("impacto_medio")),
+                "entradas": int(ent),
+                "impacto_medio": _num(soma / ent) if ent else None,
             })
         lista_arcos = [[idx[a["origem"]], idx[a["destino"]], round(float(a["peso"]), 4),
                         int(float(a.get("ocorrencias") or 0))] for a in arcos[(time, ano)]]

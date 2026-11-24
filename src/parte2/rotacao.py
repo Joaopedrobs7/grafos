@@ -182,7 +182,11 @@ def preparar_rotacao(params: dict, raw: Path = RAW, saida: Path = SAIDA) -> dict
     lados = pd.concat([tr[["temporada", "teamId", "X", "min_antes"]].set_axis(["temporada", "teamId", "p", "m"], axis=1),
                        tr[["temporada", "teamId", "Y", "min_depois"]].set_axis(["temporada", "teamId", "p", "m"], axis=1)])
     minutos = lados.groupby(["temporada", "teamId", "p"])["m"].sum()
-    entrada = arcos.groupby("destino").agg(entradas=("ocorrencias", "sum"), impacto_medio=("peso", "mean"))
+    # [IA] Claude – impacto médio ponderado pelas ocorrências (mesma definição de graficos_avd.py e da página)
+    entrada = (arcos.assign(_pxo=arcos["peso"] * arcos["ocorrencias"]).groupby("destino")
+               .agg(entradas=("ocorrencias", "sum"), _soma=("_pxo", "sum")))
+    entrada["impacto_medio"] = entrada["_soma"] / entrada["entradas"]
+    entrada = entrada[["entradas", "impacto_medio"]]
     nos = pd.DataFrame([{"no": r[0], "personId": p, "nome": r[1], "time": r[2], "temporada": a,
                          "minutos_medidos": round(float(minutos.get((a, t, p), 0.0)), 2)}
                         for (p, t, a), r in rot.items()])

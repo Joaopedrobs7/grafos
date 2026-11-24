@@ -1,6 +1,7 @@
 # [IA] Claude – testes da aplicação web (rotas, página 404) e da exportação standalone do labirinto
 import json
 import re
+from pathlib import Path
 
 import pytest
 
@@ -404,6 +405,37 @@ def test_web_dados_com_grafo_sintetico(tmp_path):
     assert ind["V"] == 3 and ind["E"] == 5 and ind["temporadas"][0]["times"][0]["time"] == "AAA"
     assert not (res / "web" / "benchmark.json").exists()        # sem parte2_report.json, sem benchmark
 
+
+
+# [IA] Claude – nós do JSON de rotação: personId (foto) e impacto médio ponderado pelas ocorrências
+def test_web_dados_personid_e_impacto_ponderado():
+    from src.parte2 import web_dados
+    rot = lambda j: f"Jogador {j}|AAA|2024"  # noqa: E731
+    arestas = [{"origem": rot(u), "destino": rot(v), "peso": p, "ocorrencias": oc, "temporada": 2024, "time": "AAA"}
+               for u, v, p, oc in [("A1", "A3", 2.0, 1), ("A2", "A3", -4.0, 3), ("A3", "A1", 1.0, 2)]]
+    jogadores = [{"no": rot(j), "personId": pid, "nome": f"Jogador {j}", "minutos_medidos": m}
+                 for j, pid, m in [("A1", "101", 500), ("A2", "102", 400), ("A3", "103", 300)]]
+    vazio = {"com_ciclo": {"componentes": []}, "sem_ciclo": {"componentes": []}}
+    d = web_dados.montar_componentes(jogadores, arestas, vazio, {})[("AAA", 2024)]
+    a3 = next(n for n in d["nos"] if n["nome"] == "Jogador A3")
+    assert a3["personId"] == 103 and a3["entradas"] == 4
+    assert a3["impacto_medio"] == pytest.approx((2.0 * 1 - 4.0 * 3) / 4)   # -2.5 (a média simples seria -1.0)
+    a2 = next(n for n in d["nos"] if n["nome"] == "Jogador A2")
+    assert a2["entradas"] == 0 and a2["impacto_medio"] is None
+
+
+def test_rotacao_json_real_tem_personid_e_impacto_ponderado():
+    pasta = Path(__file__).resolve().parents[1] / "out" / "parte2" / "web" / "rotacao"
+    arquivos = sorted(pasta.glob("*.json")) if pasta.exists() else []
+    if not arquivos:
+        pytest.skip("out/parte2/web/rotacao ainda não gerado")
+    d = json.loads(arquivos[-1].read_text(encoding="utf-8"))
+    assert all("personId" in n for n in d["nos"]) and any(n["personId"] for n in d["nos"])
+    i = max(range(len(d["nos"])), key=lambda k: d["nos"][k]["entradas"])
+    chegam = [a for a in d["arcos"] if a[1] == i]
+    ent = sum(a[3] for a in chegam)
+    assert d["nos"][i]["entradas"] == ent
+    assert d["nos"][i]["impacto_medio"] == pytest.approx(sum(a[2] * a[3] for a in chegam) / ent, abs=1e-3)
 
 # [IA] Claude – dados dos gráficos interativos da Parte 2 (impacto x minutos e times)
 def test_parte2_graficos(cliente):
