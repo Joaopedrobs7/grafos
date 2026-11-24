@@ -50,21 +50,32 @@ python -m src.cli --mapa ./data/mapas/m03_tres_chaves.txt --interactive --out ./
 pytest -q
 ```
 
-<!-- [IA] Claude – comandos da Parte 2 -->
-**Parte 2** (o `arestas.csv` já está no repositório; os dados brutos vêm do DVC):
+<!-- [IA] Claude – comandos da Parte 2 (grafo de rotação por padrão; partidas com --grafo partidas) -->
+**Parte 2** (o `arestas.csv` de partidas está no repositório; `rotacao/` e os dados brutos vêm do DVC). Com
+`--dataset ./data/dataset_parte2/`, a CLI usa o **grafo de rotação** (`rotacao/arestas_rotacao.csv`, nó `Nome|TIM|ano`)
+quando ele existe; `--grafo partidas` usa o grafo de partidas (`arestas.csv`, nó `TIME|ano`, saídas em `out/parte2/partidas/`).
 
 ```bash
+# grafo de rotação (padrão) -> out/parte2/
 python -m src.cli --dataset ./data/dataset_parte2/                                       # |V| e |E|
-python -m src.cli --dataset ./data/dataset_parte2/ --alg BFS --source "ATL|2000"
-python -m src.cli --dataset ./data/dataset_parte2/ --alg DFS --source "ATL|2000"
-python -m src.cli --dataset ./data/dataset_parte2/ --alg DIJKSTRA --source "ATL|2000" --target "SAN|2000"
-python -m src.cli --dataset ./data/dataset_parte2/ --alg BELLMAN_FORD --source "ATL|2000"
+python -m src.cli --dataset ./data/dataset_parte2/ --alg BFS --source "Brook Lopez|MIL|2022"
+python -m src.cli --dataset ./data/dataset_parte2/ --alg DFS --source "Brook Lopez|MIL|2022"
+python -m src.cli --dataset ./data/dataset_parte2/ --alg DIJKSTRA --source "Brook Lopez|MIL|2022" --target "Jae Crowder|MIL|2022" --out ./out/parte2/
+python -m src.cli --dataset ./data/dataset_parte2/ --alg BELLMAN_FORD --source "Brook Lopez|MIL|2022"
 python -m src.cli --dataset ./data/dataset_parte2/ --benchmark --out ./out/parte2/       # tempos e escalabilidade
 
-python -m src.parte2.buscas      # BFS/DFS de 3 fontes        -> out/parte2/bfs_dfs.json
-python -m src.parte2.caminhos    # Dijkstra em 5 pares        -> out/parte2/dijkstra.json
-python -m src.parte2.bellman     # com ciclo e sem ciclo      -> out/parte2/bellman_ford.json
-python -m src.parte2.graficos    # gráficos de comparação     -> out/parte2/graficos/
+python -m src.parte2.rotacao_casos       # BFS/DFS, Bellman-Ford, Dijkstra -> out/parte2/{bfs_dfs,bellman_ford,dijkstra}.json
+python -m src.parte2.rotacao_desempenho  # benchmark e escalabilidade      -> out/parte2/parte2_report.json, complexidade.csv
+python -m src.parte2.rotacao_graficos    # gráficos de comparação          -> out/parte2/graficos/
+dvc repro casos_rotacao                  # os três comandos acima
+
+# grafo de partidas -> out/parte2/partidas/
+python -m src.cli --dataset ./data/dataset_parte2/ --grafo partidas --alg DIJKSTRA --source "ATL|2000" --target "SAN|2000"
+python -m src.cli --dataset ./data/dataset_parte2/ --grafo partidas --benchmark   # partidas_report.json
+python -m src.parte2.buscas      # BFS/DFS de 3 fontes        -> out/parte2/partidas/bfs_dfs.json
+python -m src.parte2.caminhos    # Dijkstra em 5 pares        -> out/parte2/partidas/dijkstra.json
+python -m src.parte2.bellman     # com ciclo e sem ciclo      -> out/parte2/partidas/bellman_ford.json
+python -m src.parte2.graficos    # gráficos de comparação     -> out/parte2/partidas/graficos/
 python -m src.avd.descricao      # descrição do grafo         -> out/avd/
 python -m src.avd.tabelas        # tabelas de apoio à AVD     -> out/avd/tabelas/ (precisa dos dados brutos)
 ```
@@ -211,6 +222,22 @@ quando A leva vantagem no confronto. Recorte: temporada regular de 2000 a 2025.
 | Bellman-Ford sem ciclo | em cada temporada, só arcos do time de maior saldo para o de menor (grafo acíclico) |
 | Escalabilidade | 10%, 50% e 100% das **temporadas** (V = 91, 390, 777; E = 2.613, 11.255, 22.404), com o nó `INICIO` ligado a uma entrada por temporada |
 
+<!-- [IA] Claude – casos dos algoritmos no grafo de rotação (src/parte2/rotacao_casos.py) -->
+**Grafo de rotação** (`data/dataset_parte2/rotacao/`, estágio `rotacao`): nó = jogador em um time-temporada
+(`Nome|TIM|ano`, 2020 a 2025); arco X → Y = Y entrou no lugar de X; peso = saldo por 12 min com Y em quadra − saldo
+por 12 min do trecho anterior com X. 3.507 nós, 21.672 arcos, 180 componentes (time × temporada). "Principal" de um
+time-temporada = jogador com mais `minutos_medidos` (desempate pelo rótulo).
+
+| Caso | Como é calculado | Saída |
+|---|---|---|
+| BFS/DFS (3 fontes) | temporadas 2020, 2022 e 2025 (1ª, do meio e última); time com mais arcos; fonte = principal | `out/parte2/bfs_dfs.json` |
+| Bellman-Ford com ciclo | subgrafo de cada time-temporada, fonte = principal (ciclo negativo em 180 de 180) | `out/parte2/bellman_ford.json` |
+| Bellman-Ford sem ciclo | recorte "descer na rotação": só arcos X → Y com minutos(X) > minutos(Y) (acíclico); destino = nó de menor distância (status OK em 180 de 180) | `out/parte2/bellman_ford.json` |
+| Dijkstra (5 pares) | o Dijkstra do grupo recusa os pesos originais; no recorte sem ciclo, Johnson: `h(v)` = Bellman-Ford a partir de uma super-fonte com arcos de peso 0, `w' = w + h(u) − h(v) ≥ 0`, custo original = `custo' − h(s) + h(t)`; temporadas 2020, 2021, 2023, 2024, 2025; caminho e custo conferidos com o Bellman-Ford | `out/parte2/dijkstra.json` |
+| Benchmark | 5 execuções (`time.perf_counter`) por tarefa | `out/parte2/parte2_report.json` |
+| Escalabilidade | 10%, 50% e 100% dos time-temporadas (semente 42), nó `INICIO` ligado ao principal de cada um; grafo completo (V = 352, 1.743, 3.508; E = 2.069, 11.030, 21.852) e recorte sem ciclo (E = 1.062, 5.724, 11.341) | `out/parte2/parte2_report.json`, `out/parte2/complexidade.csv` |
+| Gráficos | tempo por algoritmo, tempo × tamanho com crescimento teórico, BFS × DFS, caminhos Dijkstra × Bellman-Ford | `out/parte2/graficos/` |
+
 ```bash
 dvc pull            # baixa raw/ e processed/ do drive do grupo (1ª vez abre o login do Google)
 dvc repro           # refaz só o que mudou: baixar (Kaggle) -> preparar (params.yaml)
@@ -220,6 +247,8 @@ dvc repro           # refaz só o que mudou: baixar (Kaggle) -> preparar (params
 |---|---|---|
 | `baixar` | `python -m src.parte2.baixar` | `data/dataset_parte2/raw/` (CSV do Kaggle + `MANIFESTO.json` com SHA-256) |
 | `preparar` | `python -m src.parte2.preparar` | `data/dataset_parte2/processed/arestas.csv`, `nos.csv`, `relatorio_preparacao.json` |
+| `rotacao` | `python -m src.parte2.rotacao` | `data/dataset_parte2/rotacao/arestas_rotacao.csv`, `jogadores.csv`, `relatorio_rotacao.json` |
+| `casos_rotacao` | `rotacao_casos`, `rotacao_desempenho`, `rotacao_graficos` | `out/parte2/*.json`, `complexidade.csv`, `graficos/*.png` (cache: false, versionados no git) |
 
 `params.yaml` controla a limpeza (tipos de jogo, intervalo de temporadas, sinal do peso). A temporada e o tipo
 de jogo vêm do `gameId` (ex.: os playoffs da "bolha" de 2020 pertencem à temporada 2019-20).

@@ -1,0 +1,6978 @@
+{
+  "grafo": "rotacao",
+  "arestas": "arestas_rotacao.csv",
+  "repeticoes": 5,
+  "semente": 42,
+  "fracoes": [
+    0.1,
+    0.5,
+    1.0
+  ],
+  "componentes_total": 180,
+  "V": 3507,
+  "E": 21672,
+  "tarefas": [
+    {
+      "parte": 2,
+      "algoritmo": "BFS",
+      "grafo": "completo",
+      "tarefa": "fonte Jae'Sean Tate|HOU|2020",
+      "V": 3507,
+      "E": 21672,
+      "alcancados": 28,
+      "tempos_s": [
+        1.8207996618002653e-05,
+        8.290997357107699e-06,
+        6.708003638777882e-06,
+        7.375005225185305e-06,
+        6.000002031214535e-06
+      ],
+      "media_s": 9.316400974057614e-06
+    },
+    {
+      "parte": 2,
+      "algoritmo": "DFS",
+      "grafo": "completo",
+      "tarefa": "fonte Jae'Sean Tate|HOU|2020",
+      "V": 3507,
+      "E": 21672,
+      "alcancados": 28,
+      "tempos_s": [
+        4.4208005419932306e-05,
+        4.016700404463336e-05,
+        3.0000002880115062e-05,
+        2.9082999390084296e-05,
+        2.8541995561681688e-05
+      ],
+      "media_s": 3.4400001459289344e-05
+    },
+    {
+      "parte": 2,
+      "algoritmo": "BFS",
+      "grafo": "completo",
+      "tarefa": "fonte Brook Lopez|MIL|2022",
+      "V": 3507,
+      "E": 21672,
+      "alcancados": 19,
+      "tempos_s": [
+        7.000002369750291e-06,
+        5.875001079402864e-06,
+        5.249996320344508e-06,
+        5.084002623334527e-06,
+        5.084002623334527e-06
+      ],
+      "media_s": 5.658601003233343e-06
+    },
+    {
+      "parte": 2,
+      "algoritmo": "DFS",
+      "grafo": "completo",
+      "tarefa": "fonte Brook Lopez|MIL|2022",
+      "V": 3507,
+      "E": 21672,
+      "alcancados": 19,
+      "tempos_s": [
+        3.270899469498545e-05,
+        3.087500226683915e-05,
+        2.9999995604157448e-05,
+        2.966700412798673e-05,
+        2.9541995900217444e-05
+      ],
+      "media_s": 3.055859851883724e-05
+    },
+    {
+      "parte": 2,
+      "algoritmo": "BFS",
+      "grafo": "completo",
+      "tarefa": "fonte Matas Buzelis|CHI|2025",
+      "V": 3507,
+      "E": 21672,
+      "alcancados": 23,
+      "tempos_s": [
+        7.750000804662704e-06,
+        5.916997906751931e-06,
+        5.5829950724728405e-06,
+        5.542002327274531e-06,
+        5.458998202811927e-06
+      ],
+      "media_s": 6.050198862794787e-06
+    },
+    {
+      "parte": 2,
+      "algoritmo": "DFS",
+      "grafo": "completo",
+      "tarefa": "fonte Matas Buzelis|CHI|2025",
+      "V": 3507,
+      "E": 21672,
+      "alcancados": 23,
+      "tempos_s": [
+        3.158300387440249e-05,
+        3.058300353586674e-05,
+        3.0499999411404133e-05,
+        2.995799877680838e-05,
+        2.983299782499671e-05
+      ],
+      "media_s": 3.0491400684695692e-05
+    },
+    {
+      "parte": 3,
+      "algoritmo": "Dijkstra",
+      "grafo": "recorte_sem_ciclo HOU|2020 (Johnson)",
+      "tarefa": "Jae'Sean Tate|HOU|2020 -> Armoni Brooks|HOU|2020",
+      "V": 29,
+      "E": 84,
+      "alcancados": 28,
+      "tempos_s": [
+        5.424999835668132e-05,
+        2.758300252025947e-05,
+        2.0375002350192517e-05,
+        1.9625003915280104e-05,
+        1.912500010803342e-05
+      ],
+      "media_s": 2.8191601450089367e-05
+    },
+    {
+      "parte": 3,
+      "algoritmo": "Dijkstra",
+      "grafo": "recorte_sem_ciclo MIL|2021 (Johnson)",
+      "tarefa": "Bobby Portis|MIL|2021 -> Donte DiVincenzo|MIL|2021",
+      "V": 25,
+      "E": 100,
+      "alcancados": 24,
+      "tempos_s": [
+        2.12500017369166e-05,
+        2.0500003302004188e-05,
+        1.9582999811973423e-05,
+        1.966700074262917e-05,
+        1.962499663932249e-05
+      ],
+      "media_s": 2.0125000446569175e-05
+    },
+    {
+      "parte": 3,
+      "algoritmo": "Dijkstra",
+      "grafo": "recorte_sem_ciclo MEM|2023 (Johnson)",
+      "tarefa": "Jaren Jackson Jr.|MEM|2023 -> Timmy Allen|MEM|2023",
+      "V": 31,
+      "E": 98,
+      "alcancados": 30,
+      "tempos_s": [
+        2.612500247778371e-05,
+        2.4957997084129602e-05,
+        2.4417000531684607e-05,
+        2.4000000848900527e-05,
+        2.391599991824478e-05
+      ],
+      "media_s": 2.4683200172148646e-05
+    },
+    {
+      "parte": 3,
+      "algoritmo": "Dijkstra",
+      "grafo": "recorte_sem_ciclo DAL|2024 (Johnson)",
+      "tarefa": "Spencer Dinwiddie|DAL|2024 -> Moses Brown|DAL|2024",
+      "V": 23,
+      "E": 91,
+      "alcancados": 22,
+      "tempos_s": [
+        2.4790999304968864e-05,
+        2.3332999262493104e-05,
+        2.254099672427401e-05,
+        2.2499996703118086e-05,
+        2.2332998923957348e-05
+      ],
+      "media_s": 2.3099598183762283e-05
+    },
+    {
+      "parte": 3,
+      "algoritmo": "Dijkstra",
+      "grafo": "recorte_sem_ciclo CHI|2025 (Johnson)",
+      "tarefa": "Matas Buzelis|CHI|2025 -> Mouhamadou Gueye|CHI|2025",
+      "V": 26,
+      "E": 89,
+      "alcancados": 23,
+      "tempos_s": [
+        1.95419997908175e-05,
+        1.8541999452281743e-05,
+        1.8124999769497663e-05,
+        1.7917001969181e-05,
+        1.7708000086713582e-05
+      ],
+      "media_s": 1.8366800213698296e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente ATL|2020",
+      "tarefa": "com ciclo, fonte Clint Capela|ATL|2020",
+      "V": 18,
+      "E": 114,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00014358300541061908,
+        0.00013566700363298878,
+        0.00013633300113724545,
+        0.0001350839957012795,
+        0.0001340830058325082
+      ],
+      "media_s": 0.0001369500023429282
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo ATL|2020",
+      "tarefa": "sem ciclo, fonte Clint Capela|ATL|2020",
+      "V": 18,
+      "E": 59,
+      "alcancados": 17,
+      "tempos_s": [
+        4.866699600825086e-05,
+        4.816699947696179e-05,
+        4.779200389748439e-05,
+        4.7583998821210116e-05,
+        4.8916997911874205e-05
+      ],
+      "media_s": 4.8225399223156276e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente BKN|2020",
+      "tarefa": "com ciclo, fonte Joe Harris|BKN|2020",
+      "V": 23,
+      "E": 108,
+      "alcancados": 22,
+      "tempos_s": [
+        0.00018304200057173148,
+        0.00017449999722884968,
+        0.00017779199697542936,
+        0.00018075000116368756,
+        0.00017283300257986411
+      ],
+      "media_s": 0.00017778339970391243
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo BKN|2020",
+      "tarefa": "sem ciclo, fonte Joe Harris|BKN|2020",
+      "V": 23,
+      "E": 58,
+      "alcancados": 22,
+      "tempos_s": [
+        6.425000174203888e-05,
+        6.116599979577586e-05,
+        6.200000643730164e-05,
+        6.0291000409051776e-05,
+        6.03340013185516e-05
+      ],
+      "media_s": 6.160820194054396e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente BOS|2020",
+      "tarefa": "com ciclo, fonte Jayson Tatum|BOS|2020",
+      "V": 21,
+      "E": 138,
+      "alcancados": 21,
+      "tempos_s": [
+        0.00020808399858651683,
+        0.00019887500093318522,
+        0.00019816699932562187,
+        0.00020420799410203472,
+        0.00020516700169537216
+      ],
+      "media_s": 0.00020290019892854616
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo BOS|2020",
+      "tarefa": "sem ciclo, fonte Jayson Tatum|BOS|2020",
+      "V": 21,
+      "E": 71,
+      "alcancados": 19,
+      "tempos_s": [
+        7.212500349851325e-05,
+        7.137500506360084e-05,
+        7.112499588401988e-05,
+        6.962499901419505e-05,
+        7.104199903551489e-05
+      ],
+      "media_s": 7.105840049916878e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CHA|2020",
+      "tarefa": "com ciclo, fonte Terry Rozier|CHA|2020",
+      "V": 16,
+      "E": 109,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00011929099855478853,
+        0.00011700000322889537,
+        0.00012037499982398003,
+        0.0001171670010080561,
+        0.00011970899504376575
+      ],
+      "media_s": 0.00011870839953189715
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CHA|2020",
+      "tarefa": "sem ciclo, fonte Terry Rozier|CHA|2020",
+      "V": 16,
+      "E": 53,
+      "alcancados": 16,
+      "tempos_s": [
+        4.087499837623909e-05,
+        3.9917002141010016e-05,
+        3.9667000237386674e-05,
+        4.020800406578928e-05,
+        3.958399611292407e-05
+      ],
+      "media_s": 4.0050200186669824e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CHI|2020",
+      "tarefa": "com ciclo, fonte Patrick Williams|CHI|2020",
+      "V": 21,
+      "E": 119,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00018995899881701916,
+        0.00018908399943029508,
+        0.00019425000209594145,
+        0.0001847079984145239,
+        0.0001931670049089007
+      ],
+      "media_s": 0.00019023360073333606
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CHI|2020",
+      "tarefa": "sem ciclo, fonte Patrick Williams|CHI|2020",
+      "V": 21,
+      "E": 65,
+      "alcancados": 20,
+      "tempos_s": [
+        6.612500146729872e-05,
+        6.720799865433946e-05,
+        6.687499990221113e-05,
+        6.579199543921277e-05,
+        6.970800313865766e-05
+      ],
+      "media_s": 6.714159972034394e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CLE|2020",
+      "tarefa": "com ciclo, fonte Isaac Okoro|CLE|2020",
+      "V": 24,
+      "E": 131,
+      "alcancados": 23,
+      "tempos_s": [
+        0.00022741599968867376,
+        0.00022912500571692362,
+        0.00023091700131772086,
+        0.00022283299767877907,
+        0.00022341600561048836
+      ],
+      "media_s": 0.00022674140200251713
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CLE|2020",
+      "tarefa": "sem ciclo, fonte Isaac Okoro|CLE|2020",
+      "V": 24,
+      "E": 70,
+      "alcancados": 23,
+      "tempos_s": [
+        8.308300311909989e-05,
+        7.866699888836592e-05,
+        8.404200343647972e-05,
+        8.120800339384004e-05,
+        7.891700079198927e-05
+      ],
+      "media_s": 8.118340192595497e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DAL|2020",
+      "tarefa": "com ciclo, fonte Josh Richardson|DAL|2020",
+      "V": 17,
+      "E": 100,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00012191700079711154,
+        0.00011933399946428835,
+        0.00011991700012004003,
+        0.0001557080031489022,
+        0.00013179099914850667
+      ],
+      "media_s": 0.00012973340053576977
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DAL|2020",
+      "tarefa": "sem ciclo, fonte Josh Richardson|DAL|2020",
+      "V": 17,
+      "E": 49,
+      "alcancados": 16,
+      "tempos_s": [
+        4.400000034365803e-05,
+        4.183300188742578e-05,
+        4.179200186626986e-05,
+        4.1667000914458185e-05,
+        4.191700281808153e-05
+      ],
+      "media_s": 4.2241801565978676e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DEN|2020",
+      "tarefa": "com ciclo, fonte Nikola Jokic|DEN|2020",
+      "V": 20,
+      "E": 118,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00016437500016763806,
+        0.00015987500228220597,
+        0.00016304200107697397,
+        0.00016429199604317546,
+        0.0001662499998928979
+      ],
+      "media_s": 0.00016356679989257828
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DEN|2020",
+      "tarefa": "sem ciclo, fonte Nikola Jokic|DEN|2020",
+      "V": 20,
+      "E": 68,
+      "alcancados": 18,
+      "tempos_s": [
+        6.391699571395293e-05,
+        6.199999916134402e-05,
+        6.25829998170957e-05,
+        6.208300328580663e-05,
+        6.183300138218328e-05
+      ],
+      "media_s": 6.248319987207651e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DET|2020",
+      "tarefa": "com ciclo, fonte Josh Jackson|DET|2020",
+      "V": 21,
+      "E": 102,
+      "alcancados": 21,
+      "tempos_s": [
+        0.00015720800001872703,
+        0.0001515420008217916,
+        0.00015720800001872703,
+        0.0001627080055186525,
+        0.00015108299703570083
+      ],
+      "media_s": 0.00015594980068271979
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DET|2020",
+      "tarefa": "sem ciclo, fonte Josh Jackson|DET|2020",
+      "V": 21,
+      "E": 50,
+      "alcancados": 20,
+      "tempos_s": [
+        5.124999734107405e-05,
+        5.30420002178289e-05,
+        5.004199920222163e-05,
+        4.962499951943755e-05,
+        5.037500523030758e-05
+      ],
+      "media_s": 5.086680030217394e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente GSW|2020",
+      "tarefa": "com ciclo, fonte Andrew Wiggins|GSW|2020",
+      "V": 15,
+      "E": 100,
+      "alcancados": 15,
+      "tempos_s": [
+        0.0001005830054054968,
+        9.870799840427935e-05,
+        9.999999747378752e-05,
+        9.933399996953085e-05,
+        0.00010229200415778905
+      ],
+      "media_s": 0.00010018340108217672
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo GSW|2020",
+      "tarefa": "sem ciclo, fonte Andrew Wiggins|GSW|2020",
+      "V": 15,
+      "E": 48,
+      "alcancados": 14,
+      "tempos_s": [
+        3.6624995118472725e-05,
+        3.5625002055894583e-05,
+        3.500000457279384e-05,
+        3.587499668356031e-05,
+        3.6167002690490335e-05
+      ],
+      "media_s": 3.585840022424236e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente HOU|2020",
+      "tarefa": "com ciclo, fonte Jae'Sean Tate|HOU|2020",
+      "V": 29,
+      "E": 162,
+      "alcancados": 28,
+      "tempos_s": [
+        0.0003500840030028485,
+        0.0003662919989437796,
+        0.0003473330070846714,
+        0.00035062499955529347,
+        0.0003415829996811226
+      ],
+      "media_s": 0.00035118340165354314
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo HOU|2020",
+      "tarefa": "sem ciclo, fonte Jae'Sean Tate|HOU|2020",
+      "V": 29,
+      "E": 84,
+      "alcancados": 28,
+      "tempos_s": [
+        0.00011545800225576386,
+        0.00011404100223444402,
+        0.000112749999971129,
+        0.00011204199836356565,
+        0.0001119579974329099
+      ],
+      "media_s": 0.00011324980005156249
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente IND|2020",
+      "tarefa": "com ciclo, fonte Justin Holiday|IND|2020",
+      "V": 17,
+      "E": 114,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00012095899728592485,
+        0.00012295800115680322,
+        0.00011979199916822836,
+        0.00011929200263693929,
+        0.00012133300333516672
+      ],
+      "media_s": 0.00012086680071661249
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo IND|2020",
+      "tarefa": "sem ciclo, fonte Justin Holiday|IND|2020",
+      "V": 17,
+      "E": 53,
+      "alcancados": 16,
+      "tempos_s": [
+        4.6375003876164556e-05,
+        4.4375003199093044e-05,
+        4.387499939184636e-05,
+        4.350000381236896e-05,
+        4.4874999730382115e-05
+      ],
+      "media_s": 4.4600002001971004e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente LAC|2020",
+      "tarefa": "com ciclo, fonte Nicolas Batum|LAC|2020",
+      "V": 18,
+      "E": 119,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00014591700164601207,
+        0.00014287500380305573,
+        0.00014395899779628962,
+        0.00014191700029186904,
+        0.00013983299868414178
+      ],
+      "media_s": 0.00014290020044427365
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo LAC|2020",
+      "tarefa": "sem ciclo, fonte Nicolas Batum|LAC|2020",
+      "V": 18,
+      "E": 65,
+      "alcancados": 18,
+      "tempos_s": [
+        5.408300057752058e-05,
+        5.358300404623151e-05,
+        5.3499999921768904e-05,
+        5.370900180423632e-05,
+        5.337499896995723e-05
+      ],
+      "media_s": 5.365000106394291e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente LAL|2020",
+      "tarefa": "com ciclo, fonte Kyle Kuzma|LAL|2020",
+      "V": 18,
+      "E": 104,
+      "alcancados": 17,
+      "tempos_s": [
+        0.0001282500015804544,
+        0.0001294169996981509,
+        0.000130749998788815,
+        0.0001281669974559918,
+        0.00012762500409735367
+      ],
+      "media_s": 0.00012884180032415315
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo LAL|2020",
+      "tarefa": "sem ciclo, fonte Kyle Kuzma|LAL|2020",
+      "V": 18,
+      "E": 48,
+      "alcancados": 13,
+      "tempos_s": [
+        4.374999844003469e-05,
+        4.224999429425225e-05,
+        4.1958999645430595e-05,
+        4.2625004425644875e-05,
+        4.191700281808153e-05
+      ],
+      "media_s": 4.2500199924688786e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MEM|2020",
+      "tarefa": "com ciclo, fonte Dillon Brooks|MEM|2020",
+      "V": 17,
+      "E": 90,
+      "alcancados": 16,
+      "tempos_s": [
+        0.0001071660008165054,
+        0.00010541699884925038,
+        0.00010475000453880057,
+        0.0001102499954868108,
+        0.00010774999827845022
+      ],
+      "media_s": 0.00010706659959396348
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MEM|2020",
+      "tarefa": "sem ciclo, fonte Dillon Brooks|MEM|2020",
+      "V": 17,
+      "E": 45,
+      "alcancados": 16,
+      "tempos_s": [
+        3.6375000490807e-05,
+        3.566699888324365e-05,
+        3.804100560955703e-05,
+        3.724999987753108e-05,
+        3.529200330376625e-05
+      ],
+      "media_s": 3.6525001632981e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIA|2020",
+      "tarefa": "com ciclo, fonte Duncan Robinson|MIA|2020",
+      "V": 19,
+      "E": 104,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00014799999917158857,
+        0.00014962499699322507,
+        0.00014812500012340024,
+        0.00014375000318977982,
+        0.00018116700084647164
+      ],
+      "media_s": 0.00015413340006489306
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIA|2020",
+      "tarefa": "sem ciclo, fonte Duncan Robinson|MIA|2020",
+      "V": 19,
+      "E": 53,
+      "alcancados": 18,
+      "tempos_s": [
+        5.233300180407241e-05,
+        4.954199539497495e-05,
+        5.0292001105844975e-05,
+        4.804199852515012e-05,
+        4.7625006118323654e-05
+      ],
+      "media_s": 4.956680058967322e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIL|2020",
+      "tarefa": "com ciclo, fonte Khris Middleton|MIL|2020",
+      "V": 19,
+      "E": 122,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00015941700257826596,
+        0.00015662499936297536,
+        0.00015304200496757403,
+        0.00015537500439677387,
+        0.00015837499813642353
+      ],
+      "media_s": 0.00015656680188840254
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIL|2020",
+      "tarefa": "sem ciclo, fonte Khris Middleton|MIL|2020",
+      "V": 19,
+      "E": 67,
+      "alcancados": 19,
+      "tempos_s": [
+        6.13329975749366e-05,
+        6.075000419514254e-05,
+        6.0291000409051776e-05,
+        6.066700007067993e-05,
+        5.9916994359809905e-05
+      ],
+      "media_s": 6.059159932192415e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIN|2020",
+      "tarefa": "com ciclo, fonte Anthony Edwards|MIN|2020",
+      "V": 15,
+      "E": 115,
+      "alcancados": 15,
+      "tempos_s": [
+        0.00012170900299679488,
+        0.00011937499948544428,
+        0.00011912499758182094,
+        0.00011758400069084018,
+        0.00011787500261561945
+      ],
+      "media_s": 0.00011913360067410395
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIN|2020",
+      "tarefa": "sem ciclo, fonte Anthony Edwards|MIN|2020",
+      "V": 15,
+      "E": 58,
+      "alcancados": 14,
+      "tempos_s": [
+        4.233400250086561e-05,
+        4.1541999962646514e-05,
+        4.1125000279862434e-05,
+        4.1916995542123914e-05,
+        4.150000313529745e-05
+      ],
+      "media_s": 4.1683600284159186e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente NOP|2020",
+      "tarefa": "com ciclo, fonte Zion Williamson|NOP|2020",
+      "V": 18,
+      "E": 84,
+      "alcancados": 18,
+      "tempos_s": [
+        0.0001053749947459437,
+        0.00010170899622607976,
+        0.00010112499876413494,
+        0.00010120800288859755,
+        0.00010004199430113658
+      ],
+      "media_s": 0.0001018917973851785
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo NOP|2020",
+      "tarefa": "sem ciclo, fonte Zion Williamson|NOP|2020",
+      "V": 18,
+      "E": 36,
+      "alcancados": 17,
+      "tempos_s": [
+        3.420799475861713e-05,
+        3.2333002309314907e-05,
+        3.199999628122896e-05,
+        3.2208001357503235e-05,
+        3.133300197077915e-05
+      ],
+      "media_s": 3.241639933548868e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente NYK|2020",
+      "tarefa": "com ciclo, fonte Reggie Bullock|NYK|2020",
+      "V": 17,
+      "E": 65,
+      "alcancados": 12,
+      "tempos_s": [
+        6.925000343471766e-05,
+        6.225000106496736e-05,
+        6.304199632722884e-05,
+        6.283399852691218e-05,
+        6.295899947872385e-05
+      ],
+      "media_s": 6.406699976650998e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo NYK|2020",
+      "tarefa": "sem ciclo, fonte Reggie Bullock|NYK|2020",
+      "V": 17,
+      "E": 34,
+      "alcancados": 10,
+      "tempos_s": [
+        2.95409990940243e-05,
+        2.879199746530503e-05,
+        2.8667003789450973e-05,
+        2.8708003810606897e-05,
+        2.808299905154854e-05
+      ],
+      "media_s": 2.875820064218715e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente OKC|2020",
+      "tarefa": "com ciclo, fonte Theo Maledon|OKC|2020",
+      "V": 22,
+      "E": 130,
+      "alcancados": 22,
+      "tempos_s": [
+        0.00019737499678740278,
+        0.00019700000120792538,
+        0.00019579200306907296,
+        0.00019637499644886702,
+        0.00019637499644886702
+      ],
+      "media_s": 0.00019658339879242704
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo OKC|2020",
+      "tarefa": "sem ciclo, fonte Theo Maledon|OKC|2020",
+      "V": 22,
+      "E": 66,
+      "alcancados": 22,
+      "tempos_s": [
+        6.837499677203596e-05,
+        6.749999738531187e-05,
+        6.73749964335002e-05,
+        6.600000051548705e-05,
+        6.524999480461702e-05
+      ],
+      "media_s": 6.689999718219042e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente ORL|2020",
+      "tarefa": "com ciclo, fonte Dwayne Bacon|ORL|2020",
+      "V": 27,
+      "E": 118,
+      "alcancados": 26,
+      "tempos_s": [
+        0.00020670799858635291,
+        0.00020300000323913991,
+        0.00019683299615280703,
+        0.00020162500004516914,
+        0.00020187499467283487
+      ],
+      "media_s": 0.00020200819853926076
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo ORL|2020",
+      "tarefa": "sem ciclo, fonte Dwayne Bacon|ORL|2020",
+      "V": 27,
+      "E": 59,
+      "alcancados": 25,
+      "tempos_s": [
+        7.19579984433949e-05,
+        7.245799497468397e-05,
+        7.23750054021366e-05,
+        7.295799878193066e-05,
+        7.087500125635415e-05
+      ],
+      "media_s": 7.212479977170005e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente PHI|2020",
+      "tarefa": "com ciclo, fonte Danny Green|PHI|2020",
+      "V": 21,
+      "E": 110,
+      "alcancados": 21,
+      "tempos_s": [
+        0.00016687500465195626,
+        0.00017500000103609636,
+        0.00016658299864502624,
+        0.00016058300388976932,
+        0.00016774999676272273
+      ],
+      "media_s": 0.00016735820099711418
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo PHI|2020",
+      "tarefa": "sem ciclo, fonte Danny Green|PHI|2020",
+      "V": 21,
+      "E": 57,
+      "alcancados": 17,
+      "tempos_s": [
+        5.862499529030174e-05,
+        5.633299588225782e-05,
+        5.7000004744622856e-05,
+        5.695899744750932e-05,
+        5.729099939344451e-05
+      ],
+      "media_s": 5.724159855162725e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente PHX|2020",
+      "tarefa": "com ciclo, fonte Deandre Ayton|PHX|2020",
+      "V": 17,
+      "E": 86,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00010116700286744162,
+        9.866699838312343e-05,
+        0.00010045799717772752,
+        0.00010150000161956996,
+        9.824999870033935e-05
+      ],
+      "media_s": 0.00010000839974964038
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo PHX|2020",
+      "tarefa": "sem ciclo, fonte Deandre Ayton|PHX|2020",
+      "V": 17,
+      "E": 47,
+      "alcancados": 11,
+      "tempos_s": [
+        3.887499769916758e-05,
+        3.758300590561703e-05,
+        3.741699765669182e-05,
+        3.7125006201677024e-05,
+        3.699999797390774e-05
+      ],
+      "media_s": 3.760000108741224e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente POR|2020",
+      "tarefa": "com ciclo, fonte Enes Freedom|POR|2020",
+      "V": 16,
+      "E": 91,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00010849999671336263,
+        0.00010533299791859463,
+        0.00010425000073155388,
+        0.00010679200204322115,
+        0.0001042079966282472
+      ],
+      "media_s": 0.0001058165988069959
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo POR|2020",
+      "tarefa": "sem ciclo, fonte Enes Freedom|POR|2020",
+      "V": 16,
+      "E": 49,
+      "alcancados": 16,
+      "tempos_s": [
+        3.979199391324073e-05,
+        4.1457999031990767e-05,
+        3.9000005926936865e-05,
+        3.841600118903443e-05,
+        3.9332997403107584e-05
+      ],
+      "media_s": 3.9599799492862076e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente SAC|2020",
+      "tarefa": "com ciclo, fonte Buddy Hield|SAC|2020",
+      "V": 21,
+      "E": 113,
+      "alcancados": 21,
+      "tempos_s": [
+        0.00018016600370174274,
+        0.00017762499919626862,
+        0.00017804099479690194,
+        0.00017458400543546304,
+        0.00018070899386657402
+      ],
+      "media_s": 0.00017822499939939006
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo SAC|2020",
+      "tarefa": "sem ciclo, fonte Buddy Hield|SAC|2020",
+      "V": 21,
+      "E": 55,
+      "alcancados": 20,
+      "tempos_s": [
+        5.51249977434054e-05,
+        5.554199742618948e-05,
+        5.6750002840999514e-05,
+        5.791700095869601e-05,
+        8.370899740839377e-05
+      ],
+      "media_s": 6.180859927553683e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente SAN|2020",
+      "tarefa": "com ciclo, fonte Keldon Johnson|SAN|2020",
+      "V": 17,
+      "E": 95,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00011583300511119887,
+        0.00011316699965391308,
+        0.00011095799709437415,
+        0.00011045799328712747,
+        0.0001106670024455525
+      ],
+      "media_s": 0.00011221659951843321
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo SAN|2020",
+      "tarefa": "sem ciclo, fonte Keldon Johnson|SAN|2020",
+      "V": 17,
+      "E": 48,
+      "alcancados": 17,
+      "tempos_s": [
+        4.208300379104912e-05,
+        4.0958002500701696e-05,
+        3.9874998037703335e-05,
+        4.416700539877638e-05,
+        4.1040999349206686e-05
+      ],
+      "media_s": 4.1624801815487446e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente TOR|2020",
+      "tarefa": "com ciclo, fonte Chris Boucher|TOR|2020",
+      "V": 20,
+      "E": 131,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00019887500093318522,
+        0.0001936249973368831,
+        0.00018883400480262935,
+        0.0001874169975053519,
+        0.00019029100076295435
+      ],
+      "media_s": 0.0001918084002682008
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo TOR|2020",
+      "tarefa": "sem ciclo, fonte Chris Boucher|TOR|2020",
+      "V": 20,
+      "E": 71,
+      "alcancados": 20,
+      "tempos_s": [
+        7.137500506360084e-05,
+        6.900000153109431e-05,
+        6.800000119255856e-05,
+        6.866700277896598e-05,
+        6.774999928893521e-05
+      ],
+      "media_s": 6.895840197103098e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente UTA|2020",
+      "tarefa": "com ciclo, fonte Bojan Bogdanovic|UTA|2020",
+      "V": 17,
+      "E": 57,
+      "alcancados": 17,
+      "tempos_s": [
+        7.012499554548413e-05,
+        6.579099863301963e-05,
+        6.56669944874011e-05,
+        6.712500180583447e-05,
+        6.541699985973537e-05
+      ],
+      "media_s": 6.682499806629494e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo UTA|2020",
+      "tarefa": "sem ciclo, fonte Bojan Bogdanovic|UTA|2020",
+      "V": 17,
+      "E": 30,
+      "alcancados": 15,
+      "tempos_s": [
+        2.570800279499963e-05,
+        2.479200338711962e-05,
+        2.474999928381294e-05,
+        2.512499486329034e-05,
+        2.420799864921719e-05
+      ],
+      "media_s": 2.4916599795687943e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente WAS|2020",
+      "tarefa": "com ciclo, fonte Bradley Beal|WAS|2020",
+      "V": 20,
+      "E": 116,
+      "alcancados": 14,
+      "tempos_s": [
+        0.00015845800226088613,
+        0.0001436669990653172,
+        0.00014704199566040188,
+        0.0001446249953005463,
+        0.000144959005410783
+      ],
+      "media_s": 0.0001477501995395869
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo WAS|2020",
+      "tarefa": "sem ciclo, fonte Bradley Beal|WAS|2020",
+      "V": 20,
+      "E": 58,
+      "alcancados": 14,
+      "tempos_s": [
+        5.3333002142608166e-05,
+        5.3208001190796494e-05,
+        5.2833005611319095e-05,
+        5.2292001782916486e-05,
+        5.30420002178289e-05
+      ],
+      "media_s": 5.294160218909383e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente ATL|2021",
+      "tarefa": "com ciclo, fonte Kevin Huerter|ATL|2021",
+      "V": 21,
+      "E": 97,
+      "alcancados": 18,
+      "tempos_s": [
+        0.0001397500018356368,
+        0.00013458299508783966,
+        0.00013741699513047934,
+        0.0001368750017718412,
+        0.00013808299991069362
+      ],
+      "media_s": 0.00013734159874729813
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo ATL|2021",
+      "tarefa": "sem ciclo, fonte Kevin Huerter|ATL|2021",
+      "V": 21,
+      "E": 51,
+      "alcancados": 17,
+      "tempos_s": [
+        5.0709000788629055e-05,
+        5.0000002374872565e-05,
+        5.062499985797331e-05,
+        4.949999856762588e-05,
+        4.949999856762588e-05
+      ],
+      "media_s": 5.0066800031345335e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente BKN|2021",
+      "tarefa": "com ciclo, fonte Patty Mills|BKN|2021",
+      "V": 21,
+      "E": 142,
+      "alcancados": 21,
+      "tempos_s": [
+        0.00020308399689383805,
+        0.0002168339997297153,
+        0.0002198329966631718,
+        0.00021399999968707561,
+        0.00022000000171829015
+      ],
+      "media_s": 0.0002147501989384182
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo BKN|2021",
+      "tarefa": "sem ciclo, fonte Patty Mills|BKN|2021",
+      "V": 21,
+      "E": 74,
+      "alcancados": 21,
+      "tempos_s": [
+        8.125000022118911e-05,
+        8.216700371121988e-05,
+        7.795899728080258e-05,
+        7.999999797903001e-05,
+        7.995800115168095e-05
+      ],
+      "media_s": 8.02668000687845e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente BOS|2021",
+      "tarefa": "com ciclo, fonte Jayson Tatum|BOS|2021",
+      "V": 20,
+      "E": 110,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00017025000124704093,
+        0.00016966700059128925,
+        0.00017425000260118395,
+        0.00016991699521895498,
+        0.00017458300135331228
+      ],
+      "media_s": 0.00017173340020235628
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo BOS|2021",
+      "tarefa": "sem ciclo, fonte Jayson Tatum|BOS|2021",
+      "V": 20,
+      "E": 57,
+      "alcancados": 20,
+      "tempos_s": [
+        5.7292003475595266e-05,
+        6.095899880165234e-05,
+        5.787499685538933e-05,
+        5.5834003433119506e-05,
+        5.51249977434054e-05
+      ],
+      "media_s": 5.741700006183237e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CHA|2021",
+      "tarefa": "com ciclo, fonte Miles Bridges|CHA|2021",
+      "V": 17,
+      "E": 107,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00014483300037682056,
+        0.00013699999544769526,
+        0.00014000000373926014,
+        0.00013604199921246618,
+        0.00013429100363282487
+      ],
+      "media_s": 0.0001384332004818134
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CHA|2021",
+      "tarefa": "sem ciclo, fonte Miles Bridges|CHA|2021",
+      "V": 17,
+      "E": 54,
+      "alcancados": 16,
+      "tempos_s": [
+        4.7833003918640316e-05,
+        4.587500006891787e-05,
+        4.508300480665639e-05,
+        4.4874999730382115e-05,
+        4.5291999413166195e-05
+      ],
+      "media_s": 4.5791601587552576e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CHI|2021",
+      "tarefa": "com ciclo, fonte Ayo Dosunmu|CHI|2021",
+      "V": 20,
+      "E": 127,
+      "alcancados": 20,
+      "tempos_s": [
+        0.0001810000030673109,
+        0.000179541006218642,
+        0.00017691699758870527,
+        0.00018316700152354315,
+        0.00018166599329560995
+      ],
+      "media_s": 0.00018045820033876225
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CHI|2021",
+      "tarefa": "sem ciclo, fonte Ayo Dosunmu|CHI|2021",
+      "V": 20,
+      "E": 68,
+      "alcancados": 19,
+      "tempos_s": [
+        6.529200618388131e-05,
+        6.462499732151628e-05,
+        6.920799933141097e-05,
+        6.445799954235554e-05,
+        6.591700366698205e-05
+      ],
+      "media_s": 6.590000120922923e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CLE|2021",
+      "tarefa": "com ciclo, fonte Kevin Love|CLE|2021",
+      "V": 21,
+      "E": 146,
+      "alcancados": 21,
+      "tempos_s": [
+        0.0002023330016527325,
+        0.00022566699772141874,
+        0.0002133330053766258,
+        0.00020041700190631673,
+        0.00019637500372482464
+      ],
+      "media_s": 0.00020762500207638368
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CLE|2021",
+      "tarefa": "sem ciclo, fonte Kevin Love|CLE|2021",
+      "V": 21,
+      "E": 73,
+      "alcancados": 21,
+      "tempos_s": [
+        7.14999987394549e-05,
+        7.14170018909499e-05,
+        7.162499969126657e-05,
+        6.98750009178184e-05,
+        7.170900062192231e-05
+      ],
+      "media_s": 7.122520037228242e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DAL|2021",
+      "tarefa": "com ciclo, fonte Dorian Finney-Smith|DAL|2021",
+      "V": 23,
+      "E": 140,
+      "alcancados": 23,
+      "tempos_s": [
+        0.00021766599820693955,
+        0.0002146660044672899,
+        0.00021291700250003487,
+        0.00021349999587982893,
+        0.0002119999990100041
+      ],
+      "media_s": 0.00021414980001281946
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DAL|2021",
+      "tarefa": "sem ciclo, fonte Dorian Finney-Smith|DAL|2021",
+      "V": 23,
+      "E": 68,
+      "alcancados": 20,
+      "tempos_s": [
+        7.791700045345351e-05,
+        7.391699909931049e-05,
+        7.333300163736567e-05,
+        7.28330051060766e-05,
+        7.383299816865474e-05
+      ],
+      "media_s": 7.43666008929722e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DEN|2021",
+      "tarefa": "com ciclo, fonte Nikola Jokic|DEN|2021",
+      "V": 20,
+      "E": 111,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00015762499970151111,
+        0.0001634580039535649,
+        0.00015666700346628204,
+        0.0001592499975231476,
+        0.00016933400183916092
+      ],
+      "media_s": 0.0001612668012967333
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DEN|2021",
+      "tarefa": "sem ciclo, fonte Nikola Jokic|DEN|2021",
+      "V": 20,
+      "E": 61,
+      "alcancados": 16,
+      "tempos_s": [
+        5.658400186803192e-05,
+        5.5666998378001153e-05,
+        5.8667006669566035e-05,
+        5.6166994909290224e-05,
+        5.412500468082726e-05
+      ],
+      "media_s": 5.624200130114332e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DET|2021",
+      "tarefa": "com ciclo, fonte Saddiq Bey|DET|2021",
+      "V": 25,
+      "E": 116,
+      "alcancados": 23,
+      "tempos_s": [
+        0.00020766700617969036,
+        0.0002023330016527325,
+        0.00020662500173784792,
+        0.0002059580001514405,
+        0.00020366699754958972
+      ],
+      "media_s": 0.0002052500014542602
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DET|2021",
+      "tarefa": "sem ciclo, fonte Saddiq Bey|DET|2021",
+      "V": 25,
+      "E": 59,
+      "alcancados": 22,
+      "tempos_s": [
+        7.387500227196142e-05,
+        6.970800313865766e-05,
+        7.037499744910747e-05,
+        6.9958005042281e-05,
+        7.029200060060248e-05
+      ],
+      "media_s": 7.0841601700522e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente GSW|2021",
+      "tarefa": "com ciclo, fonte Andrew Wiggins|GSW|2021",
+      "V": 16,
+      "E": 136,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00016345900075975806,
+        0.00016562500240979716,
+        0.0001667500037001446,
+        0.00016683300054864958,
+        0.00016916599997784942
+      ],
+      "media_s": 0.00016636660147923977
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo GSW|2021",
+      "tarefa": "sem ciclo, fonte Andrew Wiggins|GSW|2021",
+      "V": 16,
+      "E": 69,
+      "alcancados": 16,
+      "tempos_s": [
+        5.595800030278042e-05,
+        5.504200089490041e-05,
+        5.4459000239148736e-05,
+        5.4459000239148736e-05,
+        5.354099994292483e-05
+      ],
+      "media_s": 5.4691800323780625e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente HOU|2021",
+      "tarefa": "com ciclo, fonte Christian Wood|HOU|2021",
+      "V": 18,
+      "E": 119,
+      "alcancados": 18,
+      "tempos_s": [
+        0.0001552499961690046,
+        0.00015087499923538417,
+        0.00015066600462887436,
+        0.00015033399540698156,
+        0.00015166700177360326
+      ],
+      "media_s": 0.0001517583994427696
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo HOU|2021",
+      "tarefa": "sem ciclo, fonte Christian Wood|HOU|2021",
+      "V": 18,
+      "E": 62,
+      "alcancados": 18,
+      "tempos_s": [
+        5.504200089490041e-05,
+        5.3832998673897237e-05,
+        5.404100375017151e-05,
+        5.420800152933225e-05,
+        5.466700531542301e-05
+      ],
+      "media_s": 5.435820203274489e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente IND|2021",
+      "tarefa": "com ciclo, fonte Oshae Brissett|IND|2021",
+      "V": 24,
+      "E": 162,
+      "alcancados": 24,
+      "tempos_s": [
+        0.00026829099806491286,
+        0.0002626670029712841,
+        0.0002632910036481917,
+        0.0002674999996088445,
+        0.00027395800134399906
+      ],
+      "media_s": 0.00026714140112744645
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo IND|2021",
+      "tarefa": "sem ciclo, fonte Oshae Brissett|IND|2021",
+      "V": 24,
+      "E": 81,
+      "alcancados": 24,
+      "tempos_s": [
+        9.658400085754693e-05,
+        8.829199941828847e-05,
+        8.883299597073346e-05,
+        9.183299698634073e-05,
+        8.924999565351754e-05
+      ],
+      "media_s": 9.095839777728543e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente LAC|2021",
+      "tarefa": "com ciclo, fonte Reggie Jackson|LAC|2021",
+      "V": 19,
+      "E": 126,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00018470899522071704,
+        0.00017800000205170363,
+        0.00018058300338452682,
+        0.00017574999947100878,
+        0.00017662500613369048
+      ],
+      "media_s": 0.00017913340125232934
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo LAC|2021",
+      "tarefa": "sem ciclo, fonte Reggie Jackson|LAC|2021",
+      "V": 19,
+      "E": 64,
+      "alcancados": 18,
+      "tempos_s": [
+        6.529100210173056e-05,
+        5.8458004787098616e-05,
+        5.837500066263601e-05,
+        5.820799560751766e-05,
+        5.833299655932933e-05
+      ],
+      "media_s": 5.9732999943662435e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente LAL|2021",
+      "tarefa": "com ciclo, fonte Russell Westbrook|LAL|2021",
+      "V": 20,
+      "E": 137,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00019366599735803902,
+        0.00019425000209594145,
+        0.000192291998246219,
+        0.0002021670006797649,
+        0.00019516600150382146
+      ],
+      "media_s": 0.00019550819997675716
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo LAL|2021",
+      "tarefa": "sem ciclo, fonte Russell Westbrook|LAL|2021",
+      "V": 20,
+      "E": 62,
+      "alcancados": 19,
+      "tempos_s": [
+        5.9124999097548425e-05,
+        5.8707999414764345e-05,
+        5.824999971082434e-05,
+        5.908300227019936e-05,
+        5.8625002566259354e-05
+      ],
+      "media_s": 5.875820061191916e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MEM|2021",
+      "tarefa": "com ciclo, fonte Steven Adams|MEM|2021",
+      "V": 16,
+      "E": 98,
+      "alcancados": 16,
+      "tempos_s": [
+        0.0001135829952545464,
+        0.0001140000022132881,
+        0.000113207999675069,
+        0.00011058300151489675,
+        0.00011266700312262401
+      ],
+      "media_s": 0.00011280820035608485
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MEM|2021",
+      "tarefa": "sem ciclo, fonte Steven Adams|MEM|2021",
+      "V": 16,
+      "E": 50,
+      "alcancados": 15,
+      "tempos_s": [
+        4.004199581686407e-05,
+        3.9541999285575e-05,
+        3.89159977203235e-05,
+        4.004200309282169e-05,
+        4.004200309282169e-05
+      ],
+      "media_s": 3.9716799801681193e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIA|2021",
+      "tarefa": "com ciclo, fonte Bam Adebayo|MIA|2021",
+      "V": 19,
+      "E": 106,
+      "alcancados": 19,
+      "tempos_s": [
+        0.0001478749982197769,
+        0.00014599999849451706,
+        0.00014304200158221647,
+        0.00013941699580755085,
+        0.00013995799963595346
+      ],
+      "media_s": 0.00014325839874800294
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIA|2021",
+      "tarefa": "sem ciclo, fonte Bam Adebayo|MIA|2021",
+      "V": 19,
+      "E": 56,
+      "alcancados": 19,
+      "tempos_s": [
+        5.129099736222997e-05,
+        5.1250004617031664e-05,
+        5.116700049256906e-05,
+        5.0666996685322374e-05,
+        5.054099892731756e-05
+      ],
+      "media_s": 5.098319961689412e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIL|2021",
+      "tarefa": "com ciclo, fonte Bobby Portis|MIL|2021",
+      "V": 25,
+      "E": 201,
+      "alcancados": 24,
+      "tempos_s": [
+        0.0003223329986212775,
+        0.0003411670040804893,
+        0.00032499999360879883,
+        0.0003257500065956265,
+        0.0003202919979230501
+      ],
+      "media_s": 0.0003269084001658484
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIL|2021",
+      "tarefa": "sem ciclo, fonte Bobby Portis|MIL|2021",
+      "V": 25,
+      "E": 100,
+      "alcancados": 24,
+      "tempos_s": [
+        0.00011041700054192916,
+        0.00011141700088046491,
+        0.00011079100659117103,
+        0.00011349999840604141,
+        0.00011008299770765007
+      ],
+      "media_s": 0.00011124160082545131
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIN|2021",
+      "tarefa": "com ciclo, fonte Anthony Edwards|MIN|2021",
+      "V": 17,
+      "E": 100,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00012012499792035669,
+        0.00011920799443032593,
+        0.00011999999696854502,
+        0.00011862500105053186,
+        0.0001187919988296926
+      ],
+      "media_s": 0.00011934999783989043
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIN|2021",
+      "tarefa": "sem ciclo, fonte Anthony Edwards|MIN|2021",
+      "V": 17,
+      "E": 50,
+      "alcancados": 17,
+      "tempos_s": [
+        4.308400093577802e-05,
+        4.233400250086561e-05,
+        4.2791994928848e-05,
+        4.28749990533106e-05,
+        4.1749997762963176e-05
+      ],
+      "media_s": 4.256699903635308e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente NOP|2021",
+      "tarefa": "com ciclo, fonte Herbert Jones|NOP|2021",
+      "V": 20,
+      "E": 122,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00018070799706038088,
+        0.00017300000035902485,
+        0.00016720900021027774,
+        0.00016812499961815774,
+        0.000166584002727177
+      ],
+      "media_s": 0.00017112519999500363
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo NOP|2021",
+      "tarefa": "sem ciclo, fonte Herbert Jones|NOP|2021",
+      "V": 20,
+      "E": 65,
+      "alcancados": 20,
+      "tempos_s": [
+        6.533400301123038e-05,
+        6.470899825217202e-05,
+        6.474999827332795e-05,
+        6.395899981725961e-05,
+        6.787500024074689e-05
+      ],
+      "media_s": 6.532539991894737e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente NYK|2021",
+      "tarefa": "com ciclo, fonte Mitchell Robinson|NYK|2021",
+      "V": 19,
+      "E": 87,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00012141600018367171,
+        0.00012270899605937302,
+        0.00011712500418070704,
+        0.0001244589948328212,
+        0.00012008400517515838
+      ],
+      "media_s": 0.00012115860008634626
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo NYK|2021",
+      "tarefa": "sem ciclo, fonte Mitchell Robinson|NYK|2021",
+      "V": 19,
+      "E": 46,
+      "alcancados": 17,
+      "tempos_s": [
+        4.208299651509151e-05,
+        4.395799624035135e-05,
+        4.220900154905394e-05,
+        4.658399848267436e-05,
+        4.120900121051818e-05
+      ],
+      "media_s": 4.3208598799537865e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente OKC|2021",
+      "tarefa": "com ciclo, fonte Darius Bazley|OKC|2021",
+      "V": 23,
+      "E": 168,
+      "alcancados": 21,
+      "tempos_s": [
+        0.0002758330010692589,
+        0.0002793750027194619,
+        0.0002762910007731989,
+        0.0002929580005002208,
+        0.0002814580002450384
+      ],
+      "media_s": 0.0002811830010614358
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo OKC|2021",
+      "tarefa": "sem ciclo, fonte Darius Bazley|OKC|2021",
+      "V": 23,
+      "E": 81,
+      "alcancados": 21,
+      "tempos_s": [
+        9.962500189431012e-05,
+        9.012500231619924e-05,
+        9.087500075111166e-05,
+        8.866600546753034e-05,
+        9.320899698650464e-05
+      ],
+      "media_s": 9.25000014831312e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente ORL|2021",
+      "tarefa": "com ciclo, fonte Cole Anthony|ORL|2021",
+      "V": 22,
+      "E": 121,
+      "alcancados": 22,
+      "tempos_s": [
+        0.00018087500211549923,
+        0.00018474999524187297,
+        0.0001798329976736568,
+        0.00018404200091026723,
+        0.00018266600091010332
+      ],
+      "media_s": 0.0001824331993702799
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo ORL|2021",
+      "tarefa": "sem ciclo, fonte Cole Anthony|ORL|2021",
+      "V": 22,
+      "E": 61,
+      "alcancados": 22,
+      "tempos_s": [
+        6.199999916134402e-05,
+        6.279100489336997e-05,
+        5.987500480841845e-05,
+        6.020799628458917e-05,
+        6.145799852674827e-05
+      ],
+      "media_s": 6.126640073489398e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente PHI|2021",
+      "tarefa": "com ciclo, fonte Tyrese Maxey|PHI|2021",
+      "V": 19,
+      "E": 118,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00015787499432917684,
+        0.00015508299838984385,
+        0.00015837499813642353,
+        0.0001548750005895272,
+        0.0001536249983473681
+      ],
+      "media_s": 0.0001559665979584679
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo PHI|2021",
+      "tarefa": "sem ciclo, fonte Tyrese Maxey|PHI|2021",
+      "V": 19,
+      "E": 59,
+      "alcancados": 16,
+      "tempos_s": [
+        5.249999958323315e-05,
+        5.087500176159665e-05,
+        5.174999387236312e-05,
+        5.11659964104183e-05,
+        5.141699512023479e-05
+      ],
+      "media_s": 5.15415973495692e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente PHX|2021",
+      "tarefa": "com ciclo, fonte Mikal Bridges|PHX|2021",
+      "V": 20,
+      "E": 109,
+      "alcancados": 20,
+      "tempos_s": [
+        0.0001629170001251623,
+        0.00015749999874969944,
+        0.0001563340047141537,
+        0.00016104200039990246,
+        0.00017283300257986411
+      ],
+      "media_s": 0.0001621252013137564
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo PHX|2021",
+      "tarefa": "sem ciclo, fonte Mikal Bridges|PHX|2021",
+      "V": 20,
+      "E": 54,
+      "alcancados": 19,
+      "tempos_s": [
+        5.337499896995723e-05,
+        5.162500019650906e-05,
+        5.1458002417348325e-05,
+        5.3125004342291504e-05,
+        5.275000148685649e-05
+      ],
+      "media_s": 5.246660148259252e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente POR|2021",
+      "tarefa": "com ciclo, fonte Jusuf Nurkic|POR|2021",
+      "V": 25,
+      "E": 125,
+      "alcancados": 25,
+      "tempos_s": [
+        0.0002173750035581179,
+        0.00021533399558393285,
+        0.000222250004298985,
+        0.00022420899767894298,
+        0.00021820899564772844
+      ],
+      "media_s": 0.00021947539935354143
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo POR|2021",
+      "tarefa": "sem ciclo, fonte Jusuf Nurkic|POR|2021",
+      "V": 25,
+      "E": 70,
+      "alcancados": 22,
+      "tempos_s": [
+        8.187499770428985e-05,
+        8.062499546213076e-05,
+        8.287499804282561e-05,
+        7.908399857115e-05,
+        7.995899795787409e-05
+      ],
+      "media_s": 8.088359754765406e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente SAC|2021",
+      "tarefa": "com ciclo, fonte Harrison Barnes|SAC|2021",
+      "V": 23,
+      "E": 113,
+      "alcancados": 23,
+      "tempos_s": [
+        0.0001621249975869432,
+        0.0001606660007382743,
+        0.00015529200027231127,
+        0.00016020899784052745,
+        0.00016258400137303397
+      ],
+      "media_s": 0.00016017519956221805
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo SAC|2021",
+      "tarefa": "sem ciclo, fonte Harrison Barnes|SAC|2021",
+      "V": 23,
+      "E": 64,
+      "alcancados": 17,
+      "tempos_s": [
+        6.920799933141097e-05,
+        6.933300028322265e-05,
+        6.604100053664297e-05,
+        6.604200461879373e-05,
+        6.674999895039946e-05
+      ],
+      "media_s": 6.747480074409395e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente SAN|2021",
+      "tarefa": "com ciclo, fonte Keldon Johnson|SAN|2021",
+      "V": 20,
+      "E": 123,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00016862500342540443,
+        0.00016395899729104713,
+        0.00016229200264206156,
+        0.00016316700202878565,
+        0.00016433400014648214
+      ],
+      "media_s": 0.00016447540110675618
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo SAN|2021",
+      "tarefa": "sem ciclo, fonte Keldon Johnson|SAN|2021",
+      "V": 20,
+      "E": 60,
+      "alcancados": 16,
+      "tempos_s": [
+        5.516700184671208e-05,
+        5.479199899127707e-05,
+        5.5165997764561325e-05,
+        5.395799962570891e-05,
+        5.4957999964244664e-05
+      ],
+      "media_s": 5.480819963850081e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente TOR|2021",
+      "tarefa": "com ciclo, fonte Scottie Barnes|TOR|2021",
+      "V": 19,
+      "E": 130,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00016562499513383955,
+        0.00016400000458816066,
+        0.00016708300245227292,
+        0.00016870800027390942,
+        0.00016433299606433138
+      ],
+      "media_s": 0.0001659497997025028
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo TOR|2021",
+      "tarefa": "sem ciclo, fonte Scottie Barnes|TOR|2021",
+      "V": 19,
+      "E": 73,
+      "alcancados": 19,
+      "tempos_s": [
+        6.954099808353931e-05,
+        6.549999670824036e-05,
+        6.600000051548705e-05,
+        6.57499986118637e-05,
+        6.600000051548705e-05
+      ],
+      "media_s": 6.655819888692349e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente UTA|2021",
+      "tarefa": "com ciclo, fonte Mike Conley|UTA|2021",
+      "V": 19,
+      "E": 80,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00010720799764385447,
+        0.00010070799908135086,
+        0.00010162500257138163,
+        9.987499652197585e-05,
+        0.00010541600204305723
+      ],
+      "media_s": 0.000102966399572324
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo UTA|2021",
+      "tarefa": "sem ciclo, fonte Mike Conley|UTA|2021",
+      "V": 19,
+      "E": 37,
+      "alcancados": 13,
+      "tempos_s": [
+        3.379099507583305e-05,
+        3.433399979257956e-05,
+        3.3875003282446414e-05,
+        3.404200106160715e-05,
+        3.52080023731105e-05
+      ],
+      "media_s": 3.425000031711534e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente WAS|2021",
+      "tarefa": "com ciclo, fonte Kentavious Caldwell-Pope|WAS|2021",
+      "V": 18,
+      "E": 113,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00014858299982734025,
+        0.00015345800056820735,
+        0.00017837500490713865,
+        0.00014812500012340024,
+        0.0001585829959367402
+      ],
+      "media_s": 0.00015742480027256534
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo WAS|2021",
+      "tarefa": "sem ciclo, fonte Kentavious Caldwell-Pope|WAS|2021",
+      "V": 18,
+      "E": 52,
+      "alcancados": 18,
+      "tempos_s": [
+        4.679099947679788e-05,
+        4.541599628282711e-05,
+        4.600000102072954e-05,
+        4.570800228975713e-05,
+        4.504100070334971e-05
+      ],
+      "media_s": 4.579119995469227e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente ATL|2022",
+      "tarefa": "com ciclo, fonte Trae Young|ATL|2022",
+      "V": 17,
+      "E": 95,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00011579199781408533,
+        0.00011920800170628354,
+        0.00011462499969638884,
+        0.00011254200217081234,
+        0.00011354199523339048
+      ],
+      "media_s": 0.00011514179932419211
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo ATL|2022",
+      "tarefa": "sem ciclo, fonte Trae Young|ATL|2022",
+      "V": 17,
+      "E": 45,
+      "alcancados": 11,
+      "tempos_s": [
+        3.754199860850349e-05,
+        3.60000049113296e-05,
+        3.599999763537198e-05,
+        3.554199793143198e-05,
+        3.6249999538995326e-05
+      ],
+      "media_s": 3.6266799725126475e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente BKN|2022",
+      "tarefa": "com ciclo, fonte Nic Claxton|BKN|2022",
+      "V": 22,
+      "E": 144,
+      "alcancados": 22,
+      "tempos_s": [
+        0.00023195800167741254,
+        0.00022841700410936028,
+        0.00022679199901176617,
+        0.0002296250022482127,
+        0.00022758400154998526
+      ],
+      "media_s": 0.00022887520171934738
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo BKN|2022",
+      "tarefa": "sem ciclo, fonte Nic Claxton|BKN|2022",
+      "V": 22,
+      "E": 80,
+      "alcancados": 22,
+      "tempos_s": [
+        8.199999865610152e-05,
+        8.137499389704317e-05,
+        8.154200622811913e-05,
+        8.08749973657541e-05,
+        8.087500464171171e-05
+      ],
+      "media_s": 8.133340015774593e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente BOS|2022",
+      "tarefa": "com ciclo, fonte Derrick White|BOS|2022",
+      "V": 16,
+      "E": 107,
+      "alcancados": 15,
+      "tempos_s": [
+        0.00012474999675760046,
+        0.00012437500117812306,
+        0.00012029099889332429,
+        0.00011937499948544428,
+        0.00013012500130571425
+      ],
+      "media_s": 0.00012378319952404125
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo BOS|2022",
+      "tarefa": "sem ciclo, fonte Derrick White|BOS|2022",
+      "V": 16,
+      "E": 53,
+      "alcancados": 15,
+      "tempos_s": [
+        4.462499782675877e-05,
+        4.387499939184636e-05,
+        4.366699431557208e-05,
+        4.404200444696471e-05,
+        4.325000190874562e-05
+      ],
+      "media_s": 4.389179957797751e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CHA|2022",
+      "tarefa": "com ciclo, fonte Terry Rozier|CHA|2022",
+      "V": 19,
+      "E": 103,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00015008399350335822,
+        0.00014770800044061616,
+        0.00015050000365590677,
+        0.00015124999481486157,
+        0.0001533330068923533
+      ],
+      "media_s": 0.0001505749998614192
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CHA|2022",
+      "tarefa": "sem ciclo, fonte Terry Rozier|CHA|2022",
+      "V": 19,
+      "E": 51,
+      "alcancados": 19,
+      "tempos_s": [
+        5.0583999836817384e-05,
+        5.116700049256906e-05,
+        5.479199899127707e-05,
+        4.9540998588781804e-05,
+        4.879200423602015e-05
+      ],
+      "media_s": 5.0975200429093094e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CHI|2022",
+      "tarefa": "com ciclo, fonte Patrick Williams|CHI|2022",
+      "V": 15,
+      "E": 84,
+      "alcancados": 15,
+      "tempos_s": [
+        9.470799705013633e-05,
+        9.966699872165918e-05,
+        9.379100083606318e-05,
+        9.758300438988954e-05,
+        9.720800153445452e-05
+      ],
+      "media_s": 9.659140050644055e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CHI|2022",
+      "tarefa": "sem ciclo, fonte Patrick Williams|CHI|2022",
+      "V": 15,
+      "E": 41,
+      "alcancados": 15,
+      "tempos_s": [
+        3.22499981848523e-05,
+        3.2791998819448054e-05,
+        3.229200228815898e-05,
+        3.237499913666397e-05,
+        3.2542004191782326e-05
+      ],
+      "media_s": 3.2450200524181125e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CLE|2022",
+      "tarefa": "com ciclo, fonte Darius Garland|CLE|2022",
+      "V": 16,
+      "E": 115,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00013729200145462528,
+        0.0001487909976276569,
+        0.0001592499975231476,
+        0.00013304099411470816,
+        0.00013283400039654225
+      ],
+      "media_s": 0.00014224159822333603
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CLE|2022",
+      "tarefa": "sem ciclo, fonte Darius Garland|CLE|2022",
+      "V": 16,
+      "E": 55,
+      "alcancados": 16,
+      "tempos_s": [
+        4.445899685379118e-05,
+        4.4292006350588053e-05,
+        4.479199560591951e-05,
+        4.4041000364813954e-05,
+        4.424999497132376e-05
+      ],
+      "media_s": 4.436679882928729e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DAL|2022",
+      "tarefa": "com ciclo, fonte Reggie Bullock|DAL|2022",
+      "V": 21,
+      "E": 144,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00022554199676960707,
+        0.00021624999499181286,
+        0.00023029200383462012,
+        0.00022795800032326952,
+        0.00023958300153026357
+      ],
+      "media_s": 0.00022792499948991462
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DAL|2022",
+      "tarefa": "sem ciclo, fonte Reggie Bullock|DAL|2022",
+      "V": 21,
+      "E": 81,
+      "alcancados": 20,
+      "tempos_s": [
+        8.679200254846364e-05,
+        8.508400060236454e-05,
+        8.924999565351754e-05,
+        8.104200242087245e-05,
+        8.083399734459817e-05
+      ],
+      "media_s": 8.460039971396327e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DEN|2022",
+      "tarefa": "com ciclo, fonte Bruce Brown|DEN|2022",
+      "V": 17,
+      "E": 101,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00012312499893596396,
+        0.0001340000017080456,
+        0.00012070799857610837,
+        0.00012845900346292183,
+        0.00013895899610361084
+      ],
+      "media_s": 0.0001290501997573301
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DEN|2022",
+      "tarefa": "sem ciclo, fonte Bruce Brown|DEN|2022",
+      "V": 17,
+      "E": 51,
+      "alcancados": 15,
+      "tempos_s": [
+        4.3125000956933945e-05,
+        5.141699512023479e-05,
+        4.0875005652196705e-05,
+        4.0291997720487416e-05,
+        3.9375001506414264e-05
+      ],
+      "media_s": 4.3016800191253424e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DET|2022",
+      "tarefa": "com ciclo, fonte Jaden Ivey|DET|2022",
+      "V": 20,
+      "E": 123,
+      "alcancados": 20,
+      "tempos_s": [
+        0.000170209001225885,
+        0.00016845899517647922,
+        0.0001707090050331317,
+        0.00016837499424582347,
+        0.00017312500131083652
+      ],
+      "media_s": 0.0001701753993984312
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DET|2022",
+      "tarefa": "sem ciclo, fonte Jaden Ivey|DET|2022",
+      "V": 20,
+      "E": 68,
+      "alcancados": 20,
+      "tempos_s": [
+        9.712499740999192e-05,
+        6.904100155225024e-05,
+        7.216700032586232e-05,
+        6.491699605248868e-05,
+        6.362499698298052e-05
+      ],
+      "media_s": 7.337499846471474e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente GSW|2022",
+      "tarefa": "com ciclo, fonte Jordan Poole|GSW|2022",
+      "V": 17,
+      "E": 116,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00013408400263870135,
+        0.00012979200255358592,
+        0.00012766699364874512,
+        0.00012916700507048517,
+        0.0001266249964828603
+      ],
+      "media_s": 0.00012946700007887557
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo GSW|2022",
+      "tarefa": "sem ciclo, fonte Jordan Poole|GSW|2022",
+      "V": 17,
+      "E": 61,
+      "alcancados": 17,
+      "tempos_s": [
+        4.93340048706159e-05,
+        4.829200042877346e-05,
+        4.804199852515012e-05,
+        4.829200042877346e-05,
+        4.829200042877346e-05
+      ],
+      "media_s": 4.8450400936417284e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente HOU|2022",
+      "tarefa": "com ciclo, fonte Alperen Sengun|HOU|2022",
+      "V": 16,
+      "E": 104,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00011791699944296852,
+        0.00011349999840604141,
+        0.00011500000255182385,
+        0.00011658300354611129,
+        0.00011370800348231569
+      ],
+      "media_s": 0.00011534160148585215
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo HOU|2022",
+      "tarefa": "sem ciclo, fonte Alperen Sengun|HOU|2022",
+      "V": 16,
+      "E": 50,
+      "alcancados": 16,
+      "tempos_s": [
+        4.01659999624826e-05,
+        4.004199581686407e-05,
+        3.9541999285575e-05,
+        4.033299774164334e-05,
+        4.033299774164334e-05
+      ],
+      "media_s": 4.008319810964167e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente IND|2022",
+      "tarefa": "com ciclo, fonte Buddy Hield|IND|2022",
+      "V": 20,
+      "E": 106,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00014504199498333037,
+        0.00013991699961479753,
+        0.0001396670049871318,
+        0.00013624999701278284,
+        0.00013641699479194358
+      ],
+      "media_s": 0.00013945859827799723
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo IND|2022",
+      "tarefa": "sem ciclo, fonte Buddy Hield|IND|2022",
+      "V": 20,
+      "E": 51,
+      "alcancados": 19,
+      "tempos_s": [
+        5.129099736222997e-05,
+        4.791699757333845e-05,
+        4.774999979417771e-05,
+        4.8207999498117715e-05,
+        4.912500298814848e-05
+      ],
+      "media_s": 4.8858199443202464e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente LAC|2022",
+      "tarefa": "com ciclo, fonte Ivica Zubac|LAC|2022",
+      "V": 20,
+      "E": 140,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00019279099797131494,
+        0.00019108299602521583,
+        0.00019149999570799991,
+        0.00018737500067800283,
+        0.0001927089979290031
+      ],
+      "media_s": 0.00019109159766230732
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo LAC|2022",
+      "tarefa": "sem ciclo, fonte Ivica Zubac|LAC|2022",
+      "V": 20,
+      "E": 74,
+      "alcancados": 20,
+      "tempos_s": [
+        7.01669996487908e-05,
+        7.391599501715973e-05,
+        6.687499990221113e-05,
+        6.770799518562853e-05,
+        6.958300218684599e-05
+      ],
+      "media_s": 6.964979838812724e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente LAL|2022",
+      "tarefa": "com ciclo, fonte Troy Brown Jr.|LAL|2022",
+      "V": 21,
+      "E": 155,
+      "alcancados": 21,
+      "tempos_s": [
+        0.0002307920003659092,
+        0.00022841699683340266,
+        0.00023837499611545354,
+        0.0002320420026080683,
+        0.00023850000434322283
+      ],
+      "media_s": 0.0002336252000532113
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo LAL|2022",
+      "tarefa": "sem ciclo, fonte Troy Brown Jr.|LAL|2022",
+      "V": 21,
+      "E": 75,
+      "alcancados": 21,
+      "tempos_s": [
+        7.554199692094699e-05,
+        7.208299939520657e-05,
+        7.124999683583155e-05,
+        7.437499880325049e-05,
+        7.316700066439807e-05
+      ],
+      "media_s": 7.328339852392673e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MEM|2022",
+      "tarefa": "com ciclo, fonte Santi Aldama|MEM|2022",
+      "V": 17,
+      "E": 85,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00010795900016091764,
+        0.00011212500248802826,
+        0.00010412499977974221,
+        0.00010995800403179601,
+        0.00010104200191562995
+      ],
+      "media_s": 0.00010704180167522281
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MEM|2022",
+      "tarefa": "sem ciclo, fonte Santi Aldama|MEM|2022",
+      "V": 17,
+      "E": 44,
+      "alcancados": 17,
+      "tempos_s": [
+        3.7582998629659414e-05,
+        3.833299706457183e-05,
+        3.724999987753108e-05,
+        3.670899604912847e-05,
+        3.579199983505532e-05
+      ],
+      "media_s": 3.7133398291189226e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIA|2022",
+      "tarefa": "com ciclo, fonte Tyler Herro|MIA|2022",
+      "V": 20,
+      "E": 100,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00014020900562172756,
+        0.00013666699669556692,
+        0.0001438330000382848,
+        0.00014858299982734025,
+        0.0001471659998060204
+      ],
+      "media_s": 0.000143291600397788
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIA|2022",
+      "tarefa": "sem ciclo, fonte Tyler Herro|MIA|2022",
+      "V": 20,
+      "E": 49,
+      "alcancados": 15,
+      "tempos_s": [
+        4.66250057797879e-05,
+        4.5291999413166195e-05,
+        4.787500074598938e-05,
+        4.850000550504774e-05,
+        4.962499951943755e-05
+      ],
+      "media_s": 4.758340219268575e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIL|2022",
+      "tarefa": "com ciclo, fonte Brook Lopez|MIL|2022",
+      "V": 19,
+      "E": 177,
+      "alcancados": 19,
+      "tempos_s": [
+        0.0002541659996495582,
+        0.00024291699810419232,
+        0.0002417089999653399,
+        0.00024920899886637926,
+        0.00024254200252471492
+      ],
+      "media_s": 0.0002461085998220369
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIL|2022",
+      "tarefa": "sem ciclo, fonte Brook Lopez|MIL|2022",
+      "V": 19,
+      "E": 98,
+      "alcancados": 19,
+      "tempos_s": [
+        9.287500142818317e-05,
+        9.416700049769133e-05,
+        8.94170007086359e-05,
+        9.291600144933909e-05,
+        9.412499639438465e-05
+      ],
+      "media_s": 9.270000009564683e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIN|2022",
+      "tarefa": "com ciclo, fonte Jaden McDaniels|MIN|2022",
+      "V": 18,
+      "E": 130,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00016904099902603775,
+        0.00016554199828533456,
+        0.00016841699834913015,
+        0.00018650000129127875,
+        0.00016074999439297244
+      ],
+      "media_s": 0.00017004999826895074
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIN|2022",
+      "tarefa": "sem ciclo, fonte Jaden McDaniels|MIN|2022",
+      "V": 18,
+      "E": 70,
+      "alcancados": 18,
+      "tempos_s": [
+        6.312500045169145e-05,
+        6.058399594621733e-05,
+        6.075000419514254e-05,
+        6.066700007067993e-05,
+        6.095899880165234e-05
+      ],
+      "media_s": 6.121699989307672e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente NOP|2022",
+      "tarefa": "com ciclo, fonte Jonas Valanciunas|NOP|2022",
+      "V": 16,
+      "E": 118,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00012354199861874804,
+        0.00012466600310290232,
+        0.00012399999832268804,
+        0.00012512500688899308,
+        0.00012837500253226608
+      ],
+      "media_s": 0.00012514160189311952
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo NOP|2022",
+      "tarefa": "sem ciclo, fonte Jonas Valanciunas|NOP|2022",
+      "V": 16,
+      "E": 59,
+      "alcancados": 15,
+      "tempos_s": [
+        4.520799848251045e-05,
+        4.4792002881877124e-05,
+        4.4458000047598034e-05,
+        4.533299943432212e-05,
+        4.433299909578636e-05
+      ],
+      "media_s": 4.4824799988418815e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente NYK|2022",
+      "tarefa": "com ciclo, fonte Jalen Brunson|NYK|2022",
+      "V": 15,
+      "E": 69,
+      "alcancados": 10,
+      "tempos_s": [
+        6.166700040921569e-05,
+        5.862499529030174e-05,
+        5.854099435964599e-05,
+        5.8208002883475274e-05,
+        5.933299689786509e-05
+      ],
+      "media_s": 5.927479796810076e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo NYK|2022",
+      "tarefa": "sem ciclo, fonte Jalen Brunson|NYK|2022",
+      "V": 15,
+      "E": 36,
+      "alcancados": 10,
+      "tempos_s": [
+        2.6957997761201113e-05,
+        2.65829949057661e-05,
+        2.5957997422665358e-05,
+        2.6166999305132776e-05,
+        2.6374997105449438e-05
+      ],
+      "media_s": 2.6408197300042957e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente OKC|2022",
+      "tarefa": "com ciclo, fonte Jalen Williams|OKC|2022",
+      "V": 19,
+      "E": 159,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00019991699809907004,
+        0.0001948749995790422,
+        0.00019508299737935886,
+        0.00019429199892329052,
+        0.000192749997950159
+      ],
+      "media_s": 0.00019538339838618413
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo OKC|2022",
+      "tarefa": "sem ciclo, fonte Jalen Williams|OKC|2022",
+      "V": 19,
+      "E": 78,
+      "alcancados": 19,
+      "tempos_s": [
+        7.183299749158323e-05,
+        7.24159981473349e-05,
+        7.166700379457325e-05,
+        7.062499935273081e-05,
+        7.070900028338656e-05
+      ],
+      "media_s": 7.144999981392174e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente ORL|2022",
+      "tarefa": "com ciclo, fonte Franz Wagner|ORL|2022",
+      "V": 19,
+      "E": 124,
+      "alcancados": 18,
+      "tempos_s": [
+        0.0001842499987105839,
+        0.0001769579976098612,
+        0.0001798330049496144,
+        0.00017924999701790512,
+        0.00017875000048661605
+      ],
+      "media_s": 0.00017980819975491614
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo ORL|2022",
+      "tarefa": "sem ciclo, fonte Franz Wagner|ORL|2022",
+      "V": 19,
+      "E": 64,
+      "alcancados": 17,
+      "tempos_s": [
+        6.0457998188212514e-05,
+        6.108300294727087e-05,
+        6.074999691918492e-05,
+        6.012499943608418e-05,
+        6.004200258757919e-05
+      ],
+      "media_s": 6.049160001566634e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente PHI|2022",
+      "tarefa": "com ciclo, fonte Tobias Harris|PHI|2022",
+      "V": 17,
+      "E": 117,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00013987500278744847,
+        0.00014045799616724253,
+        0.0001373330014757812,
+        0.00013824999768985435,
+        0.00013891599519411102
+      ],
+      "media_s": 0.0001389663986628875
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo PHI|2022",
+      "tarefa": "sem ciclo, fonte Tobias Harris|PHI|2022",
+      "V": 17,
+      "E": 62,
+      "alcancados": 17,
+      "tempos_s": [
+        5.062499985797331e-05,
+        5.075000080978498e-05,
+        4.983299731975421e-05,
+        5.066599987912923e-05,
+        4.929200076730922e-05
+      ],
+      "media_s": 5.023319972679019e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente PHX|2022",
+      "tarefa": "com ciclo, fonte Torrey Craig|PHX|2022",
+      "V": 20,
+      "E": 127,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00018141700275009498,
+        0.00018429199553793296,
+        0.00017825000395532697,
+        0.00017924999701790512,
+        0.00017383300291839987
+      ],
+      "media_s": 0.00017940840043593199
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo PHX|2022",
+      "tarefa": "sem ciclo, fonte Torrey Craig|PHX|2022",
+      "V": 20,
+      "E": 61,
+      "alcancados": 19,
+      "tempos_s": [
+        5.704100476577878e-05,
+        5.7124998420476913e-05,
+        5.687499651685357e-05,
+        5.604199395747855e-05,
+        5.662500188918784e-05
+      ],
+      "media_s": 5.674159910995513e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente POR|2022",
+      "tarefa": "com ciclo, fonte Drew Eubanks|POR|2022",
+      "V": 23,
+      "E": 101,
+      "alcancados": 21,
+      "tempos_s": [
+        0.00017374999879393727,
+        0.00016987499839160591,
+        0.00017220799782080576,
+        0.0001720830041449517,
+        0.00017674999980954453
+      ],
+      "media_s": 0.00017293319979216903
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo POR|2022",
+      "tarefa": "sem ciclo, fonte Drew Eubanks|POR|2022",
+      "V": 23,
+      "E": 52,
+      "alcancados": 21,
+      "tempos_s": [
+        6.0375001339707524e-05,
+        6.012499943608418e-05,
+        6.00829953327775e-05,
+        5.991700163576752e-05,
+        6.0291000409051776e-05
+      ],
+      "media_s": 6.01581996306777e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente SAC|2022",
+      "tarefa": "com ciclo, fonte Keegan Murray|SAC|2022",
+      "V": 16,
+      "E": 82,
+      "alcancados": 16,
+      "tempos_s": [
+        8.750000415602699e-05,
+        8.341699867742136e-05,
+        8.325000089826062e-05,
+        8.179200085578486e-05,
+        8.204100595321506e-05
+      ],
+      "media_s": 8.360000210814179e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo SAC|2022",
+      "tarefa": "sem ciclo, fonte Keegan Murray|SAC|2022",
+      "V": 16,
+      "E": 42,
+      "alcancados": 14,
+      "tempos_s": [
+        3.320800169603899e-05,
+        3.258300421293825e-05,
+        3.191699943272397e-05,
+        3.18750026053749e-05,
+        3.2542004191782326e-05
+      ],
+      "media_s": 3.242500242777169e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente SAN|2022",
+      "tarefa": "com ciclo, fonte Keldon Johnson|SAN|2022",
+      "V": 21,
+      "E": 160,
+      "alcancados": 21,
+      "tempos_s": [
+        0.0002390829977230169,
+        0.00024208300601458177,
+        0.00024104100157273933,
+        0.0002375839976593852,
+        0.00024129200028255582
+      ],
+      "media_s": 0.0002402166006504558
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo SAN|2022",
+      "tarefa": "sem ciclo, fonte Keldon Johnson|SAN|2022",
+      "V": 21,
+      "E": 88,
+      "alcancados": 21,
+      "tempos_s": [
+        9.074999979929999e-05,
+        9.162499918602407e-05,
+        0.00011912499758182094,
+        8.874999912222847e-05,
+        8.833400352159515e-05
+      ],
+      "media_s": 9.571679984219373e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente TOR|2022",
+      "tarefa": "com ciclo, fonte Scottie Barnes|TOR|2022",
+      "V": 17,
+      "E": 133,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00016479199985042214,
+        0.00016366699856007472,
+        0.00016345900075975806,
+        0.00016354200488422066,
+        0.00017616600234759971
+      ],
+      "media_s": 0.00016632520128041507
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo TOR|2022",
+      "tarefa": "sem ciclo, fonte Scottie Barnes|TOR|2022",
+      "V": 17,
+      "E": 64,
+      "alcancados": 17,
+      "tempos_s": [
+        5.1832997996825725e-05,
+        5.345800309441984e-05,
+        5.1957998948637396e-05,
+        5.1792005251627415e-05,
+        5.1333001465536654e-05
+      ],
+      "media_s": 5.207480135140941e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente UTA|2022",
+      "tarefa": "com ciclo, fonte Lauri Markkanen|UTA|2022",
+      "V": 21,
+      "E": 122,
+      "alcancados": 20,
+      "tempos_s": [
+        0.0001633749998291023,
+        0.00016112499724840745,
+        0.00015962500037858263,
+        0.0001632919957046397,
+        0.00015916700067464262
+      ],
+      "media_s": 0.00016131679876707494
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo UTA|2022",
+      "tarefa": "sem ciclo, fonte Lauri Markkanen|UTA|2022",
+      "V": 21,
+      "E": 61,
+      "alcancados": 20,
+      "tempos_s": [
+        6.191700231283903e-05,
+        6.0874997870996594e-05,
+        6.025000038789585e-05,
+        6.166599632706493e-05,
+        6.074999691918492e-05
+      ],
+      "media_s": 6.109159876359627e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente WAS|2022",
+      "tarefa": "com ciclo, fonte Kristaps Porzingis|WAS|2022",
+      "V": 19,
+      "E": 121,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00016095900355139747,
+        0.00015737499779788777,
+        0.0001548329964862205,
+        0.000153207998664584,
+        0.0001592920016264543
+      ],
+      "media_s": 0.0001571333996253088
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo WAS|2022",
+      "tarefa": "sem ciclo, fonte Kristaps Porzingis|WAS|2022",
+      "V": 19,
+      "E": 62,
+      "alcancados": 19,
+      "tempos_s": [
+        5.7457997172605246e-05,
+        5.7124998420476913e-05,
+        5.566600157180801e-05,
+        5.5417003750335425e-05,
+        5.533399962587282e-05
+      ],
+      "media_s": 5.6200000108219685e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente ATL|2023",
+      "tarefa": "com ciclo, fonte Bogdan Bogdanovic|ATL|2023",
+      "V": 19,
+      "E": 104,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00014895800268277526,
+        0.00014099999680183828,
+        0.00014416599879041314,
+        0.00014304200158221647,
+        0.0001441670028725639
+      ],
+      "media_s": 0.00014426660054596142
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo ATL|2023",
+      "tarefa": "sem ciclo, fonte Bogdan Bogdanovic|ATL|2023",
+      "V": 19,
+      "E": 48,
+      "alcancados": 17,
+      "tempos_s": [
+        4.558400542009622e-05,
+        4.454199370229617e-05,
+        4.4917003833688796e-05,
+        4.437499592313543e-05,
+        4.441700002644211e-05
+      ],
+      "media_s": 4.476699978113174e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente BKN|2023",
+      "tarefa": "com ciclo, fonte Nic Claxton|BKN|2023",
+      "V": 19,
+      "E": 129,
+      "alcancados": 19,
+      "tempos_s": [
+        0.0001882920041680336,
+        0.00018604200158733875,
+        0.00018629099940881133,
+        0.00018445799651090056,
+        0.00019179199443897232
+      ],
+      "media_s": 0.00018737499922281132
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo BKN|2023",
+      "tarefa": "sem ciclo, fonte Nic Claxton|BKN|2023",
+      "V": 19,
+      "E": 66,
+      "alcancados": 19,
+      "tempos_s": [
+        6.016700353939086e-05,
+        6.370800110744312e-05,
+        6.087500514695421e-05,
+        5.883399717276916e-05,
+        6.199999916134402e-05
+      ],
+      "media_s": 6.111680122558027e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente BOS|2023",
+      "tarefa": "com ciclo, fonte Kristaps Porzingis|BOS|2023",
+      "V": 17,
+      "E": 110,
+      "alcancados": 17,
+      "tempos_s": [
+        0.0001187919988296926,
+        0.0001217500030179508,
+        0.00012191699352115393,
+        0.00012208300177007914,
+        0.00011749999976018444
+      ],
+      "media_s": 0.00012040839937981218
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo BOS|2023",
+      "tarefa": "sem ciclo, fonte Kristaps Porzingis|BOS|2023",
+      "V": 17,
+      "E": 56,
+      "alcancados": 17,
+      "tempos_s": [
+        4.8000001697801054e-05,
+        4.70830054837279e-05,
+        4.629100294550881e-05,
+        4.712500231107697e-05,
+        4.579099913826212e-05
+      ],
+      "media_s": 4.685800231527537e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CHA|2023",
+      "tarefa": "com ciclo, fonte Brandon Miller|CHA|2023",
+      "V": 24,
+      "E": 117,
+      "alcancados": 24,
+      "tempos_s": [
+        0.00018887499754782766,
+        0.0001819160024751909,
+        0.00017833300080383196,
+        0.0001829590037232265,
+        0.0001858749965322204
+      ],
+      "media_s": 0.00018359160021645947
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CHA|2023",
+      "tarefa": "sem ciclo, fonte Brandon Miller|CHA|2023",
+      "V": 24,
+      "E": 55,
+      "alcancados": 24,
+      "tempos_s": [
+        6.316600047284737e-05,
+        6.558300083270296e-05,
+        6.266700074775144e-05,
+        6.316699727904052e-05,
+        6.279200169956312e-05
+      ],
+      "media_s": 6.347500020638108e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CHI|2023",
+      "tarefa": "com ciclo, fonte Ayo Dosunmu|CHI|2023",
+      "V": 17,
+      "E": 115,
+      "alcancados": 16,
+      "tempos_s": [
+        0.0001233750008395873,
+        0.00012275000335648656,
+        0.0001221249985974282,
+        0.00012245799734955654,
+        0.0001234580049640499
+      ],
+      "media_s": 0.0001228332010214217
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CHI|2023",
+      "tarefa": "sem ciclo, fonte Ayo Dosunmu|CHI|2023",
+      "V": 17,
+      "E": 58,
+      "alcancados": 15,
+      "tempos_s": [
+        4.7208006435539573e-05,
+        4.654199437936768e-05,
+        4.6375003876164556e-05,
+        4.650000482797623e-05,
+        4.8207999498117715e-05
+      ],
+      "media_s": 4.696660180343315e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CLE|2023",
+      "tarefa": "com ciclo, fonte Max Strus|CLE|2023",
+      "V": 17,
+      "E": 119,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00013216699881013483,
+        0.00014016700151842088,
+        0.00013458300236379728,
+        0.00013912499707657844,
+        0.00013466700329445302
+      ],
+      "media_s": 0.0001361418006126769
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CLE|2023",
+      "tarefa": "sem ciclo, fonte Max Strus|CLE|2023",
+      "V": 17,
+      "E": 61,
+      "alcancados": 17,
+      "tempos_s": [
+        5.05419957335107e-05,
+        4.858399915974587e-05,
+        4.870900011155754e-05,
+        4.887500108452514e-05,
+        4.949999856762588e-05
+      ],
+      "media_s": 4.9241998931393026e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DAL|2023",
+      "tarefa": "com ciclo, fonte Tim Hardaway Jr.|DAL|2023",
+      "V": 20,
+      "E": 121,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00020183400192763656,
+        0.00017308299720752984,
+        0.00017137499526143074,
+        0.00016708399925846606,
+        0.00016870900435606018
+      ],
+      "media_s": 0.00017641699960222468
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DAL|2023",
+      "tarefa": "sem ciclo, fonte Tim Hardaway Jr.|DAL|2023",
+      "V": 20,
+      "E": 59,
+      "alcancados": 20,
+      "tempos_s": [
+        5.849999433849007e-05,
+        5.679199966834858e-05,
+        5.699999746866524e-05,
+        5.624999903375283e-05,
+        5.612500535789877e-05
+      ],
+      "media_s": 5.69333991734311e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DEN|2023",
+      "tarefa": "com ciclo, fonte Reggie Jackson|DEN|2023",
+      "V": 15,
+      "E": 66,
+      "alcancados": 15,
+      "tempos_s": [
+        7.008300599409267e-05,
+        6.966700311750174e-05,
+        6.904199835844338e-05,
+        6.858300184831023e-05,
+        6.90829983795993e-05
+      ],
+      "media_s": 6.929160153958946e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DEN|2023",
+      "tarefa": "sem ciclo, fonte Reggie Jackson|DEN|2023",
+      "V": 15,
+      "E": 34,
+      "alcancados": 15,
+      "tempos_s": [
+        2.570800279499963e-05,
+        2.5583001843187958e-05,
+        2.524999581510201e-05,
+        2.5542001822032034e-05,
+        2.5125002139247954e-05
+      ],
+      "media_s": 2.5441600882913917e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DET|2023",
+      "tarefa": "com ciclo, fonte Jaden Ivey|DET|2023",
+      "V": 29,
+      "E": 165,
+      "alcancados": 28,
+      "tempos_s": [
+        0.0003301660035504028,
+        0.00032745800126576796,
+        0.0003174170051352121,
+        0.00032241699955193326,
+        0.00032620799902360886
+      ],
+      "media_s": 0.000324733201705385
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DET|2023",
+      "tarefa": "sem ciclo, fonte Jaden Ivey|DET|2023",
+      "V": 29,
+      "E": 87,
+      "alcancados": 26,
+      "tempos_s": [
+        0.00011708300007740036,
+        0.0001173330019810237,
+        0.00012275000335648656,
+        0.00011779199849115685,
+        0.00012083299952792004
+      ],
+      "media_s": 0.0001191582006867975
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente GSW|2023",
+      "tarefa": "com ciclo, fonte Stephen Curry|GSW|2023",
+      "V": 16,
+      "E": 106,
+      "alcancados": 16,
+      "tempos_s": [
+        0.0001163340057246387,
+        0.00011341699428157881,
+        0.00011416599591029808,
+        0.0001140000022132881,
+        0.00011137499677715823
+      ],
+      "media_s": 0.00011385839898139238
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo GSW|2023",
+      "tarefa": "sem ciclo, fonte Stephen Curry|GSW|2023",
+      "V": 16,
+      "E": 57,
+      "alcancados": 16,
+      "tempos_s": [
+        4.624999564839527e-05,
+        4.391700349515304e-05,
+        4.3624997488223016e-05,
+        4.57499991171062e-05,
+        4.883300425717607e-05
+      ],
+      "media_s": 4.567500000121072e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente HOU|2023",
+      "tarefa": "com ciclo, fonte Dillon Brooks|HOU|2023",
+      "V": 16,
+      "E": 113,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00014362500223796815,
+        0.00013466700329445302,
+        0.0001232089998666197,
+        0.00012312499893596396,
+        0.0001260839999304153
+      ],
+      "media_s": 0.00013014200085308402
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo HOU|2023",
+      "tarefa": "sem ciclo, fonte Dillon Brooks|HOU|2023",
+      "V": 16,
+      "E": 62,
+      "alcancados": 16,
+      "tempos_s": [
+        4.766700294567272e-05,
+        5.354199674911797e-05,
+        4.983300459571183e-05,
+        5.1041002734564245e-05,
+        4.68340003862977e-05
+      ],
+      "media_s": 4.978340148227289e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente IND|2023",
+      "tarefa": "com ciclo, fonte Aaron Nesmith|IND|2023",
+      "V": 17,
+      "E": 96,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00010620799730531871,
+        0.00010525000107008964,
+        0.00010487499821465462,
+        0.00010537500202190131,
+        0.00011145800090162084
+      ],
+      "media_s": 0.00010663319990271703
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo IND|2023",
+      "tarefa": "sem ciclo, fonte Aaron Nesmith|IND|2023",
+      "V": 17,
+      "E": 53,
+      "alcancados": 16,
+      "tempos_s": [
+        4.187499871477485e-05,
+        4.120900121051818e-05,
+        4.079199425177649e-05,
+        4.1541999962646514e-05,
+        4.1000006604008377e-05
+      ],
+      "media_s": 4.128360014874488e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente LAC|2023",
+      "tarefa": "com ciclo, fonte Ivica Zubac|LAC|2023",
+      "V": 17,
+      "E": 106,
+      "alcancados": 16,
+      "tempos_s": [
+        0.0001181659972644411,
+        0.00011704200005624443,
+        0.00011812499724328518,
+        0.00011604099563555792,
+        0.00011625000479398295
+      ],
+      "media_s": 0.00011712479899870232
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo LAC|2023",
+      "tarefa": "sem ciclo, fonte Ivica Zubac|LAC|2023",
+      "V": 17,
+      "E": 55,
+      "alcancados": 16,
+      "tempos_s": [
+        4.395799624035135e-05,
+        4.3416999687906355e-05,
+        4.3374995584599674e-05,
+        4.550000448944047e-05,
+        4.437499592313543e-05
+      ],
+      "media_s": 4.412499838508665e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente LAL|2023",
+      "tarefa": "com ciclo, fonte Austin Reaves|LAL|2023",
+      "V": 15,
+      "E": 102,
+      "alcancados": 15,
+      "tempos_s": [
+        0.00010566700075287372,
+        0.00010958399798255414,
+        0.00010383399785496294,
+        0.00010395899880677462,
+        0.0001073340026778169
+      ],
+      "media_s": 0.00010607559961499647
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo LAL|2023",
+      "tarefa": "sem ciclo, fonte Austin Reaves|LAL|2023",
+      "V": 15,
+      "E": 48,
+      "alcancados": 15,
+      "tempos_s": [
+        3.6375000490807e-05,
+        3.6416997318156064e-05,
+        3.825000021606684e-05,
+        3.7625002732966095e-05,
+        3.6249999538995326e-05
+      ],
+      "media_s": 3.698340005939826e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MEM|2023",
+      "tarefa": "com ciclo, fonte Jaren Jackson Jr.|MEM|2023",
+      "V": 31,
+      "E": 179,
+      "alcancados": 30,
+      "tempos_s": [
+        0.0003999580003437586,
+        0.0004008750038337894,
+        0.00039729200216243044,
+        0.00040091700066113845,
+        0.00040304200229002163
+      ],
+      "media_s": 0.0004004168018582277
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MEM|2023",
+      "tarefa": "sem ciclo, fonte Jaren Jackson Jr.|MEM|2023",
+      "V": 31,
+      "E": 98,
+      "alcancados": 30,
+      "tempos_s": [
+        0.00017120799748227,
+        0.00013987499551149085,
+        0.00014070799807086587,
+        0.0001354589985567145,
+        0.0001356249995296821
+      ],
+      "media_s": 0.00014457499783020465
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIA|2023",
+      "tarefa": "com ciclo, fonte Jimmy Butler III|MIA|2023",
+      "V": 19,
+      "E": 123,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00016820800374262035,
+        0.000171125000633765,
+        0.00016829199739731848,
+        0.00016266699822153896,
+        0.00016558299830649048
+      ],
+      "media_s": 0.00016717499966034666
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIA|2023",
+      "tarefa": "sem ciclo, fonte Jimmy Butler III|MIA|2023",
+      "V": 19,
+      "E": 62,
+      "alcancados": 19,
+      "tempos_s": [
+        5.866699939360842e-05,
+        5.758399493061006e-05,
+        5.7084005675278604e-05,
+        5.7999997807201e-05,
+        5.895800131838769e-05
+      ],
+      "media_s": 5.8058599825017156e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIL|2023",
+      "tarefa": "com ciclo, fonte Giannis Antetokounmpo|MIL|2023",
+      "V": 18,
+      "E": 112,
+      "alcancados": 18,
+      "tempos_s": [
+        0.0001498749988968484,
+        0.00015216699830489233,
+        0.00015083299513207749,
+        0.0001498749988968484,
+        0.00015125000209081918
+      ],
+      "media_s": 0.00015079999866429716
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIL|2023",
+      "tarefa": "sem ciclo, fonte Giannis Antetokounmpo|MIL|2023",
+      "V": 18,
+      "E": 60,
+      "alcancados": 17,
+      "tempos_s": [
+        5.108299956191331e-05,
+        5.0374997954349965e-05,
+        4.924999666400254e-05,
+        5.012499605072662e-05,
+        4.9583002692088485e-05
+      ],
+      "media_s": 5.008319858461619e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIN|2023",
+      "tarefa": "com ciclo, fonte Rudy Gobert|MIN|2023",
+      "V": 15,
+      "E": 98,
+      "alcancados": 15,
+      "tempos_s": [
+        0.00010008300159825012,
+        9.958299779100344e-05,
+        9.887499618344009e-05,
+        9.666600089985877e-05,
+        9.895899711409584e-05
+      ],
+      "media_s": 9.883319871732965e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIN|2023",
+      "tarefa": "sem ciclo, fonte Rudy Gobert|MIN|2023",
+      "V": 15,
+      "E": 54,
+      "alcancados": 15,
+      "tempos_s": [
+        3.962500341003761e-05,
+        3.8875004975125194e-05,
+        3.833299706457183e-05,
+        3.883300087181851e-05,
+        3.883300087181851e-05
+      ],
+      "media_s": 3.889980143867433e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente NOP|2023",
+      "tarefa": "com ciclo, fonte Zion Williamson|NOP|2023",
+      "V": 17,
+      "E": 111,
+      "alcancados": 16,
+      "tempos_s": [
+        0.0001177079975605011,
+        0.00011445799464127049,
+        0.00011383299715816975,
+        0.00011537500540725887,
+        0.00011804099631262943
+      ],
+      "media_s": 0.00011588299821596593
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo NOP|2023",
+      "tarefa": "sem ciclo, fonte Zion Williamson|NOP|2023",
+      "V": 17,
+      "E": 60,
+      "alcancados": 16,
+      "tempos_s": [
+        4.6749999455641955e-05,
+        4.641700070351362e-05,
+        4.599999374477193e-05,
+        4.641700070351362e-05,
+        4.616599471773952e-05
+      ],
+      "media_s": 4.634999786503613e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente NYK|2023",
+      "tarefa": "com ciclo, fonte Jalen Brunson|NYK|2023",
+      "V": 20,
+      "E": 96,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00014120800187811255,
+        0.00014087500312598422,
+        0.00013787500211037695,
+        0.00013891600247006863,
+        0.0001365830030408688
+      ],
+      "media_s": 0.00013909140252508224
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo NYK|2023",
+      "tarefa": "sem ciclo, fonte Jalen Brunson|NYK|2023",
+      "V": 20,
+      "E": 50,
+      "alcancados": 18,
+      "tempos_s": [
+        5.07079967064783e-05,
+        4.933300078846514e-05,
+        4.933300078846514e-05,
+        4.837499727727845e-05,
+        4.916599573334679e-05
+      ],
+      "media_s": 4.938299825880676e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente OKC|2023",
+      "tarefa": "com ciclo, fonte Luguentz Dort|OKC|2023",
+      "V": 19,
+      "E": 115,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00015691600128775463,
+        0.00015945899940561503,
+        0.0001564999984111637,
+        0.00017358399782096967,
+        0.00015533400437561795
+      ],
+      "media_s": 0.0001603586002602242
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo OKC|2023",
+      "tarefa": "sem ciclo, fonte Luguentz Dort|OKC|2023",
+      "V": 19,
+      "E": 65,
+      "alcancados": 16,
+      "tempos_s": [
+        5.7167002523783594e-05,
+        5.679100286215544e-05,
+        5.662500188918784e-05,
+        5.6666001910343766e-05,
+        5.612500535789877e-05
+      ],
+      "media_s": 5.667480290867388e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente ORL|2023",
+      "tarefa": "com ciclo, fonte Franz Wagner|ORL|2023",
+      "V": 16,
+      "E": 104,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00012062500172760338,
+        0.0001252919973921962,
+        0.00012224999954923987,
+        0.00012270899605937302,
+        0.00012195899762446061
+      ],
+      "media_s": 0.00012256699847057462
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo ORL|2023",
+      "tarefa": "sem ciclo, fonte Franz Wagner|ORL|2023",
+      "V": 16,
+      "E": 52,
+      "alcancados": 13,
+      "tempos_s": [
+        3.9208003727253526e-05,
+        3.887499769916758e-05,
+        3.9665996155235916e-05,
+        3.9582999306730926e-05,
+        3.8875004975125194e-05
+      ],
+      "media_s": 3.924140037270263e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente PHI|2023",
+      "tarefa": "com ciclo, fonte Tobias Harris|PHI|2023",
+      "V": 23,
+      "E": 140,
+      "alcancados": 23,
+      "tempos_s": [
+        0.00025958299374906346,
+        0.0002569169955677353,
+        0.00025591700250515714,
+        0.00026029199943877757,
+        0.000260959001025185
+      ],
+      "media_s": 0.0002587335984571837
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo PHI|2023",
+      "tarefa": "sem ciclo, fonte Tobias Harris|PHI|2023",
+      "V": 23,
+      "E": 72,
+      "alcancados": 20,
+      "tempos_s": [
+        7.99590052338317e-05,
+        8.07089963927865e-05,
+        8.24169983388856e-05,
+        8.045799768297002e-05,
+        8.57499981066212e-05
+      ],
+      "media_s": 8.1858599151019e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente PHX|2023",
+      "tarefa": "com ciclo, fonte Grayson Allen|PHX|2023",
+      "V": 19,
+      "E": 118,
+      "alcancados": 19,
+      "tempos_s": [
+        0.0001947089986060746,
+        0.00018812499911291525,
+        0.0001663329967414029,
+        0.0001662499998928979,
+        0.00016491599672008306
+      ],
+      "media_s": 0.00017606659821467474
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo PHX|2023",
+      "tarefa": "sem ciclo, fonte Grayson Allen|PHX|2023",
+      "V": 19,
+      "E": 61,
+      "alcancados": 15,
+      "tempos_s": [
+        8.570899808546528e-05,
+        5.758299812441692e-05,
+        5.608300125459209e-05,
+        5.5749995226506144e-05,
+        5.441599932964891e-05
+      ],
+      "media_s": 6.190819840412587e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente POR|2023",
+      "tarefa": "com ciclo, fonte Toumani Camara|POR|2023",
+      "V": 22,
+      "E": 135,
+      "alcancados": 22,
+      "tempos_s": [
+        0.0002046670051640831,
+        0.0001970410012290813,
+        0.00020008399587823078,
+        0.00019645900465548038,
+        0.00019795799744315445
+      ],
+      "media_s": 0.00019924180087400601
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo POR|2023",
+      "tarefa": "sem ciclo, fonte Toumani Camara|POR|2023",
+      "V": 22,
+      "E": 72,
+      "alcancados": 22,
+      "tempos_s": [
+        7.516700134146959e-05,
+        7.2750000981614e-05,
+        7.375000132014975e-05,
+        7.300000288523734e-05,
+        7.416599692078307e-05
+      ],
+      "media_s": 7.376660068985075e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente SAC|2023",
+      "tarefa": "com ciclo, fonte Harrison Barnes|SAC|2023",
+      "V": 17,
+      "E": 98,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00011004199768649414,
+        0.00011208300566067919,
+        0.00011104100121883675,
+        0.00011074999929405749,
+        0.00010745799954747781
+      ],
+      "media_s": 0.00011027480068150907
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo SAC|2023",
+      "tarefa": "sem ciclo, fonte Harrison Barnes|SAC|2023",
+      "V": 17,
+      "E": 52,
+      "alcancados": 17,
+      "tempos_s": [
+        4.350000381236896e-05,
+        4.295800317777321e-05,
+        4.254100349498913e-05,
+        4.25000034738332e-05,
+        4.295799590181559e-05
+      ],
+      "media_s": 4.289140197215602e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente SAN|2023",
+      "tarefa": "com ciclo, fonte Jeremy Sochan|SAN|2023",
+      "V": 18,
+      "E": 114,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00015654200251447037,
+        0.00015566700312774628,
+        0.00015683299716329202,
+        0.0001565000056871213,
+        0.00015816600352991372
+      ],
+      "media_s": 0.00015674160240450875
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo SAN|2023",
+      "tarefa": "sem ciclo, fonte Jeremy Sochan|SAN|2023",
+      "V": 18,
+      "E": 59,
+      "alcancados": 18,
+      "tempos_s": [
+        5.5999997130129486e-05,
+        5.299999611452222e-05,
+        5.3832998673897237e-05,
+        5.220800085226074e-05,
+        5.358300404623151e-05
+      ],
+      "media_s": 5.372479936340824e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente TOR|2023",
+      "tarefa": "com ciclo, fonte Scottie Barnes|TOR|2023",
+      "V": 26,
+      "E": 167,
+      "alcancados": 26,
+      "tempos_s": [
+        0.00031679200037615374,
+        0.0003063339972868562,
+        0.0003142500063404441,
+        0.0003140420012641698,
+        0.0003165840025758371
+      ],
+      "media_s": 0.0003136004015686922
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo TOR|2023",
+      "tarefa": "sem ciclo, fonte Scottie Barnes|TOR|2023",
+      "V": 26,
+      "E": 85,
+      "alcancados": 26,
+      "tempos_s": [
+        0.0001099579967558384,
+        0.00010862500494113192,
+        0.00010583300172584131,
+        0.00011037499643862247,
+        0.00010941599612124264
+      ],
+      "media_s": 0.00010884139919653535
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente UTA|2023",
+      "tarefa": "com ciclo, fonte Collin Sexton|UTA|2023",
+      "V": 19,
+      "E": 98,
+      "alcancados": 19,
+      "tempos_s": [
+        0.0001332079991698265,
+        0.00013949999993201345,
+        0.00014270799874793738,
+        0.0001320830051554367,
+        0.00013016699813306332
+      ],
+      "media_s": 0.00013553320022765546
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo UTA|2023",
+      "tarefa": "sem ciclo, fonte Collin Sexton|UTA|2023",
+      "V": 19,
+      "E": 52,
+      "alcancados": 16,
+      "tempos_s": [
+        4.87080033053644e-05,
+        4.8499998229090124e-05,
+        4.916599573334679e-05,
+        5.099999543745071e-05,
+        4.745799378724769e-05
+      ],
+      "media_s": 4.8966397298499945e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente WAS|2023",
+      "tarefa": "com ciclo, fonte Deni Avdija|WAS|2023",
+      "V": 21,
+      "E": 110,
+      "alcancados": 21,
+      "tempos_s": [
+        0.00017216699779964983,
+        0.00016620800306554884,
+        0.00016033300198614597,
+        0.00016458299796795473,
+        0.00015999999595806003
+      ],
+      "media_s": 0.0001646581993554719
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo WAS|2023",
+      "tarefa": "sem ciclo, fonte Deni Avdija|WAS|2023",
+      "V": 21,
+      "E": 54,
+      "alcancados": 18,
+      "tempos_s": [
+        5.8917001297231764e-05,
+        5.641699681291357e-05,
+        5.4207994253374636e-05,
+        5.8290999731980264e-05,
+        5.820899968966842e-05
+      ],
+      "media_s": 5.720839835703373e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente ATL|2024",
+      "tarefa": "com ciclo, fonte Dyson Daniels|ATL|2024",
+      "V": 20,
+      "E": 111,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00016095799946924672,
+        0.00017183299496537074,
+        0.00016729199705878273,
+        0.00017374999879393727,
+        0.00015912500384729356
+      ],
+      "media_s": 0.0001665915988269262
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo ATL|2024",
+      "tarefa": "sem ciclo, fonte Dyson Daniels|ATL|2024",
+      "V": 20,
+      "E": 56,
+      "alcancados": 18,
+      "tempos_s": [
+        5.7167002523783594e-05,
+        5.779100320069119e-05,
+        5.612499808194116e-05,
+        5.433300248114392e-05,
+        5.320799391483888e-05
+      ],
+      "media_s": 5.572480004047975e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente BKN|2024",
+      "tarefa": "com ciclo, fonte Jalen Wilson|BKN|2024",
+      "V": 22,
+      "E": 150,
+      "alcancados": 22,
+      "tempos_s": [
+        0.0002689579996513203,
+        0.00026004200481111184,
+        0.0002562910012784414,
+        0.0002919170001405291,
+        0.00026070900639751926
+      ],
+      "media_s": 0.00026758340245578436
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo BKN|2024",
+      "tarefa": "sem ciclo, fonte Jalen Wilson|BKN|2024",
+      "V": 22,
+      "E": 81,
+      "alcancados": 22,
+      "tempos_s": [
+        8.725000225240365e-05,
+        8.541600254829973e-05,
+        8.470899774692953e-05,
+        8.437500218860805e-05,
+        8.48339986987412e-05
+      ],
+      "media_s": 8.531680068699644e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente BOS|2024",
+      "tarefa": "com ciclo, fonte Al Horford|BOS|2024",
+      "V": 17,
+      "E": 103,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00012995900033274665,
+        0.00013204199785832316,
+        0.0001298749994020909,
+        0.00012916699779452756,
+        0.00012845799938077107
+      ],
+      "media_s": 0.00012990019895369186
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo BOS|2024",
+      "tarefa": "sem ciclo, fonte Al Horford|BOS|2024",
+      "V": 17,
+      "E": 59,
+      "alcancados": 16,
+      "tempos_s": [
+        4.741700104204938e-05,
+        4.808399535249919e-05,
+        4.729200009023771e-05,
+        4.691699723480269e-05,
+        4.762499884236604e-05
+      ],
+      "media_s": 4.7466998512391e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CHA|2024",
+      "tarefa": "com ciclo, fonte Josh Green|CHA|2024",
+      "V": 26,
+      "E": 162,
+      "alcancados": 26,
+      "tempos_s": [
+        0.00028649999876506627,
+        0.0003028330029337667,
+        0.0002937500030384399,
+        0.00029770800028927624,
+        0.00029599999834317714
+      ],
+      "media_s": 0.00029535820067394525
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CHA|2024",
+      "tarefa": "sem ciclo, fonte Josh Green|CHA|2024",
+      "V": 26,
+      "E": 84,
+      "alcancados": 26,
+      "tempos_s": [
+        0.00010608300362946466,
+        0.00010004100477090105,
+        9.724999836180359e-05,
+        9.741599933477119e-05,
+        9.683299867901951e-05
+      ],
+      "media_s": 9.9524600955192e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CHI|2024",
+      "tarefa": "com ciclo, fonte Coby White|CHI|2024",
+      "V": 18,
+      "E": 131,
+      "alcancados": 17,
+      "tempos_s": [
+        0.0001615410001249984,
+        0.0001589579987921752,
+        0.0001609169994480908,
+        0.0001610000035725534,
+        0.00016670899640303105
+      ],
+      "media_s": 0.00016182499966816978
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CHI|2024",
+      "tarefa": "sem ciclo, fonte Coby White|CHI|2024",
+      "V": 18,
+      "E": 67,
+      "alcancados": 17,
+      "tempos_s": [
+        6.304200360318646e-05,
+        6.166700040921569e-05,
+        6.112499977461994e-05,
+        6.125000072643161e-05,
+        6.1249993450474e-05
+      ],
+      "media_s": 6.166679959278554e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CLE|2024",
+      "tarefa": "com ciclo, fonte Jarrett Allen|CLE|2024",
+      "V": 18,
+      "E": 114,
+      "alcancados": 18,
+      "tempos_s": [
+        0.0001388750024489127,
+        0.0001363749979645945,
+        0.00013583300460595638,
+        0.00014062500122236088,
+        0.0001390410034218803
+      ],
+      "media_s": 0.00013814980193274095
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CLE|2024",
+      "tarefa": "sem ciclo, fonte Jarrett Allen|CLE|2024",
+      "V": 18,
+      "E": 61,
+      "alcancados": 16,
+      "tempos_s": [
+        5.51249977434054e-05,
+        5.066700396127999e-05,
+        5.100000271340832e-05,
+        5.104199954075739e-05,
+        5.004199920222163e-05
+      ],
+      "media_s": 5.1575200632214543e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DAL|2024",
+      "tarefa": "com ciclo, fonte Spencer Dinwiddie|DAL|2024",
+      "V": 23,
+      "E": 172,
+      "alcancados": 22,
+      "tempos_s": [
+        0.00028366700280457735,
+        0.0002760839997790754,
+        0.0002761249998002313,
+        0.0002897079975809902,
+        0.0002785830001812428
+      ],
+      "media_s": 0.0002808334000292234
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DAL|2024",
+      "tarefa": "sem ciclo, fonte Spencer Dinwiddie|DAL|2024",
+      "V": 23,
+      "E": 91,
+      "alcancados": 22,
+      "tempos_s": [
+        9.741599933477119e-05,
+        9.770900214789435e-05,
+        9.783400309970602e-05,
+        9.770899487193674e-05,
+        9.76250012172386e-05
+      ],
+      "media_s": 9.765860013430939e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DEN|2024",
+      "tarefa": "com ciclo, fonte Michael Porter Jr.|DEN|2024",
+      "V": 17,
+      "E": 87,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00010920799832092598,
+        0.00010525000107008964,
+        0.00010633399506332353,
+        0.00010208399908151478,
+        0.00010104100510943681
+      ],
+      "media_s": 0.00010478339972905815
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DEN|2024",
+      "tarefa": "sem ciclo, fonte Michael Porter Jr.|DEN|2024",
+      "V": 17,
+      "E": 47,
+      "alcancados": 17,
+      "tempos_s": [
+        4.1290993976872414e-05,
+        4.8000001697801054e-05,
+        3.912499960279092e-05,
+        3.9957994886208326e-05,
+        3.925000055460259e-05
+      ],
+      "media_s": 4.152479814365506e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DET|2024",
+      "tarefa": "com ciclo, fonte Malik Beasley|DET|2024",
+      "V": 18,
+      "E": 104,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00014133300282992423,
+        0.00013958299678051844,
+        0.00013691700587514788,
+        0.00014525000005960464,
+        0.00014108399773249403
+      ],
+      "media_s": 0.00014083340065553784
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DET|2024",
+      "tarefa": "sem ciclo, fonte Malik Beasley|DET|2024",
+      "V": 18,
+      "E": 53,
+      "alcancados": 17,
+      "tempos_s": [
+        5.004199920222163e-05,
+        4.949999856762588e-05,
+        4.737500421470031e-05,
+        4.754200199386105e-05,
+        4.7166999138426036e-05
+      ],
+      "media_s": 4.832520062336698e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente GSW|2024",
+      "tarefa": "com ciclo, fonte Buddy Hield|GSW|2024",
+      "V": 18,
+      "E": 131,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00018249999993713573,
+        0.00016854199930094182,
+        0.00018674999591894448,
+        0.00017216700507560745,
+        0.00016429099923698232
+      ],
+      "media_s": 0.00017484999989392236
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo GSW|2024",
+      "tarefa": "sem ciclo, fonte Buddy Hield|GSW|2024",
+      "V": 18,
+      "E": 67,
+      "alcancados": 18,
+      "tempos_s": [
+        5.8166995586361736e-05,
+        5.7624994951765984e-05,
+        5.7459001254756004e-05,
+        5.604200123343617e-05,
+        5.629100633086637e-05
+      ],
+      "media_s": 5.711679987143725e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente HOU|2024",
+      "tarefa": "com ciclo, fonte Alperen Sengun|HOU|2024",
+      "V": 18,
+      "E": 129,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00016354200488422066,
+        0.00017212500097230077,
+        0.0001581250035087578,
+        0.00015470800281036645,
+        0.0001556249990244396
+      ],
+      "media_s": 0.00016082500224001706
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo HOU|2024",
+      "tarefa": "sem ciclo, fonte Alperen Sengun|HOU|2024",
+      "V": 18,
+      "E": 68,
+      "alcancados": 18,
+      "tempos_s": [
+        5.8625002566259354e-05,
+        5.7749995903577656e-05,
+        5.7709003158379346e-05,
+        5.791700095869601e-05,
+        5.7999997807201e-05
+      ],
+      "media_s": 5.800020007882267e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente IND|2024",
+      "tarefa": "com ciclo, fonte Tyrese Haliburton|IND|2024",
+      "V": 19,
+      "E": 93,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00013062499783700332,
+        0.0001336250061285682,
+        0.00013129199942341074,
+        0.00012854200031142682,
+        0.0001291250009671785
+      ],
+      "media_s": 0.0001306418009335175
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo IND|2024",
+      "tarefa": "sem ciclo, fonte Tyrese Haliburton|IND|2024",
+      "V": 19,
+      "E": 52,
+      "alcancados": 19,
+      "tempos_s": [
+        4.7166999138426036e-05,
+        4.587500006891787e-05,
+        4.604199784807861e-05,
+        4.595799691742286e-05,
+        4.512500163400546e-05
+      ],
+      "media_s": 4.603339912137017e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente LAC|2024",
+      "tarefa": "com ciclo, fonte Ivica Zubac|LAC|2024",
+      "V": 19,
+      "E": 113,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00014599999849451706,
+        0.0001472080039093271,
+        0.00014099999680183828,
+        0.00014558299881173298,
+        0.00014245800412027165
+      ],
+      "media_s": 0.0001444498004275374
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo LAC|2024",
+      "tarefa": "sem ciclo, fonte Ivica Zubac|LAC|2024",
+      "V": 19,
+      "E": 61,
+      "alcancados": 19,
+      "tempos_s": [
+        5.7292003475595266e-05,
+        5.741699715144932e-05,
+        6.033300451235846e-05,
+        5.733300349675119e-05,
+        5.7457997172605246e-05
+      ],
+      "media_s": 5.7966601161751896e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente LAL|2024",
+      "tarefa": "com ciclo, fonte LeBron James|LAL|2024",
+      "V": 20,
+      "E": 152,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00021050000214017928,
+        0.00021116599964443594,
+        0.00020479199883993715,
+        0.00019800000154646114,
+        0.0002005420028581284
+      ],
+      "media_s": 0.0002050000010058284
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo LAL|2024",
+      "tarefa": "sem ciclo, fonte LeBron James|LAL|2024",
+      "V": 20,
+      "E": 75,
+      "alcancados": 20,
+      "tempos_s": [
+        7.133300096029416e-05,
+        6.912500248290598e-05,
+        6.883300375193357e-05,
+        7.087500125635415e-05,
+        6.904199835844338e-05
+      ],
+      "media_s": 6.984160136198625e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MEM|2024",
+      "tarefa": "com ciclo, fonte Jaylen Wells|MEM|2024",
+      "V": 19,
+      "E": 130,
+      "alcancados": 19,
+      "tempos_s": [
+        0.0001764170010574162,
+        0.00017129199841292575,
+        0.0001688330012257211,
+        0.0001729159994283691,
+        0.00017208400095114484
+      ],
+      "media_s": 0.0001723084002151154
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MEM|2024",
+      "tarefa": "sem ciclo, fonte Jaylen Wells|MEM|2024",
+      "V": 19,
+      "E": 71,
+      "alcancados": 19,
+      "tempos_s": [
+        6.583399954251945e-05,
+        6.462499732151628e-05,
+        6.425000174203888e-05,
+        6.48339992039837e-05,
+        6.341699918266386e-05
+      ],
+      "media_s": 6.459199939854444e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIA|2024",
+      "tarefa": "com ciclo, fonte Bam Adebayo|MIA|2024",
+      "V": 18,
+      "E": 105,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00011870799789903685,
+        0.00011649999942164868,
+        0.00011595799878705293,
+        0.00011850000009872019,
+        0.00012037499982398003
+      ],
+      "media_s": 0.00011800819920608774
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIA|2024",
+      "tarefa": "sem ciclo, fonte Bam Adebayo|MIA|2024",
+      "V": 18,
+      "E": 53,
+      "alcancados": 15,
+      "tempos_s": [
+        4.650000482797623e-05,
+        4.433299909578636e-05,
+        4.333299875725061e-05,
+        4.3125000956933945e-05,
+        4.358300066087395e-05
+      ],
+      "media_s": 4.417480085976422e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIL|2024",
+      "tarefa": "com ciclo, fonte Taurean Prince|MIL|2024",
+      "V": 18,
+      "E": 105,
+      "alcancados": 18,
+      "tempos_s": [
+        0.0001289589999942109,
+        0.00012391700147418305,
+        0.00012887499906355515,
+        0.00012925000191899016,
+        0.00012833400251111016
+      ],
+      "media_s": 0.0001278670009924099
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIL|2024",
+      "tarefa": "sem ciclo, fonte Taurean Prince|MIL|2024",
+      "V": 18,
+      "E": 59,
+      "alcancados": 18,
+      "tempos_s": [
+        5.2124996727798134e-05,
+        4.995900235371664e-05,
+        5.112499638926238e-05,
+        5.108299956191331e-05,
+        5.054200300946832e-05
+      ],
+      "media_s": 5.0966799608431754e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIN|2024",
+      "tarefa": "com ciclo, fonte Jaden McDaniels|MIN|2024",
+      "V": 15,
+      "E": 102,
+      "alcancados": 15,
+      "tempos_s": [
+        0.00010970899893436581,
+        0.00010720900172600523,
+        0.0001062909941538237,
+        0.00011074999929405749,
+        0.00010650000331224874
+      ],
+      "media_s": 0.0001080917994841002
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIN|2024",
+      "tarefa": "sem ciclo, fonte Jaden McDaniels|MIN|2024",
+      "V": 15,
+      "E": 58,
+      "alcancados": 14,
+      "tempos_s": [
+        4.374999844003469e-05,
+        4.416699812281877e-05,
+        4.445899685379118e-05,
+        4.179200186626986e-05,
+        4.199999966658652e-05
+      ],
+      "media_s": 4.32335989899002e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente NOP|2024",
+      "tarefa": "com ciclo, fonte Yves Missi|NOP|2024",
+      "V": 25,
+      "E": 157,
+      "alcancados": 25,
+      "tempos_s": [
+        0.0002632079995237291,
+        0.0002699169999687001,
+        0.0002734160007094033,
+        0.00029070799791952595,
+        0.00027054199745180085
+      ],
+      "media_s": 0.00027355819911463187
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo NOP|2024",
+      "tarefa": "sem ciclo, fonte Yves Missi|NOP|2024",
+      "V": 25,
+      "E": 76,
+      "alcancados": 24,
+      "tempos_s": [
+        8.708300447324291e-05,
+        8.725000225240365e-05,
+        8.749999688006938e-05,
+        8.787499973550439e-05,
+        8.870799501892179e-05
+      ],
+      "media_s": 8.768319967202842e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente NYK|2024",
+      "tarefa": "com ciclo, fonte OG Anunoby|NYK|2024",
+      "V": 19,
+      "E": 86,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00011183300375705585,
+        0.00010774999827845022,
+        0.00010937499610008672,
+        0.00010770900553325191,
+        0.00010983299580402672
+      ],
+      "media_s": 0.00010929999989457428
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo NYK|2024",
+      "tarefa": "sem ciclo, fonte OG Anunoby|NYK|2024",
+      "V": 19,
+      "E": 44,
+      "alcancados": 19,
+      "tempos_s": [
+        4.149999585933983e-05,
+        4.1207997128367424e-05,
+        4.1292005334980786e-05,
+        4.0833001548890024e-05,
+        4.070800059707835e-05
+      ],
+      "media_s": 4.1108200093731284e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente OKC|2024",
+      "tarefa": "com ciclo, fonte Cason Wallace|OKC|2024",
+      "V": 17,
+      "E": 132,
+      "alcancados": 17,
+      "tempos_s": [
+        0.000149125000461936,
+        0.00015166700177360326,
+        0.0001524580002296716,
+        0.00014841699885437265,
+        0.00014891599857946858
+      ],
+      "media_s": 0.0001501165999798104
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo OKC|2024",
+      "tarefa": "sem ciclo, fonte Cason Wallace|OKC|2024",
+      "V": 17,
+      "E": 67,
+      "alcancados": 17,
+      "tempos_s": [
+        5.7792000006884336e-05,
+        5.587500345427543e-05,
+        5.541699647437781e-05,
+        5.5374999647028744e-05,
+        5.520799459191039e-05
+      ],
+      "media_s": 5.593339883489534e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente ORL|2024",
+      "tarefa": "com ciclo, fonte Kentavious Caldwell-Pope|ORL|2024",
+      "V": 16,
+      "E": 130,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00015345800056820735,
+        0.0001540830053272657,
+        0.0001502919985796325,
+        0.0001506670014350675,
+        0.00014974999794503674
+      ],
+      "media_s": 0.00015165000077104195
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo ORL|2024",
+      "tarefa": "sem ciclo, fonte Kentavious Caldwell-Pope|ORL|2024",
+      "V": 16,
+      "E": 64,
+      "alcancados": 16,
+      "tempos_s": [
+        6.024999311193824e-05,
+        4.904200613964349e-05,
+        4.8624999180901796e-05,
+        4.8417001380585134e-05,
+        4.87080033053644e-05
+      ],
+      "media_s": 5.100840062368661e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente PHI|2024",
+      "tarefa": "com ciclo, fonte Guerschon Yabusele|PHI|2024",
+      "V": 27,
+      "E": 159,
+      "alcancados": 26,
+      "tempos_s": [
+        0.0002691670015337877,
+        0.00026270899979863316,
+        0.000265957998635713,
+        0.0002761669966275804,
+        0.00026345800142735243
+      ],
+      "media_s": 0.00026749179960461333
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo PHI|2024",
+      "tarefa": "sem ciclo, fonte Guerschon Yabusele|PHI|2024",
+      "V": 27,
+      "E": 80,
+      "alcancados": 24,
+      "tempos_s": [
+        9.64579958235845e-05,
+        9.541700273985043e-05,
+        9.504199988441542e-05,
+        9.804099681787193e-05,
+        9.500000305706635e-05
+      ],
+      "media_s": 9.599159966455773e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente PHX|2024",
+      "tarefa": "com ciclo, fonte Tyus Jones|PHX|2024",
+      "V": 19,
+      "E": 120,
+      "alcancados": 19,
+      "tempos_s": [
+        0.0001628340032766573,
+        0.0001604169956408441,
+        0.00016045800293795764,
+        0.00015862500004004687,
+        0.00016458299796795473
+      ],
+      "media_s": 0.00016138339997269214
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo PHX|2024",
+      "tarefa": "sem ciclo, fonte Tyus Jones|PHX|2024",
+      "V": 19,
+      "E": 63,
+      "alcancados": 19,
+      "tempos_s": [
+        5.900000542169437e-05,
+        5.7375000324100256e-05,
+        5.708300159312785e-05,
+        5.783300002804026e-05,
+        5.787500413134694e-05
+      ],
+      "media_s": 5.783320229966193e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente POR|2024",
+      "tarefa": "com ciclo, fonte Scoot Henderson|POR|2024",
+      "V": 16,
+      "E": 111,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00012962499749846756,
+        0.00012562500342028216,
+        0.00012745799904223531,
+        0.00012583399802679196,
+        0.0001294169996981509
+      ],
+      "media_s": 0.00012759179953718557
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo POR|2024",
+      "tarefa": "sem ciclo, fonte Scoot Henderson|POR|2024",
+      "V": 16,
+      "E": 56,
+      "alcancados": 16,
+      "tempos_s": [
+        4.5417000364977866e-05,
+        4.374999844003469e-05,
+        4.425000224728137e-05,
+        4.7708002966828644e-05,
+        4.65829944005236e-05
+      ],
+      "media_s": 4.554159968392923e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente SAC|2024",
+      "tarefa": "com ciclo, fonte Keon Ellis|SAC|2024",
+      "V": 19,
+      "E": 116,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00014241699682315812,
+        0.00014362500223796815,
+        0.0001421249980921857,
+        0.0001467909969505854,
+        0.00014716700388817117
+      ],
+      "media_s": 0.0001444249995984137
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo SAC|2024",
+      "tarefa": "sem ciclo, fonte Keon Ellis|SAC|2024",
+      "V": 19,
+      "E": 59,
+      "alcancados": 18,
+      "tempos_s": [
+        5.604200123343617e-05,
+        5.379199865274131e-05,
+        5.479099490912631e-05,
+        5.633299588225782e-05,
+        5.424999835668132e-05
+      ],
+      "media_s": 5.504159780684858e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente SAN|2024",
+      "tarefa": "com ciclo, fonte Harrison Barnes|SAN|2024",
+      "V": 17,
+      "E": 114,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00014783399819862098,
+        0.0001429170006304048,
+        0.00013837499864166602,
+        0.0001422909990651533,
+        0.00014474999625235796
+      ],
+      "media_s": 0.0001432333985576406
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo SAN|2024",
+      "tarefa": "sem ciclo, fonte Harrison Barnes|SAN|2024",
+      "V": 17,
+      "E": 58,
+      "alcancados": 17,
+      "tempos_s": [
+        4.983299731975421e-05,
+        4.9291003961116076e-05,
+        5.1792005251627415e-05,
+        5.075000080978498e-05,
+        4.845800140174106e-05
+      ],
+      "media_s": 5.002480174880475e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente TOR|2024",
+      "tarefa": "com ciclo, fonte Scottie Barnes|TOR|2024",
+      "V": 23,
+      "E": 147,
+      "alcancados": 23,
+      "tempos_s": [
+        0.0002478340029483661,
+        0.0002741249991231598,
+        0.0002410829984000884,
+        0.00024191700504161417,
+        0.00024229199334513396
+      ],
+      "media_s": 0.0002494501997716725
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo TOR|2024",
+      "tarefa": "sem ciclo, fonte Scottie Barnes|TOR|2024",
+      "V": 23,
+      "E": 77,
+      "alcancados": 23,
+      "tempos_s": [
+        8.20420027594082e-05,
+        0.00010816700523719192,
+        8.158299897331744e-05,
+        8.125000022118911e-05,
+        8.21249996079132e-05
+      ],
+      "media_s": 8.703340135980397e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente UTA|2024",
+      "tarefa": "com ciclo, fonte Keyonte George|UTA|2024",
+      "V": 20,
+      "E": 134,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00019966700347140431,
+        0.00019733399676624686,
+        0.0001962080059456639,
+        0.00019949999841628596,
+        0.00019820900342892855
+      ],
+      "media_s": 0.00019818360160570592
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo UTA|2024",
+      "tarefa": "sem ciclo, fonte Keyonte George|UTA|2024",
+      "V": 20,
+      "E": 68,
+      "alcancados": 15,
+      "tempos_s": [
+        6.470800144597888e-05,
+        6.320799730019644e-05,
+        6.325000140350312e-05,
+        6.354200013447553e-05,
+        6.41250007902272e-05
+      ],
+      "media_s": 6.376660021487624e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente WAS|2024",
+      "tarefa": "com ciclo, fonte Bub Carrington|WAS|2024",
+      "V": 23,
+      "E": 124,
+      "alcancados": 23,
+      "tempos_s": [
+        0.00019962499936809763,
+        0.00019349999638507143,
+        0.00019141699885949492,
+        0.0001909159982460551,
+        0.00018679200002225116
+      ],
+      "media_s": 0.00019244999857619404
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo WAS|2024",
+      "tarefa": "sem ciclo, fonte Bub Carrington|WAS|2024",
+      "V": 23,
+      "E": 66,
+      "alcancados": 23,
+      "tempos_s": [
+        6.929200026206672e-05,
+        6.90829983795993e-05,
+        6.912500248290598e-05,
+        6.941699393792078e-05,
+        7.000000186963007e-05
+      ],
+      "media_s": 6.938339938642458e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente ATL|2025",
+      "tarefa": "com ciclo, fonte Dyson Daniels|ATL|2025",
+      "V": 19,
+      "E": 113,
+      "alcancados": 19,
+      "tempos_s": [
+        0.0001524580002296716,
+        0.0001511250011390075,
+        0.00014962499699322507,
+        0.0001502090017311275,
+        0.00015279199578799307
+      ],
+      "media_s": 0.00015124179917620496
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo ATL|2025",
+      "tarefa": "sem ciclo, fonte Dyson Daniels|ATL|2025",
+      "V": 19,
+      "E": 60,
+      "alcancados": 19,
+      "tempos_s": [
+        5.795800097985193e-05,
+        5.633299588225782e-05,
+        6.0040998505428433e-05,
+        5.7375000324100256e-05,
+        5.687499651685357e-05
+      ],
+      "media_s": 5.7716398441698405e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente BKN|2025",
+      "tarefa": "com ciclo, fonte Michael Porter Jr.|BKN|2025",
+      "V": 22,
+      "E": 126,
+      "alcancados": 21,
+      "tempos_s": [
+        0.00019762499869102612,
+        0.00019358300050953403,
+        0.00019845800125040114,
+        0.00019266700110165402,
+        0.0002082920036627911
+      ],
+      "media_s": 0.0001981250010430813
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo BKN|2025",
+      "tarefa": "sem ciclo, fonte Michael Porter Jr.|BKN|2025",
+      "V": 22,
+      "E": 66,
+      "alcancados": 21,
+      "tempos_s": [
+        6.895799742778763e-05,
+        6.858300184831023e-05,
+        6.849999772384763e-05,
+        6.674999895039946e-05,
+        6.729200686095282e-05
+      ],
+      "media_s": 6.801660056225956e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente BOS|2025",
+      "tarefa": "com ciclo, fonte Neemias Queta|BOS|2025",
+      "V": 18,
+      "E": 115,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00015187499957391992,
+        0.00015295799676096067,
+        0.00015262500528478995,
+        0.00015433299995493144,
+        0.0001548329964862205
+      ],
+      "media_s": 0.0001533247996121645
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo BOS|2025",
+      "tarefa": "sem ciclo, fonte Neemias Queta|BOS|2025",
+      "V": 18,
+      "E": 64,
+      "alcancados": 18,
+      "tempos_s": [
+        5.895799404243007e-05,
+        5.8750003518071026e-05,
+        5.824999971082434e-05,
+        5.683400377165526e-05,
+        5.8083998737856746e-05
+      ],
+      "media_s": 5.8175199956167487e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CHA|2025",
+      "tarefa": "com ciclo, fonte Kon Knueppel|CHA|2025",
+      "V": 21,
+      "E": 126,
+      "alcancados": 21,
+      "tempos_s": [
+        0.0001830000037443824,
+        0.0001832919951993972,
+        0.00018520800222177058,
+        0.00018441699648974463,
+        0.0001841670018620789
+      ],
+      "media_s": 0.00018401679990347474
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CHA|2025",
+      "tarefa": "sem ciclo, fonte Kon Knueppel|CHA|2025",
+      "V": 21,
+      "E": 67,
+      "alcancados": 21,
+      "tempos_s": [
+        7.312500383704901e-05,
+        6.958300218684599e-05,
+        6.804199801990762e-05,
+        6.833400402683765e-05,
+        6.958399899303913e-05
+      ],
+      "media_s": 6.973360141273587e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CHI|2025",
+      "tarefa": "com ciclo, fonte Matas Buzelis|CHI|2025",
+      "V": 26,
+      "E": 181,
+      "alcancados": 23,
+      "tempos_s": [
+        0.00032854200253495947,
+        0.0003299169984529726,
+        0.00032683400058886036,
+        0.00032866700348677114,
+        0.0003284580016043037
+      ],
+      "media_s": 0.00032848360133357345
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CHI|2025",
+      "tarefa": "sem ciclo, fonte Matas Buzelis|CHI|2025",
+      "V": 26,
+      "E": 89,
+      "alcancados": 23,
+      "tempos_s": [
+        0.00010874999861698598,
+        0.00010391700197942555,
+        0.0001067080011125654,
+        0.00010504100646357983,
+        0.00010887499956879765
+      ],
+      "media_s": 0.00010665820154827088
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente CLE|2025",
+      "tarefa": "com ciclo, fonte Donovan Mitchell|CLE|2025",
+      "V": 20,
+      "E": 139,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00019270800112280995,
+        0.00019304200395708904,
+        0.00019437500304775313,
+        0.00019658399833133444,
+        0.0001923340023495257
+      ],
+      "media_s": 0.00019380860176170244
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo CLE|2025",
+      "tarefa": "sem ciclo, fonte Donovan Mitchell|CLE|2025",
+      "V": 20,
+      "E": 69,
+      "alcancados": 19,
+      "tempos_s": [
+        6.508299702545628e-05,
+        6.61670055706054e-05,
+        6.824999582022429e-05,
+        6.70000008540228e-05,
+        6.533299892907962e-05
+      ],
+      "media_s": 6.636659963987768e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DAL|2025",
+      "tarefa": "com ciclo, fonte Naji Marshall|DAL|2025",
+      "V": 23,
+      "E": 146,
+      "alcancados": 23,
+      "tempos_s": [
+        0.00024149999808287248,
+        0.0002355839969823137,
+        0.00023441600205842406,
+        0.00023499999952036887,
+        0.00023345800582319498
+      ],
+      "media_s": 0.00023599160049343483
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DAL|2025",
+      "tarefa": "sem ciclo, fonte Naji Marshall|DAL|2025",
+      "V": 23,
+      "E": 72,
+      "alcancados": 21,
+      "tempos_s": [
+        8.616699778940529e-05,
+        8.416700438829139e-05,
+        8.029099990380928e-05,
+        8.187500498024747e-05,
+        8.420800440944731e-05
+      ],
+      "media_s": 8.334160229424014e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DEN|2025",
+      "tarefa": "com ciclo, fonte Tim Hardaway Jr.|DEN|2025",
+      "V": 18,
+      "E": 111,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00014574999659089372,
+        0.00014870800077915192,
+        0.00014429200382437557,
+        0.00014466699940385297,
+        0.00014866600395180285
+      ],
+      "media_s": 0.0001464166009100154
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DEN|2025",
+      "tarefa": "sem ciclo, fonte Tim Hardaway Jr.|DEN|2025",
+      "V": 18,
+      "E": 56,
+      "alcancados": 18,
+      "tempos_s": [
+        4.8207999498117715e-05,
+        4.616600199369714e-05,
+        4.766700294567272e-05,
+        4.925000393996015e-05,
+        4.900000203633681e-05
+      ],
+      "media_s": 4.805820208275691e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente DET|2025",
+      "tarefa": "com ciclo, fonte Duncan Robinson|DET|2025",
+      "V": 19,
+      "E": 117,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00016508399858139455,
+        0.00016037499881349504,
+        0.00016429199604317546,
+        0.00015783400158397853,
+        0.00016308399790432304
+      ],
+      "media_s": 0.00016213379858527334
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo DET|2025",
+      "tarefa": "sem ciclo, fonte Duncan Robinson|DET|2025",
+      "V": 19,
+      "E": 66,
+      "alcancados": 18,
+      "tempos_s": [
+        6.704199768137187e-05,
+        6.316600047284737e-05,
+        6.337499507935718e-05,
+        6.0874997870996594e-05,
+        6.212500011315569e-05
+      ],
+      "media_s": 6.331659824354574e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente GSW|2025",
+      "tarefa": "com ciclo, fonte Brandin Podziemski|GSW|2025",
+      "V": 22,
+      "E": 164,
+      "alcancados": 22,
+      "tempos_s": [
+        0.0002427080034976825,
+        0.00025099999766098335,
+        0.00024212499556597322,
+        0.0002444589990773238,
+        0.0002460000032442622
+      ],
+      "media_s": 0.000245258399809245
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo GSW|2025",
+      "tarefa": "sem ciclo, fonte Brandin Podziemski|GSW|2025",
+      "V": 22,
+      "E": 80,
+      "alcancados": 22,
+      "tempos_s": [
+        8.570800127927214e-05,
+        8.125000022118911e-05,
+        8.600000001024455e-05,
+        8.641699969302863e-05,
+        8.237500151153654e-05
+      ],
+      "media_s": 8.43500005430542e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente HOU|2025",
+      "tarefa": "com ciclo, fonte Amen Thompson|HOU|2025",
+      "V": 14,
+      "E": 99,
+      "alcancados": 14,
+      "tempos_s": [
+        0.00010337499406887218,
+        0.00010183400445384905,
+        0.00010187499719904736,
+        0.00010483300138730556,
+        0.00010554199980106205
+      ],
+      "media_s": 0.00010349179938202724
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo HOU|2025",
+      "tarefa": "sem ciclo, fonte Amen Thompson|HOU|2025",
+      "V": 14,
+      "E": 50,
+      "alcancados": 14,
+      "tempos_s": [
+        3.7208003050182015e-05,
+        3.587499668356031e-05,
+        3.520799509715289e-05,
+        3.391700010979548e-05,
+        3.308399755042046e-05
+      ],
+      "media_s": 3.505839849822223e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente IND|2025",
+      "tarefa": "com ciclo, fonte Jay Huff|IND|2025",
+      "V": 26,
+      "E": 146,
+      "alcancados": 25,
+      "tempos_s": [
+        0.00027712500013876706,
+        0.0002864579946617596,
+        0.0002919999969890341,
+        0.0002773329979390837,
+        0.00030279200291261077
+      ],
+      "media_s": 0.00028714159852825103
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo IND|2025",
+      "tarefa": "sem ciclo, fonte Jay Huff|IND|2025",
+      "V": 26,
+      "E": 74,
+      "alcancados": 25,
+      "tempos_s": [
+        8.874999912222847e-05,
+        9.291700553148985e-05,
+        8.874999912222847e-05,
+        8.679099846631289e-05,
+        8.687499939696863e-05
+      ],
+      "media_s": 8.881660032784566e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente LAC|2025",
+      "tarefa": "com ciclo, fonte Kris Dunn|LAC|2025",
+      "V": 20,
+      "E": 127,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00018020899733528495,
+        0.00018200000340584666,
+        0.00017637500423006713,
+        0.00017912499606609344,
+        0.00018249999993713573
+      ],
+      "media_s": 0.0001800418001948856
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo LAC|2025",
+      "tarefa": "sem ciclo, fonte Kris Dunn|LAC|2025",
+      "V": 20,
+      "E": 68,
+      "alcancados": 20,
+      "tempos_s": [
+        6.854200182715431e-05,
+        6.654199387412518e-05,
+        6.500000017695129e-05,
+        6.529200618388131e-05,
+        6.595799641218036e-05
+      ],
+      "media_s": 6.626679969485849e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente LAL|2025",
+      "tarefa": "com ciclo, fonte Jake LaRavia|LAL|2025",
+      "V": 18,
+      "E": 132,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00016666699957568198,
+        0.00016212500486290082,
+        0.0001610000035725534,
+        0.00015974999405443668,
+        0.00016854199930094182
+      ],
+      "media_s": 0.00016361680027330295
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo LAL|2025",
+      "tarefa": "sem ciclo, fonte Jake LaRavia|LAL|2025",
+      "V": 18,
+      "E": 64,
+      "alcancados": 18,
+      "tempos_s": [
+        5.820899968966842e-05,
+        5.641700408887118e-05,
+        5.63749999855645e-05,
+        5.604200123343617e-05,
+        5.604099715128541e-05
+      ],
+      "media_s": 5.6616800429765134e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MEM|2025",
+      "tarefa": "com ciclo, fonte Jaylen Wells|MEM|2025",
+      "V": 31,
+      "E": 143,
+      "alcancados": 30,
+      "tempos_s": [
+        0.00030966600024839863,
+        0.0003044580007554032,
+        0.00030858399986755103,
+        0.0003090840036747977,
+        0.0003213339950889349
+      ],
+      "media_s": 0.0003106251999270171
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MEM|2025",
+      "tarefa": "sem ciclo, fonte Jaylen Wells|MEM|2025",
+      "V": 31,
+      "E": 69,
+      "alcancados": 30,
+      "tempos_s": [
+        0.00010145800479222089,
+        9.94160000118427e-05,
+        0.00010320799628971145,
+        0.00010095799370901659,
+        0.00010458299948368222
+      ],
+      "media_s": 0.00010192459885729476
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIA|2025",
+      "tarefa": "com ciclo, fonte Jaime Jaquez Jr.|MIA|2025",
+      "V": 15,
+      "E": 116,
+      "alcancados": 15,
+      "tempos_s": [
+        0.0001140000022132881,
+        0.0001157080041593872,
+        0.00011649999942164868,
+        0.0001216669988934882,
+        0.00011445799464127049
+      ],
+      "media_s": 0.00011646659986581653
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIA|2025",
+      "tarefa": "sem ciclo, fonte Jaime Jaquez Jr.|MIA|2025",
+      "V": 15,
+      "E": 61,
+      "alcancados": 15,
+      "tempos_s": [
+        4.774999979417771e-05,
+        4.870900011155754e-05,
+        4.829200042877346e-05,
+        4.4749998778570443e-05,
+        4.5583998144138604e-05
+      ],
+      "media_s": 4.7016999451443554e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIL|2025",
+      "tarefa": "com ciclo, fonte AJ Green|MIL|2025",
+      "V": 21,
+      "E": 149,
+      "alcancados": 21,
+      "tempos_s": [
+        0.00023095800133887678,
+        0.00023391699505737051,
+        0.00022650000028079376,
+        0.0002266670053359121,
+        0.00022795800032326952
+      ],
+      "media_s": 0.00022920000046724453
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIL|2025",
+      "tarefa": "sem ciclo, fonte AJ Green|MIL|2025",
+      "V": 21,
+      "E": 81,
+      "alcancados": 21,
+      "tempos_s": [
+        8.470899774692953e-05,
+        8.850000449456275e-05,
+        8.600000001024455e-05,
+        8.287499804282561e-05,
+        8.766700193518773e-05
+      ],
+      "media_s": 8.595020044595003e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente MIN|2025",
+      "tarefa": "com ciclo, fonte Rudy Gobert|MIN|2025",
+      "V": 19,
+      "E": 130,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00018095799896400422,
+        0.00018179199832957238,
+        0.00018416599777992815,
+        0.00018066700431518257,
+        0.00017954099894268438
+      ],
+      "media_s": 0.00018142479966627435
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo MIN|2025",
+      "tarefa": "sem ciclo, fonte Rudy Gobert|MIN|2025",
+      "V": 19,
+      "E": 70,
+      "alcancados": 18,
+      "tempos_s": [
+        6.858299457235262e-05,
+        6.720900273649022e-05,
+        6.48339992039837e-05,
+        6.812500214437023e-05,
+        6.991699774516746e-05
+      ],
+      "media_s": 6.773359928047284e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente NOP|2025",
+      "tarefa": "com ciclo, fonte Derik Queen|NOP|2025",
+      "V": 19,
+      "E": 127,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00016925000090850517,
+        0.00016491600399604067,
+        0.00016545900143682957,
+        0.00015970799722708762,
+        0.0001622500058147125
+      ],
+      "media_s": 0.0001643166018766351
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo NOP|2025",
+      "tarefa": "sem ciclo, fonte Derik Queen|NOP|2025",
+      "V": 19,
+      "E": 66,
+      "alcancados": 19,
+      "tempos_s": [
+        6.583399954251945e-05,
+        6.474999827332795e-05,
+        6.083300104364753e-05,
+        5.9541998780332506e-05,
+        6.262500392040238e-05
+      ],
+      "media_s": 6.271680031204596e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente NYK|2025",
+      "tarefa": "com ciclo, fonte Mikal Bridges|NYK|2025",
+      "V": 18,
+      "E": 134,
+      "alcancados": 18,
+      "tempos_s": [
+        0.0002088330002152361,
+        0.00017154199304059148,
+        0.00017079099779948592,
+        0.0001678749977145344,
+        0.00017137500253738835
+      ],
+      "media_s": 0.00017808319826144724
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo NYK|2025",
+      "tarefa": "sem ciclo, fonte Mikal Bridges|NYK|2025",
+      "V": 18,
+      "E": 68,
+      "alcancados": 18,
+      "tempos_s": [
+        6.433399539673701e-05,
+        6.529200618388131e-05,
+        5.975000385660678e-05,
+        6.0375001339707524e-05,
+        5.979200068395585e-05
+      ],
+      "media_s": 6.19086014921777e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente OKC|2025",
+      "tarefa": "com ciclo, fonte Cason Wallace|OKC|2025",
+      "V": 19,
+      "E": 154,
+      "alcancados": 19,
+      "tempos_s": [
+        0.00019116600014967844,
+        0.00018900000577559695,
+        0.0001900830029626377,
+        0.00018791599723044783,
+        0.00019174999761162326
+      ],
+      "media_s": 0.00018998300074599684
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo OKC|2025",
+      "tarefa": "sem ciclo, fonte Cason Wallace|OKC|2025",
+      "V": 19,
+      "E": 82,
+      "alcancados": 19,
+      "tempos_s": [
+        7.316599658224732e-05,
+        7.329199434025213e-05,
+        7.200000254670158e-05,
+        7.212499622255564e-05,
+        7.345799531321973e-05
+      ],
+      "media_s": 7.280819700099528e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente ORL|2025",
+      "tarefa": "com ciclo, fonte Desmond Bane|ORL|2025",
+      "V": 16,
+      "E": 112,
+      "alcancados": 16,
+      "tempos_s": [
+        0.00011683299817377701,
+        0.00011270800314377993,
+        0.00011504199937917292,
+        0.00011191699741175398,
+        0.00011187500058440492
+      ],
+      "media_s": 0.00011367499973857775
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo ORL|2025",
+      "tarefa": "sem ciclo, fonte Desmond Bane|ORL|2025",
+      "V": 16,
+      "E": 55,
+      "alcancados": 13,
+      "tempos_s": [
+        3.9999998989515007e-05,
+        4.037500184495002e-05,
+        4.037500184495002e-05,
+        3.991599805885926e-05,
+        3.9500002458225936e-05
+      ],
+      "media_s": 4.003320063930005e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente PHI|2025",
+      "tarefa": "com ciclo, fonte VJ Edgecombe|PHI|2025",
+      "V": 18,
+      "E": 104,
+      "alcancados": 17,
+      "tempos_s": [
+        0.000127875006000977,
+        0.00012879200221505016,
+        0.00012945899652549997,
+        0.0001266250037588179,
+        0.00013129199942341074
+      ],
+      "media_s": 0.00012880860158475115
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo PHI|2025",
+      "tarefa": "sem ciclo, fonte VJ Edgecombe|PHI|2025",
+      "V": 18,
+      "E": 57,
+      "alcancados": 17,
+      "tempos_s": [
+        5.075000080978498e-05,
+        5.329200212145224e-05,
+        5.075000080978498e-05,
+        5.2292001782916486e-05,
+        4.9957998271565884e-05
+      ],
+      "media_s": 5.140840075910091e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente PHX|2025",
+      "tarefa": "com ciclo, fonte Collin Gillespie|PHX|2025",
+      "V": 19,
+      "E": 116,
+      "alcancados": 19,
+      "tempos_s": [
+        0.0001498749988968484,
+        0.00014999999984866008,
+        0.0001446249953005463,
+        0.00014674999692942947,
+        0.00014591700164601207
+      ],
+      "media_s": 0.00014743339852429926
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo PHX|2025",
+      "tarefa": "sem ciclo, fonte Collin Gillespie|PHX|2025",
+      "V": 19,
+      "E": 57,
+      "alcancados": 19,
+      "tempos_s": [
+        5.3333002142608166e-05,
+        5.262500053504482e-05,
+        5.30420002178289e-05,
+        5.458400119096041e-05,
+        5.3959003707859665e-05
+      ],
+      "media_s": 5.350860155886039e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente POR|2025",
+      "tarefa": "com ciclo, fonte Donovan Clingan|POR|2025",
+      "V": 18,
+      "E": 161,
+      "alcancados": 18,
+      "tempos_s": [
+        0.00019833400438074023,
+        0.00019549999706214294,
+        0.00019845899805659428,
+        0.00020616700203390792,
+        0.00019633299962151796
+      ],
+      "media_s": 0.00019895860023098067
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo POR|2025",
+      "tarefa": "sem ciclo, fonte Donovan Clingan|POR|2025",
+      "V": 18,
+      "E": 87,
+      "alcancados": 18,
+      "tempos_s": [
+        7.400000322377309e-05,
+        7.412500417558476e-05,
+        7.383399497484788e-05,
+        7.38340022508055e-05,
+        7.562500104540959e-05
+      ],
+      "media_s": 7.428360113408417e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente SAC|2025",
+      "tarefa": "com ciclo, fonte DeMar DeRozan|SAC|2025",
+      "V": 21,
+      "E": 133,
+      "alcancados": 20,
+      "tempos_s": [
+        0.00019462500495137647,
+        0.00018954199913423508,
+        0.0001830000037443824,
+        0.0001887500038719736,
+        0.00019062500359723344
+      ],
+      "media_s": 0.0001893084030598402
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo SAC|2025",
+      "tarefa": "sem ciclo, fonte DeMar DeRozan|SAC|2025",
+      "V": 21,
+      "E": 66,
+      "alcancados": 19,
+      "tempos_s": [
+        6.733400368830189e-05,
+        6.562499766005203e-05,
+        6.516700523206964e-05,
+        6.345899601001292e-05,
+        6.52919989079237e-05
+      ],
+      "media_s": 6.537540029967203e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente SAN|2025",
+      "tarefa": "com ciclo, fonte Stephon Castle|SAN|2025",
+      "V": 17,
+      "E": 109,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00012254100147401914,
+        0.00012158299796283245,
+        0.00012550000246847048,
+        0.0001217500030179508,
+        0.00012399999832268804
+      ],
+      "media_s": 0.0001230748006491922
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo SAN|2025",
+      "tarefa": "sem ciclo, fonte Stephon Castle|SAN|2025",
+      "V": 17,
+      "E": 54,
+      "alcancados": 17,
+      "tempos_s": [
+        4.237500252202153e-05,
+        4.208300379104912e-05,
+        4.179200186626986e-05,
+        4.166599683230743e-05,
+        4.179200186626986e-05
+      ],
+      "media_s": 4.194160137558356e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente TOR|2025",
+      "tarefa": "com ciclo, fonte Scottie Barnes|TOR|2025",
+      "V": 17,
+      "E": 121,
+      "alcancados": 17,
+      "tempos_s": [
+        0.00014566700701834634,
+        0.00014729199756402522,
+        0.00014925000141374767,
+        0.00014179100253386423,
+        0.00015125000209081918
+      ],
+      "media_s": 0.00014705000212416052
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo TOR|2025",
+      "tarefa": "sem ciclo, fonte Scottie Barnes|TOR|2025",
+      "V": 17,
+      "E": 60,
+      "alcancados": 17,
+      "tempos_s": [
+        4.729200009023771e-05,
+        4.854199505643919e-05,
+        4.9540998588781804e-05,
+        4.6749999455641955e-05,
+        4.679099947679788e-05
+      ],
+      "media_s": 4.7783198533579706e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente UTA|2025",
+      "tarefa": "com ciclo, fonte Ace Bailey|UTA|2025",
+      "V": 23,
+      "E": 145,
+      "alcancados": 23,
+      "tempos_s": [
+        0.0002593749959487468,
+        0.00022850000095786527,
+        0.0002275829974678345,
+        0.00022762499429518357,
+        0.0002197499998146668
+      ],
+      "media_s": 0.0002325665976968594
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo UTA|2025",
+      "tarefa": "sem ciclo, fonte Ace Bailey|UTA|2025",
+      "V": 23,
+      "E": 75,
+      "alcancados": 23,
+      "tempos_s": [
+        7.916700269561261e-05,
+        7.904099766165018e-05,
+        8.00420020823367e-05,
+        7.812499825377017e-05,
+        7.941700459923595e-05
+      ],
+      "media_s": 7.915840105852113e-05
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "componente WAS|2025",
+      "tarefa": "com ciclo, fonte Bub Carrington|WAS|2025",
+      "V": 24,
+      "E": 148,
+      "alcancados": 23,
+      "tempos_s": [
+        0.00024654200387885794,
+        0.00024883399601094425,
+        0.00023662500461796299,
+        0.0002455830035614781,
+        0.0002422500037937425
+      ],
+      "media_s": 0.00024396680237259716
+    },
+    {
+      "parte": 4,
+      "algoritmo": "Bellman-Ford",
+      "grafo": "recorte_sem_ciclo WAS|2025",
+      "tarefa": "sem ciclo, fonte Bub Carrington|WAS|2025",
+      "V": 24,
+      "E": 79,
+      "alcancados": 23,
+      "tempos_s": [
+        8.545900345779955e-05,
+        8.408400026382878e-05,
+        8.541699935449287e-05,
+        8.533300569979474e-05,
+        8.520799747202545e-05
+      ],
+      "media_s": 8.510020124958828e-05
+    }
+  ],
+  "escalabilidade": [
+    {
+      "amostra": 0.1,
+      "componentes": 18,
+      "grafo": "completo",
+      "algoritmo": "BFS",
+      "fonte": "INICIO",
+      "V": 352,
+      "E": 2069,
+      "alcancados": 342,
+      "tempos_s": [
+        8.770799468038604e-05,
+        7.850000110920519e-05,
+        7.441700290655717e-05,
+        7.166599971242249e-05,
+        7.245899905683473e-05
+      ],
+      "media_s": 7.694999949308113e-05
+    },
+    {
+      "amostra": 0.1,
+      "componentes": 18,
+      "grafo": "completo",
+      "algoritmo": "DFS",
+      "fonte": "INICIO",
+      "V": 352,
+      "E": 2069,
+      "alcancados": 342,
+      "tempos_s": [
+        0.00044112500472692773,
+        0.00042337500053690746,
+        0.0003845409955829382,
+        0.00038375000440282747,
+        0.00043066699436167255
+      ],
+      "media_s": 0.0004126915999222547
+    },
+    {
+      "amostra": 0.1,
+      "componentes": 18,
+      "grafo": "completo",
+      "algoritmo": "Bellman-Ford",
+      "fonte": "INICIO",
+      "V": 352,
+      "E": 2069,
+      "alcancados": 342,
+      "tempos_s": [
+        0.053437166003277525,
+        0.05311804100347217,
+        0.054517292002856266,
+        0.054450582996651065,
+        0.054344874995877035
+      ],
+      "media_s": 0.05397359140042681
+    },
+    {
+      "amostra": 0.1,
+      "componentes": 18,
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "BFS",
+      "fonte": "INICIO",
+      "V": 352,
+      "E": 1062,
+      "alcancados": 316,
+      "tempos_s": [
+        7.462500070687383e-05,
+        6.150000263005495e-05,
+        5.1707997045014054e-05,
+        8.316599996760488e-05,
+        6.32920055068098e-05
+      ],
+      "media_s": 6.68582011712715e-05
+    },
+    {
+      "amostra": 0.1,
+      "componentes": 18,
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "DFS",
+      "fonte": "INICIO",
+      "V": 352,
+      "E": 1062,
+      "alcancados": 316,
+      "tempos_s": [
+        0.00021799999376526102,
+        0.00021183400531299412,
+        0.00020716699509648606,
+        0.00020575000235112384,
+        0.0002041669940808788
+      ],
+      "media_s": 0.00020938359812134878
+    },
+    {
+      "amostra": 0.1,
+      "componentes": 18,
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "Dijkstra",
+      "fonte": "INICIO",
+      "V": 352,
+      "E": 1062,
+      "alcancados": 316,
+      "tempos_s": [
+        0.00028779199783457443,
+        0.0002670839967322536,
+        0.0002646670036483556,
+        0.00025833400286501274,
+        0.0002594170000520535
+      ],
+      "media_s": 0.00026745880022645
+    },
+    {
+      "amostra": 0.1,
+      "componentes": 18,
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "Bellman-Ford",
+      "fonte": "INICIO",
+      "V": 352,
+      "E": 1062,
+      "alcancados": 316,
+      "tempos_s": [
+        0.017547667004691903,
+        0.019327082998643164,
+        0.017658125005254988,
+        0.018966083000123035,
+        0.018193500000052154
+      ],
+      "media_s": 0.01833849160175305
+    },
+    {
+      "amostra": 0.5,
+      "componentes": 90,
+      "grafo": "completo",
+      "algoritmo": "BFS",
+      "fonte": "INICIO",
+      "V": 1743,
+      "E": 11030,
+      "alcancados": 1709,
+      "tempos_s": [
+        0.0004510409999056719,
+        0.00042374999611638486,
+        0.0004128340005991049,
+        0.00040945900400402024,
+        0.0004083749954588711
+      ],
+      "media_s": 0.00042109179921681064
+    },
+    {
+      "amostra": 0.5,
+      "componentes": 90,
+      "grafo": "completo",
+      "algoritmo": "DFS",
+      "fonte": "INICIO",
+      "V": 1743,
+      "E": 11030,
+      "alcancados": 1709,
+      "tempos_s": [
+        0.0024460420027025975,
+        0.002346125002077315,
+        0.00235416700161295,
+        0.0022437499937950633,
+        0.0022180000014486723
+      ],
+      "media_s": 0.0023216168003273195
+    },
+    {
+      "amostra": 0.5,
+      "componentes": 90,
+      "grafo": "completo",
+      "algoritmo": "Bellman-Ford",
+      "fonte": "INICIO",
+      "V": 1743,
+      "E": 11030,
+      "alcancados": 1709,
+      "tempos_s": [
+        1.4805556669962243,
+        1.462780207999458,
+        1.4643921250026324,
+        1.459819083000184,
+        1.465920875001757
+      ],
+      "media_s": 1.4666935916000512
+    },
+    {
+      "amostra": 0.5,
+      "componentes": 90,
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "BFS",
+      "fonte": "INICIO",
+      "V": 1743,
+      "E": 5724,
+      "alcancados": 1653,
+      "tempos_s": [
+        0.00038095799391157925,
+        0.00029908400028944016,
+        0.0002989589993376285,
+        0.00033516700204927474,
+        0.0002994169990415685
+      ],
+      "media_s": 0.00032271699892589823
+    },
+    {
+      "amostra": 0.5,
+      "componentes": 90,
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "DFS",
+      "fonte": "INICIO",
+      "V": 1743,
+      "E": 5724,
+      "alcancados": 1653,
+      "tempos_s": [
+        0.0012889159988844767,
+        0.001302291995671112,
+        0.0012720829981844872,
+        0.00127983299898915,
+        0.004749540996272117
+      ],
+      "media_s": 0.0019785329976002687
+    },
+    {
+      "amostra": 0.5,
+      "componentes": 90,
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "Dijkstra",
+      "fonte": "INICIO",
+      "V": 1743,
+      "E": 5724,
+      "alcancados": 1653,
+      "tempos_s": [
+        0.0016715410019969568,
+        0.0016751660004956648,
+        0.0016334590036422014,
+        0.0016427500013378449,
+        0.0017048330046236515
+      ],
+      "media_s": 0.001665549802419264
+    },
+    {
+      "amostra": 0.5,
+      "componentes": 90,
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "Bellman-Ford",
+      "fonte": "INICIO",
+      "V": 1743,
+      "E": 5724,
+      "alcancados": 1653,
+      "tempos_s": [
+        0.4749727089947555,
+        0.4735735419963021,
+        0.47500429100182373,
+        0.475079583004117,
+        0.47605270799977006
+      ],
+      "media_s": 0.4749365665993537
+    },
+    {
+      "amostra": 1.0,
+      "componentes": 180,
+      "grafo": "completo",
+      "algoritmo": "BFS",
+      "fonte": "INICIO",
+      "V": 3508,
+      "E": 21852,
+      "alcancados": 3438,
+      "tempos_s": [
+        0.0009073330002138391,
+        0.0009125419965130277,
+        0.0008312080026371405,
+        0.0008221669995691627,
+        0.0008234999986598268
+      ],
+      "media_s": 0.0008593499995185993
+    },
+    {
+      "amostra": 1.0,
+      "componentes": 180,
+      "grafo": "completo",
+      "algoritmo": "DFS",
+      "fonte": "INICIO",
+      "V": 3508,
+      "E": 21852,
+      "alcancados": 3438,
+      "tempos_s": [
+        0.008559959002013784,
+        0.004481707997911144,
+        0.004515790998993907,
+        0.004421792000357527,
+        0.0044653329969150946
+      ],
+      "media_s": 0.005288916599238291
+    },
+    {
+      "amostra": 1.0,
+      "componentes": 180,
+      "grafo": "completo",
+      "algoritmo": "Bellman-Ford",
+      "fonte": "INICIO",
+      "V": 3508,
+      "E": 21852,
+      "alcancados": 3438,
+      "tempos_s": [
+        5.945048582994787,
+        5.954505458998028,
+        5.953892792000261,
+        5.999747750000097,
+        6.014708333001181
+      ],
+      "media_s": 5.973580583398871
+    },
+    {
+      "amostra": 1.0,
+      "componentes": 180,
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "BFS",
+      "fonte": "INICIO",
+      "V": 3508,
+      "E": 11341,
+      "alcancados": 3308,
+      "tempos_s": [
+        0.0007358750008279458,
+        0.000677415999234654,
+        0.0006597499959752895,
+        0.0006584580041817389,
+        0.000650499998300802
+      ],
+      "media_s": 0.000676399799704086
+    },
+    {
+      "amostra": 1.0,
+      "componentes": 180,
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "DFS",
+      "fonte": "INICIO",
+      "V": 3508,
+      "E": 11341,
+      "alcancados": 3308,
+      "tempos_s": [
+        0.0026514579949434847,
+        0.0025650829993537627,
+        0.0025826659984886646,
+        0.002652584000315983,
+        0.0026212080047116615
+      ],
+      "media_s": 0.002614599799562711
+    },
+    {
+      "amostra": 1.0,
+      "componentes": 180,
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "Dijkstra",
+      "fonte": "INICIO",
+      "V": 3508,
+      "E": 11341,
+      "alcancados": 3308,
+      "tempos_s": [
+        0.0035888330021407455,
+        0.0036393339978531003,
+        0.0035689170035766438,
+        0.0036091250003664754,
+        0.0036795420019188896
+      ],
+      "media_s": 0.003617150201171171
+    },
+    {
+      "amostra": 1.0,
+      "componentes": 180,
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "Bellman-Ford",
+      "fonte": "INICIO",
+      "V": 3508,
+      "E": 11341,
+      "alcancados": 3308,
+      "tempos_s": [
+        1.9769647079956485,
+        1.969478250000975,
+        1.9775312499987194,
+        1.976249833998736,
+        1.9865799580002204
+      ],
+      "media_s": 1.9773607999988598
+    }
+  ],
+  "complexidade": [
+    {
+      "grafo": "completo",
+      "algoritmo": "BFS",
+      "amostra": 0.1,
+      "V": 352,
+      "E": 2069,
+      "complexidade": "O(V+E)",
+      "valor_teorico": 2421,
+      "tempo_medio_s": 7.694999949308113e-05,
+      "razao_tempo_valor": 3.1784386407716284e-08,
+      "crescimento_tempo": 1.0,
+      "crescimento_teorico": 1.0
+    },
+    {
+      "grafo": "completo",
+      "algoritmo": "DFS",
+      "amostra": 0.1,
+      "V": 352,
+      "E": 2069,
+      "complexidade": "O(V+E)",
+      "valor_teorico": 2421,
+      "tempo_medio_s": 0.0004126915999222547,
+      "razao_tempo_valor": 1.7046327960440096e-07,
+      "crescimento_tempo": 1.0,
+      "crescimento_teorico": 1.0
+    },
+    {
+      "grafo": "completo",
+      "algoritmo": "Bellman-Ford",
+      "amostra": 0.1,
+      "V": 352,
+      "E": 2069,
+      "complexidade": "O(V·E)",
+      "valor_teorico": 728288,
+      "tempo_medio_s": 0.05397359140042681,
+      "razao_tempo_valor": 7.41102302940963e-08,
+      "crescimento_tempo": 1.0,
+      "crescimento_teorico": 1.0
+    },
+    {
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "BFS",
+      "amostra": 0.1,
+      "V": 352,
+      "E": 1062,
+      "complexidade": "O(V+E)",
+      "valor_teorico": 1414,
+      "tempo_medio_s": 6.68582011712715e-05,
+      "razao_tempo_valor": 4.728302770245509e-08,
+      "crescimento_tempo": 1.0,
+      "crescimento_teorico": 1.0
+    },
+    {
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "DFS",
+      "amostra": 0.1,
+      "V": 352,
+      "E": 1062,
+      "complexidade": "O(V+E)",
+      "valor_teorico": 1414,
+      "tempo_medio_s": 0.00020938359812134878,
+      "razao_tempo_valor": 1.4807892370675304e-07,
+      "crescimento_tempo": 1.0,
+      "crescimento_teorico": 1.0
+    },
+    {
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "Dijkstra",
+      "amostra": 0.1,
+      "V": 352,
+      "E": 1062,
+      "complexidade": "O((V+E)·log V)",
+      "valor_teorico": 11961.636308753137,
+      "tempo_medio_s": 0.00026745880022645,
+      "razao_tempo_valor": 2.2359716791483814e-08,
+      "crescimento_tempo": 1.0,
+      "crescimento_teorico": 1.0
+    },
+    {
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "Bellman-Ford",
+      "amostra": 0.1,
+      "V": 352,
+      "E": 1062,
+      "complexidade": "O(V·E)",
+      "valor_teorico": 373824,
+      "tempo_medio_s": 0.01833849160175305,
+      "razao_tempo_valor": 4.9056485409585923e-08,
+      "crescimento_tempo": 1.0,
+      "crescimento_teorico": 1.0
+    },
+    {
+      "grafo": "completo",
+      "algoritmo": "BFS",
+      "amostra": 0.5,
+      "V": 1743,
+      "E": 11030,
+      "complexidade": "O(V+E)",
+      "valor_teorico": 12773,
+      "tempo_medio_s": 0.00042109179921681064,
+      "razao_tempo_valor": 3.2967337290911346e-08,
+      "crescimento_tempo": 5.472278128535565,
+      "crescimento_teorico": 5.275919041718298
+    },
+    {
+      "grafo": "completo",
+      "algoritmo": "DFS",
+      "amostra": 0.5,
+      "V": 1743,
+      "E": 11030,
+      "complexidade": "O(V+E)",
+      "valor_teorico": 12773,
+      "tempo_medio_s": 0.0023216168003273195,
+      "razao_tempo_valor": 1.8175971191789865e-07,
+      "crescimento_tempo": 5.625548958991846,
+      "crescimento_teorico": 5.275919041718298
+    },
+    {
+      "grafo": "completo",
+      "algoritmo": "Bellman-Ford",
+      "amostra": 0.5,
+      "V": 1743,
+      "E": 11030,
+      "complexidade": "O(V·E)",
+      "valor_teorico": 19225290,
+      "tempo_medio_s": 1.4666935916000512,
+      "razao_tempo_valor": 7.628980325394578e-08,
+      "crescimento_tempo": 27.174281969097446,
+      "crescimento_teorico": 26.397922250538247
+    },
+    {
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "BFS",
+      "amostra": 0.5,
+      "V": 1743,
+      "E": 5724,
+      "complexidade": "O(V+E)",
+      "valor_teorico": 7467,
+      "tempo_medio_s": 0.00032271699892589823,
+      "razao_tempo_valor": 4.321909721787843e-08,
+      "crescimento_tempo": 4.826887252009518,
+      "crescimento_teorico": 5.280763790664781
+    },
+    {
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "DFS",
+      "amostra": 0.5,
+      "V": 1743,
+      "E": 5724,
+      "complexidade": "O(V+E)",
+      "valor_teorico": 7467,
+      "tempo_medio_s": 0.0019785329976002687,
+      "razao_tempo_valor": 2.649702688630332e-07,
+      "crescimento_tempo": 9.449321796703508,
+      "crescimento_teorico": 5.280763790664781
+    },
+    {
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "Dijkstra",
+      "amostra": 0.5,
+      "V": 1743,
+      "E": 5724,
+      "complexidade": "O((V+E)·log V)",
+      "valor_teorico": 80399.85362975649,
+      "tempo_medio_s": 0.001665549802419264,
+      "razao_tempo_valor": 2.0715831276126025e-08,
+      "crescimento_tempo": 6.227313518975966,
+      "crescimento_teorico": 6.721476188915933
+    },
+    {
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "Bellman-Ford",
+      "amostra": 0.5,
+      "V": 1743,
+      "E": 5724,
+      "complexidade": "O(V·E)",
+      "valor_teorico": 9976932,
+      "tempo_medio_s": 0.4749365665993537,
+      "razao_tempo_valor": 4.7603468340703707e-08,
+      "crescimento_tempo": 25.89834414483428,
+      "crescimento_teorico": 26.688848228043142
+    },
+    {
+      "grafo": "completo",
+      "algoritmo": "BFS",
+      "amostra": 1.0,
+      "V": 3508,
+      "E": 21852,
+      "complexidade": "O(V+E)",
+      "valor_teorico": 25360,
+      "tempo_medio_s": 0.0008593499995185993,
+      "razao_tempo_valor": 3.3886040990481043e-08,
+      "crescimento_tempo": 11.167641392848441,
+      "crescimento_teorico": 10.475010326311441
+    },
+    {
+      "grafo": "completo",
+      "algoritmo": "DFS",
+      "amostra": 1.0,
+      "V": 3508,
+      "E": 21852,
+      "complexidade": "O(V+E)",
+      "valor_teorico": 25360,
+      "tempo_medio_s": 0.005288916599238291,
+      "razao_tempo_valor": 2.085534936608159e-07,
+      "crescimento_tempo": 12.815663319133826,
+      "crescimento_teorico": 10.475010326311441
+    },
+    {
+      "grafo": "completo",
+      "algoritmo": "Bellman-Ford",
+      "amostra": 1.0,
+      "V": 3508,
+      "E": 21852,
+      "complexidade": "O(V·E)",
+      "valor_teorico": 76656816,
+      "tempo_medio_s": 5.973580583398871,
+      "razao_tempo_valor": 7.792628098979314e-08,
+      "crescimento_tempo": 110.67598854190075,
+      "crescimento_teorico": 105.2561843666242
+    },
+    {
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "BFS",
+      "amostra": 1.0,
+      "V": 3508,
+      "E": 11341,
+      "complexidade": "O(V+E)",
+      "valor_teorico": 14849,
+      "tempo_medio_s": 0.000676399799704086,
+      "razao_tempo_valor": 4.555187552724668e-08,
+      "crescimento_tempo": 10.116930875411143,
+      "crescimento_teorico": 10.501414427157002
+    },
+    {
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "DFS",
+      "amostra": 1.0,
+      "V": 3508,
+      "E": 11341,
+      "complexidade": "O(V+E)",
+      "valor_teorico": 14849,
+      "tempo_medio_s": 0.002614599799562711,
+      "razao_tempo_valor": 1.760791837539707e-07,
+      "crescimento_tempo": 12.487128041650204,
+      "crescimento_teorico": 10.501414427157002
+    },
+    {
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "Dijkstra",
+      "amostra": 1.0,
+      "V": 3508,
+      "E": 11341,
+      "complexidade": "O((V+E)·log V)",
+      "valor_teorico": 174868.25409877187,
+      "tempo_medio_s": 0.003617150201171171,
+      "razao_tempo_valor": 2.0685002088075257e-08,
+      "crescimento_tempo": 13.524139785674016,
+      "crescimento_teorico": 14.619091367191038
+    },
+    {
+      "grafo": "recorte_sem_ciclo",
+      "algoritmo": "Bellman-Ford",
+      "amostra": 1.0,
+      "V": 3508,
+      "E": 11341,
+      "complexidade": "O(V·E)",
+      "valor_teorico": 39784228,
+      "tempo_medio_s": 1.9773607999988598,
+      "razao_tempo_valor": 4.970212819006718e-08,
+      "crescimento_tempo": 107.82570578541127,
+      "crescimento_teorico": 106.42502354048965
+    }
+  ]
+}

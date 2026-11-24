@@ -24,3 +24,32 @@ stages:
     - rotacao
     outs:
     - data/dataset_parte2/rotacao
+  # [IA] Claude – casos, benchmark e gráficos dos algoritmos do grupo no grafo de rotação
+  casos_rotacao:
+    cmd: python -m src.parte2.rotacao_casos && python -m src.parte2.rotacao_desempenho && python -m src.parte2.rotacao_graficos
+    deps:
+    - data/dataset_parte2/rotacao
+    - src/graphs/algorithms.py
+    - src/graphs/graph.py
+    - src/parte2/rotacao_casos.py
+    - src/parte2/rotacao_desempenho.py
+    - src/parte2/rotacao_graficos.py
+    outs:
+    - out/parte2/bfs_dfs.json:
+        cache: false
+    - out/parte2/bellman_ford.json:
+        cache: false
+    - out/parte2/dijkstra.json:
+        cache: false
+    - out/parte2/parte2_report.json:
+        cache: false
+    - out/parte2/complexidade.csv:
+        cache: false
+    - out/parte2/graficos/tempo_por_algoritmo.png:
+        cache: false
+    - out/parte2/graficos/tempo_por_tamanho.png:
+        cache: false
+    - out/parte2/graficos/bfs_x_dfs.png:
+        cache: false
+    - out/parte2/graficos/caminhos_dijkstra.png:
+        cache: false

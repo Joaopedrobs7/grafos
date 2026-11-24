@@ -1,0 +1,688 @@
+{
+  "grafo": "rotacao",
+  "fontes": [
+    {
+      "temporada": 2020,
+      "time": "HOU",
+      "fonte": "Jae'Sean Tate|HOU|2020",
+      "minutos_fonte": 1068.28,
+      "nos_componente": 29,
+      "arcos_componente": 162,
+      "BFS": {
+        "ordem": [
+          "Jae'Sean Tate|HOU|2020",
+          "Anthony Lamb|HOU|2020",
+          "Armoni Brooks|HOU|2020",
+          "Avery Bradley|HOU|2020",
+          "Ben McLemore|HOU|2020",
+          "Christian Wood|HOU|2020",
+          "D.J. Wilson|HOU|2020",
+          "DaQuan Jeffries|HOU|2020",
+          "Danuel House Jr.|HOU|2020",
+          "David Nwaba|HOU|2020",
+          "DeMarcus Cousins|HOU|2020",
+          "Eric Gordon|HOU|2020",
+          "John Wall|HOU|2020",
+          "Justin Patton|HOU|2020",
+          "Kelly Olynyk|HOU|2020",
+          "Kenyon Martin Jr.|HOU|2020",
+          "Kevin Porter Jr.|HOU|2020",
+          "P.J. Tucker|HOU|2020",
+          "Rodions Kurucs|HOU|2020",
+          "Sterling Brown|HOU|2020",
+          "Mason Jones|HOU|2020",
+          "D.J. Augustin|HOU|2020",
+          "Victor Oladipo|HOU|2020",
+          "Bruno Caboclo|HOU|2020",
+          "Ray Spalding|HOU|2020",
+          "James Harden|HOU|2020",
+          "Cameron Oliver|HOU|2020",
+          "Khyri Thomas|HOU|2020"
+        ],
+        "camadas": [
+          [
+            "Jae'Sean Tate|HOU|2020"
+          ],
+          [
+            "Anthony Lamb|HOU|2020",
+            "Armoni Brooks|HOU|2020",
+            "Avery Bradley|HOU|2020",
+            "Ben McLemore|HOU|2020",
+            "Christian Wood|HOU|2020",
+            "D.J. Wilson|HOU|2020",
+            "DaQuan Jeffries|HOU|2020",
+            "Danuel House Jr.|HOU|2020",
+            "David Nwaba|HOU|2020",
+            "DeMarcus Cousins|HOU|2020",
+            "Eric Gordon|HOU|2020",
+            "John Wall|HOU|2020",
+            "Justin Patton|HOU|2020",
+            "Kelly Olynyk|HOU|2020",
+            "Kenyon Martin Jr.|HOU|2020",
+            "Kevin Porter Jr.|HOU|2020",
+            "P.J. Tucker|HOU|2020",
+            "Rodions Kurucs|HOU|2020",
+            "Sterling Brown|HOU|2020"
+          ],
+          [
+            "Mason Jones|HOU|2020",
+            "D.J. Augustin|HOU|2020",
+            "Victor Oladipo|HOU|2020",
+            "Bruno Caboclo|HOU|2020",
+            "Ray Spalding|HOU|2020",
+            "James Harden|HOU|2020",
+            "Cameron Oliver|HOU|2020"
+          ],
+          [
+            "Khyri Thomas|HOU|2020"
+          ]
+        ]
+      },
+      "DFS": {
+        "ordem": [
+          "Jae'Sean Tate|HOU|2020",
+          "Anthony Lamb|HOU|2020",
+          "DaQuan Jeffries|HOU|2020",
+          "Armoni Brooks|HOU|2020",
+          "Avery Bradley|HOU|2020",
+          "John Wall|HOU|2020",
+          "Ben McLemore|HOU|2020",
+          "Danuel House Jr.|HOU|2020",
+          "D.J. Augustin|HOU|2020",
+          "Khyri Thomas|HOU|2020",
+          "Kenyon Martin Jr.|HOU|2020",
+          "Christian Wood|HOU|2020",
+          "D.J. Wilson|HOU|2020",
+          "Kelly Olynyk|HOU|2020",
+          "Cameron Oliver|HOU|2020",
+          "DeMarcus Cousins|HOU|2020",
+          "Bruno Caboclo|HOU|2020",
+          "P.J. Tucker|HOU|2020",
+          "Justin Patton|HOU|2020",
+          "Sterling Brown|HOU|2020",
+          "David Nwaba|HOU|2020",
+          "Eric Gordon|HOU|2020",
+          "James Harden|HOU|2020",
+          "Kevin Porter Jr.|HOU|2020",
+          "Mason Jones|HOU|2020",
+          "Victor Oladipo|HOU|2020",
+          "Ray Spalding|HOU|2020",
+          "Rodions Kurucs|HOU|2020"
+        ],
+        "profundidades": [
+          [
+            "Jae'Sean Tate|HOU|2020"
+          ],
+          [
+            "Anthony Lamb|HOU|2020",
+            "Rodions Kurucs|HOU|2020"
+          ],
+          [
+            "DaQuan Jeffries|HOU|2020"
+          ],
+          [
+            "Armoni Brooks|HOU|2020"
+          ],
+          [
+            "Avery Bradley|HOU|2020"
+          ],
+          [
+            "John Wall|HOU|2020"
+          ],
+          [
+            "Ben McLemore|HOU|2020"
+          ],
+          [
+            "Danuel House Jr.|HOU|2020"
+          ],
+          [
+            "D.J. Augustin|HOU|2020"
+          ],
+          [
+            "Khyri Thomas|HOU|2020"
+          ],
+          [
+            "Kenyon Martin Jr.|HOU|2020"
+          ],
+          [
+            "Christian Wood|HOU|2020"
+          ],
+          [
+            "D.J. Wilson|HOU|2020",
+            "DeMarcus Cousins|HOU|2020"
+          ],
+          [
+            "Kelly Olynyk|HOU|2020",
+            "Bruno Caboclo|HOU|2020",
+            "P.J. Tucker|HOU|2020",
+            "Ray Spalding|HOU|2020"
+          ],
+          [
+            "Cameron Oliver|HOU|2020",
+            "Justin Patton|HOU|2020"
+          ],
+          [
+            "Sterling Brown|HOU|2020"
+          ],
+          [
+            "David Nwaba|HOU|2020"
+          ],
+          [
+            "Eric Gordon|HOU|2020"
+          ],
+          [
+            "James Harden|HOU|2020",
+            "Kevin Porter Jr.|HOU|2020"
+          ],
+          [
+            "Mason Jones|HOU|2020"
+          ],
+          [
+            "Victor Oladipo|HOU|2020"
+          ]
+        ],
+        "classes": {
+          "arvore": 27,
+          "retorno": 77,
+          "avanco": 57,
+          "cruzamento": 0
+        },
+        "tem_ciclo": true,
+        "n_arcos_retorno": 77,
+        "arcos_retorno": [
+          {
+            "arco": [
+              "DaQuan Jeffries|HOU|2020",
+              "Anthony Lamb|HOU|2020"
+            ],
+            "ciclo": [
+              "Anthony Lamb|HOU|2020",
+              "DaQuan Jeffries|HOU|2020",
+              "Anthony Lamb|HOU|2020"
+            ]
+          },
+          {
+            "arco": [
+              "Avery Bradley|HOU|2020",
+              "Armoni Brooks|HOU|2020"
+            ],
+            "ciclo": [
+              "Armoni Brooks|HOU|2020",
+              "Avery Bradley|HOU|2020",
+              "Armoni Brooks|HOU|2020"
+            ]
+          },
+          {
+            "arco": [
+              "Avery Bradley|HOU|2020",
+              "DaQuan Jeffries|HOU|2020"
+            ],
+            "ciclo": [
+              "DaQuan Jeffries|HOU|2020",
+              "Armoni Brooks|HOU|2020",
+              "Avery Bradley|HOU|2020",
+              "DaQuan Jeffries|HOU|2020"
+            ]
+          },
+          {
+            "arco": [
+              "Avery Bradley|HOU|2020",
+              "Jae'Sean Tate|HOU|2020"
+            ],
+            "ciclo": [
+              "Jae'Sean Tate|HOU|2020",
+              "Anthony Lamb|HOU|2020",
+              "DaQuan Jeffries|HOU|2020",
+              "Armoni Brooks|HOU|2020",
+              "Avery Bradley|HOU|2020",
+              "Jae'Sean Tate|HOU|2020"
+            ]
+          },
+          {
+            "arco": [
+              "John Wall|HOU|2020",
+              "Avery Bradley|HOU|2020"
+            ],
+            "ciclo": [
+              "Avery Bradley|HOU|2020",
+              "John Wall|HOU|2020",
+              "Avery Bradley|HOU|2020"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "temporada": 2022,
+      "time": "MIL",
+      "fonte": "Brook Lopez|MIL|2022",
+      "minutos_fonte": 1364.83,
+      "nos_componente": 19,
+      "arcos_componente": 177,
+      "BFS": {
+        "ordem": [
+          "Brook Lopez|MIL|2022",
+          "AJ Green|MIL|2022",
+          "Bobby Portis|MIL|2022",
+          "Giannis Antetokounmpo|MIL|2022",
+          "Grayson Allen|MIL|2022",
+          "Jae Crowder|MIL|2022",
+          "Jevon Carter|MIL|2022",
+          "Joe Ingles|MIL|2022",
+          "Jordan Nwora|MIL|2022",
+          "Jrue Holiday|MIL|2022",
+          "Khris Middleton|MIL|2022",
+          "MarJon Beauchamp|MIL|2022",
+          "Meyers Leonard|MIL|2022",
+          "Pat Connaughton|MIL|2022",
+          "Sandro Mamukelashvili|MIL|2022",
+          "Serge Ibaka|MIL|2022",
+          "Thanasis Antetokounmpo|MIL|2022",
+          "Wesley Matthews|MIL|2022",
+          "George Hill|MIL|2022"
+        ],
+        "camadas": [
+          [
+            "Brook Lopez|MIL|2022"
+          ],
+          [
+            "AJ Green|MIL|2022",
+            "Bobby Portis|MIL|2022",
+            "Giannis Antetokounmpo|MIL|2022",
+            "Grayson Allen|MIL|2022",
+            "Jae Crowder|MIL|2022",
+            "Jevon Carter|MIL|2022",
+            "Joe Ingles|MIL|2022",
+            "Jordan Nwora|MIL|2022",
+            "Jrue Holiday|MIL|2022",
+            "Khris Middleton|MIL|2022",
+            "MarJon Beauchamp|MIL|2022",
+            "Meyers Leonard|MIL|2022",
+            "Pat Connaughton|MIL|2022",
+            "Sandro Mamukelashvili|MIL|2022",
+            "Serge Ibaka|MIL|2022",
+            "Thanasis Antetokounmpo|MIL|2022",
+            "Wesley Matthews|MIL|2022"
+          ],
+          [
+            "George Hill|MIL|2022"
+          ]
+        ]
+      },
+      "DFS": {
+        "ordem": [
+          "Brook Lopez|MIL|2022",
+          "AJ Green|MIL|2022",
+          "Bobby Portis|MIL|2022",
+          "George Hill|MIL|2022",
+          "Giannis Antetokounmpo|MIL|2022",
+          "Jae Crowder|MIL|2022",
+          "Grayson Allen|MIL|2022",
+          "Jevon Carter|MIL|2022",
+          "Joe Ingles|MIL|2022",
+          "Jordan Nwora|MIL|2022",
+          "Jrue Holiday|MIL|2022",
+          "Khris Middleton|MIL|2022",
+          "Pat Connaughton|MIL|2022",
+          "MarJon Beauchamp|MIL|2022",
+          "Wesley Matthews|MIL|2022",
+          "Meyers Leonard|MIL|2022",
+          "Thanasis Antetokounmpo|MIL|2022",
+          "Sandro Mamukelashvili|MIL|2022",
+          "Serge Ibaka|MIL|2022"
+        ],
+        "profundidades": [
+          [
+            "Brook Lopez|MIL|2022"
+          ],
+          [
+            "AJ Green|MIL|2022"
+          ],
+          [
+            "Bobby Portis|MIL|2022"
+          ],
+          [
+            "George Hill|MIL|2022",
+            "Serge Ibaka|MIL|2022"
+          ],
+          [
+            "Giannis Antetokounmpo|MIL|2022"
+          ],
+          [
+            "Jae Crowder|MIL|2022"
+          ],
+          [
+            "Grayson Allen|MIL|2022"
+          ],
+          [
+            "Jevon Carter|MIL|2022"
+          ],
+          [
+            "Joe Ingles|MIL|2022"
+          ],
+          [
+            "Jordan Nwora|MIL|2022"
+          ],
+          [
+            "Jrue Holiday|MIL|2022"
+          ],
+          [
+            "Khris Middleton|MIL|2022"
+          ],
+          [
+            "Pat Connaughton|MIL|2022"
+          ],
+          [
+            "MarJon Beauchamp|MIL|2022",
+            "Sandro Mamukelashvili|MIL|2022"
+          ],
+          [
+            "Wesley Matthews|MIL|2022"
+          ],
+          [
+            "Meyers Leonard|MIL|2022"
+          ],
+          [
+            "Thanasis Antetokounmpo|MIL|2022"
+          ]
+        ],
+        "classes": {
+          "arvore": 18,
+          "retorno": 76,
+          "avanco": 80,
+          "cruzamento": 3
+        },
+        "tem_ciclo": true,
+        "n_arcos_retorno": 76,
+        "arcos_retorno": [
+          {
+            "arco": [
+              "Bobby Portis|MIL|2022",
+              "AJ Green|MIL|2022"
+            ],
+            "ciclo": [
+              "AJ Green|MIL|2022",
+              "Bobby Portis|MIL|2022",
+              "AJ Green|MIL|2022"
+            ]
+          },
+          {
+            "arco": [
+              "Bobby Portis|MIL|2022",
+              "Brook Lopez|MIL|2022"
+            ],
+            "ciclo": [
+              "Brook Lopez|MIL|2022",
+              "AJ Green|MIL|2022",
+              "Bobby Portis|MIL|2022",
+              "Brook Lopez|MIL|2022"
+            ]
+          },
+          {
+            "arco": [
+              "George Hill|MIL|2022",
+              "Brook Lopez|MIL|2022"
+            ],
+            "ciclo": [
+              "Brook Lopez|MIL|2022",
+              "AJ Green|MIL|2022",
+              "Bobby Portis|MIL|2022",
+              "George Hill|MIL|2022",
+              "Brook Lopez|MIL|2022"
+            ]
+          },
+          {
+            "arco": [
+              "Giannis Antetokounmpo|MIL|2022",
+              "AJ Green|MIL|2022"
+            ],
+            "ciclo": [
+              "AJ Green|MIL|2022",
+              "Bobby Portis|MIL|2022",
+              "George Hill|MIL|2022",
+              "Giannis Antetokounmpo|MIL|2022",
+              "AJ Green|MIL|2022"
+            ]
+          },
+          {
+            "arco": [
+              "Giannis Antetokounmpo|MIL|2022",
+              "Bobby Portis|MIL|2022"
+            ],
+            "ciclo": [
+              "Bobby Portis|MIL|2022",
+              "George Hill|MIL|2022",
+              "Giannis Antetokounmpo|MIL|2022",
+              "Bobby Portis|MIL|2022"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "temporada": 2025,
+      "time": "CHI",
+      "fonte": "Matas Buzelis|CHI|2025",
+      "minutos_fonte": 1230.76,
+      "nos_componente": 26,
+      "arcos_componente": 181,
+      "BFS": {
+        "ordem": [
+          "Matas Buzelis|CHI|2025",
+          "Anfernee Simons|CHI|2025",
+          "Ayo Dosunmu|CHI|2025",
+          "Coby White|CHI|2025",
+          "Collin Sexton|CHI|2025",
+          "Dalen Terry|CHI|2025",
+          "Guerschon Yabusele|CHI|2025",
+          "Isaac Okoro|CHI|2025",
+          "Jalen Smith|CHI|2025",
+          "Josh Giddey|CHI|2025",
+          "Julian Phillips|CHI|2025",
+          "Kevin Huerter|CHI|2025",
+          "Lachlan Olbrich|CHI|2025",
+          "Leonard Miller|CHI|2025",
+          "Nikola Vucevic|CHI|2025",
+          "Patrick Williams|CHI|2025",
+          "Rob Dillingham|CHI|2025",
+          "Tre Jones|CHI|2025",
+          "Yuki Kawamura|CHI|2025",
+          "Jevon Carter|CHI|2025",
+          "Nick Richards|CHI|2025",
+          "Mouhamadou Gueye|CHI|2025",
+          "Zach Collins|CHI|2025"
+        ],
+        "camadas": [
+          [
+            "Matas Buzelis|CHI|2025"
+          ],
+          [
+            "Anfernee Simons|CHI|2025",
+            "Ayo Dosunmu|CHI|2025",
+            "Coby White|CHI|2025",
+            "Collin Sexton|CHI|2025",
+            "Dalen Terry|CHI|2025",
+            "Guerschon Yabusele|CHI|2025",
+            "Isaac Okoro|CHI|2025",
+            "Jalen Smith|CHI|2025",
+            "Josh Giddey|CHI|2025",
+            "Julian Phillips|CHI|2025",
+            "Kevin Huerter|CHI|2025",
+            "Lachlan Olbrich|CHI|2025",
+            "Leonard Miller|CHI|2025",
+            "Nikola Vucevic|CHI|2025",
+            "Patrick Williams|CHI|2025",
+            "Rob Dillingham|CHI|2025",
+            "Tre Jones|CHI|2025",
+            "Yuki Kawamura|CHI|2025"
+          ],
+          [
+            "Jevon Carter|CHI|2025",
+            "Nick Richards|CHI|2025",
+            "Mouhamadou Gueye|CHI|2025",
+            "Zach Collins|CHI|2025"
+          ]
+        ]
+      },
+      "DFS": {
+        "ordem": [
+          "Matas Buzelis|CHI|2025",
+          "Anfernee Simons|CHI|2025",
+          "Collin Sexton|CHI|2025",
+          "Isaac Okoro|CHI|2025",
+          "Ayo Dosunmu|CHI|2025",
+          "Coby White|CHI|2025",
+          "Dalen Terry|CHI|2025",
+          "Kevin Huerter|CHI|2025",
+          "Jalen Smith|CHI|2025",
+          "Guerschon Yabusele|CHI|2025",
+          "Lachlan Olbrich|CHI|2025",
+          "Leonard Miller|CHI|2025",
+          "Josh Giddey|CHI|2025",
+          "Jevon Carter|CHI|2025",
+          "Patrick Williams|CHI|2025",
+          "Julian Phillips|CHI|2025",
+          "Tre Jones|CHI|2025",
+          "Rob Dillingham|CHI|2025",
+          "Yuki Kawamura|CHI|2025",
+          "Nikola Vucevic|CHI|2025",
+          "Zach Collins|CHI|2025",
+          "Mouhamadou Gueye|CHI|2025",
+          "Nick Richards|CHI|2025"
+        ],
+        "profundidades": [
+          [
+            "Matas Buzelis|CHI|2025"
+          ],
+          [
+            "Anfernee Simons|CHI|2025"
+          ],
+          [
+            "Collin Sexton|CHI|2025"
+          ],
+          [
+            "Isaac Okoro|CHI|2025"
+          ],
+          [
+            "Ayo Dosunmu|CHI|2025"
+          ],
+          [
+            "Coby White|CHI|2025"
+          ],
+          [
+            "Dalen Terry|CHI|2025"
+          ],
+          [
+            "Kevin Huerter|CHI|2025"
+          ],
+          [
+            "Jalen Smith|CHI|2025"
+          ],
+          [
+            "Guerschon Yabusele|CHI|2025"
+          ],
+          [
+            "Lachlan Olbrich|CHI|2025"
+          ],
+          [
+            "Leonard Miller|CHI|2025"
+          ],
+          [
+            "Josh Giddey|CHI|2025",
+            "Mouhamadou Gueye|CHI|2025",
+            "Nick Richards|CHI|2025"
+          ],
+          [
+            "Jevon Carter|CHI|2025",
+            "Patrick Williams|CHI|2025"
+          ],
+          [
+            "Julian Phillips|CHI|2025",
+            "Nikola Vucevic|CHI|2025"
+          ],
+          [
+            "Tre Jones|CHI|2025",
+            "Zach Collins|CHI|2025"
+          ],
+          [
+            "Rob Dillingham|CHI|2025"
+          ],
+          [
+            "Yuki Kawamura|CHI|2025"
+          ]
+        ],
+        "classes": {
+          "arvore": 22,
+          "retorno": 82,
+          "avanco": 70,
+          "cruzamento": 3
+        },
+        "tem_ciclo": true,
+        "n_arcos_retorno": 82,
+        "arcos_retorno": [
+          {
+            "arco": [
+              "Coby White|CHI|2025",
+              "Ayo Dosunmu|CHI|2025"
+            ],
+            "ciclo": [
+              "Ayo Dosunmu|CHI|2025",
+              "Coby White|CHI|2025",
+              "Ayo Dosunmu|CHI|2025"
+            ]
+          },
+          {
+            "arco": [
+              "Dalen Terry|CHI|2025",
+              "Ayo Dosunmu|CHI|2025"
+            ],
+            "ciclo": [
+              "Ayo Dosunmu|CHI|2025",
+              "Coby White|CHI|2025",
+              "Dalen Terry|CHI|2025",
+              "Ayo Dosunmu|CHI|2025"
+            ]
+          },
+          {
+            "arco": [
+              "Dalen Terry|CHI|2025",
+              "Isaac Okoro|CHI|2025"
+            ],
+            "ciclo": [
+              "Isaac Okoro|CHI|2025",
+              "Ayo Dosunmu|CHI|2025",
+              "Coby White|CHI|2025",
+              "Dalen Terry|CHI|2025",
+              "Isaac Okoro|CHI|2025"
+            ]
+          },
+          {
+            "arco": [
+              "Kevin Huerter|CHI|2025",
+              "Ayo Dosunmu|CHI|2025"
+            ],
+            "ciclo": [
+              "Ayo Dosunmu|CHI|2025",
+              "Coby White|CHI|2025",
+              "Dalen Terry|CHI|2025",
+              "Kevin Huerter|CHI|2025",
+              "Ayo Dosunmu|CHI|2025"
+            ]
+          },
+          {
+            "arco": [
+              "Kevin Huerter|CHI|2025",
+              "Coby White|CHI|2025"
+            ],
+            "ciclo": [
+              "Coby White|CHI|2025",
+              "Dalen Terry|CHI|2025",
+              "Kevin Huerter|CHI|2025",
+              "Coby White|CHI|2025"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
