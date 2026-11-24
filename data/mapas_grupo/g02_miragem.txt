@@ -1,0 +1,13 @@
+; Mapa do grupo 2 - "Miragem": ponte de esteiras gera armadilha de camada + ralo ao sul (35,29% armadilhas).
+; Atravessar >>> antes de pegar 'a' prende o jogador no salao leste; BFS corta pela agua (42 passos, custo 46) e Dijkstra contorna (44 passos, custo 44).
+#################
+#a....#...#...b.#
+#.###.#.#.#.###.#
+#...#.#.#.#.#...#
+###.###.#.#.#.###
+#S....>>>...#A..#
+#############.#.#
+#...v.#.....#~..#
+#.#.#.#.###.#..##
+#.#...#...#.#.BG#
+#################

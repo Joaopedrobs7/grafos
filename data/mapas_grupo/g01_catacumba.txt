@@ -1,0 +1,13 @@
+; Mapa do grupo 1 - "Catacumba": 3 chaves (a, b, c), esteiras e 2 bonus.
+; BFS corta pela agua (60 passos, custo 76); Bellman-Ford desvia por esteiras e coleta os 2 bonus (62 passos, custo 52).
+#################
+#..a.~..#.~~...b#
+#.#.#.#.#.###.#.#
+#...+~..#.+..>..#
+#.#v###.#.#####.#
+#....S..A...#...#
+###############B#
+#...#.....<<<...#
+###.C.###.###.###
+#G..#.#c....#...#
+#################
