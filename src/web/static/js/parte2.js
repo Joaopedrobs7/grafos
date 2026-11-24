@@ -261,10 +261,9 @@
         "<span>" + esc(n.nome) + "</span></button>";
     }).join("");
     return '<div class="p2-convite"><p class="p2-convite__titulo">Ficha do jogador</p>' +
-      '<p class="p2-convite__texto"><b>Clique num jogador</b> no grafo ou na tabela para ver o impacto médio dele, ' +
-      "quem entrou no lugar dele e no lugar de quem ele entrou.</p>" +
+      '<p class="p2-convite__texto">Clique num jogador para ver o impacto e as trocas dele.</p>' +
       '<p class="p2-convite__rotulo">Mais minutos em quadra:</p><div class="p2-chips">' + sugest + "</div>" +
-      '<p class="p2-convite__teclado">Teclado: Tab até o grafo e use as setas; Esc fecha a ficha.</p></div>';
+      '</div>';
   }
 
   function htmlFicha(i) {
@@ -918,11 +917,8 @@
       "</b> no quadrante, mediana de minutos <b>" + fmt(graf.mediana, 0) + "</b>";
     var ex = graf.pontos.filter(function (p) { return p[4] > 0 && p[3] < graf.mediana; })
       .sort(function (x, y) { return y[4] - x[4]; })[0] || graf.pontos.slice().sort(function (x, y) { return y[4] - x[4]; })[0];
-    $("gComoLer").innerHTML = ex ? "<b>Como ler:</b> cada bolinha é um jogador numa temporada. No eixo vertical, o <b>impacto</b>: " +
-      "quantos pontos de saldo o time ganhou (+) ou perdeu (−) a cada 12 minutos depois que o jogador entrou, comparado ao trecho " +
-      "anterior com quem ele substituiu. Exemplo: <b>" + esc(ex[0]) + "</b> (" + esc(ex[1]) + " " + rotuloTemporada(ex[2]) + ") está em <b>" +
-      fmtSinal(ex[4], 2) + "</b>: quando entrou, o saldo do time ficou, em média, " + fmt(Math.abs(ex[4]), 2) + " pontos " +
-      (ex[4] >= 0 ? "melhor" : "pior") + " a cada 12 minutos; ele somou " + fmt(ex[3], 0) + " minutos em quadra em " + fmtInt(ex[5]) + " entradas." : "";
+    $("gComoLer").innerHTML = ex ? "Cada bolinha é um jogador. Mais para cima, mais o saldo do time melhora quando ele entra " +
+      "(pts a cada 12 min). Ex.: <b>" + esc(ex[0]) + "</b>, " + fmtSinal(ex[4], 2) + "." : "";
     desenharBolinhas();
     montarBarras();
     desenharHistograma();
@@ -1034,13 +1030,8 @@
     var n = lin.length, maxAbs = Math.max.apply(null, lin.map(function (t) { return Math.abs(t[1]); }).concat([0.1]));
     var periodo = chave === "todas" ? "de 2020-21 a 2025-26" : "em " + rotuloTemporada(+chave);
     var topo = lin[lin.length - 1];
-    $("gTimesNota").innerHTML = "<b>Como ler:</b> para cada time, a média do peso de todas as substituições " + periodo +
-      " (ponderada por quantas vezes cada troca aconteceu). O valor é a <b>mudança no saldo de pontos do time a cada 12 minutos</b>: " +
-      "positivo = depois das trocas o time passou a ter saldo melhor do que antes; negativo = pior. " +
-      (topo ? "Exemplo: <b>" + esc(topo[0]) + " " + fmtSinal(topo[1], 2) + "</b> = nas " + fmtInt(topo[2]) + " substituições do " +
-        esc(topo[0]) + " " + periodo + ", o time passou a ter, em média, " + fmt(Math.abs(topo[1]), 2) + " pontos " +
-        (topo[1] >= 0 ? "a mais" : "a menos") + " de saldo a cada 12 minutos depois da troca. " : "") +
-      "Os 5 maiores e os 5 menores estão destacados.";
+    $("gTimesNota").innerHTML = "Média das trocas de cada time " + periodo + ": quanto o saldo muda a cada 12 min depois da troca." +
+      (topo ? " Ex.: <b>" + esc(topo[0]) + " " + fmtSinal(topo[1], 2) + "</b>." : "");
     $("gBarras").innerHTML = '<li class="g-barra g-barra--cab" aria-hidden="true"><span></span><span class="g-barra__eixo">' +
       '<span>← piora depois da troca</span><span>0</span><span>melhora depois da troca →</span></span>' +
       '<span class="g-barra__num">pts / 12 min</span></li>' + lin.slice().reverse().map(function (t, i) {
@@ -1059,10 +1050,8 @@
     var chave = gTemp.value, h = graf.dados.histograma[chave];
     if (!h || paineis[1].hidden) return;
     var periodo = chave === "todas" ? "de 2020-21 a 2025-26" : "em " + rotuloTemporada(+chave);
-    $("gHistLer").innerHTML = "<b>Como ler:</b> cada barra conta quantas trocas diferentes (arcos X → Y) " + periodo +
-      " têm o peso naquela faixa de 2 pontos. O peso é a mudança no saldo do time a cada 12 minutos depois da troca " +
-      "(negativo, em vermelho = piorou; positivo, em azul = melhorou). São <b>" + fmtInt(h.n) + "</b> trocas, <b>" +
-      fmtInt(h.negativos) + "</b> com peso negativo; a linha tracejada é a mediana (" + fmtSinal(h.mediana, 2) + " pts).";
+    $("gHistLer").innerHTML = "Quantas trocas " + periodo + " caem em cada faixa de peso. Vermelho: o time piorou depois da troca; " +
+      "azul: melhorou. Tracejado: mediana (" + fmtSinal(h.mediana, 2) + ").";
     var tela = $("gHist"), area = $("gHistArea"), dpr = window.devicePixelRatio || 1;
     var larg = area.clientWidth, alt = Math.max(260, Math.min(380, Math.round(larg * 0.32)));
     tela.width = larg * dpr; tela.height = alt * dpr; tela.style.height = alt + "px";
@@ -1088,24 +1077,24 @@
 
   /* [IA] Claude – E4: matriz de correlação de Spearman (valor em cada célula, escala divergente −1 a +1) */
   function corCorr(r) {
-    var t = Math.min(Math.abs(r), 1), alvo = r < 0 ? [214, 96, 77] : [33, 102, 172];
-    var c = [247, 247, 247].map(function (v, i) { return Math.round(v + (alvo[i] - v) * t); });
-    return "rgb(" + c.join(",") + ")";
+    var a = Math.min(Math.abs(r), 1), c = r < 0 ? NEG : POS;
+    return "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (0.08 + 0.72 * a).toFixed(3) + ")";
   }
   function montarCorrelacao() {
     var chave = gTemp.value, m = graf.dados.correlacao[chave];
     if (!m) return;
     var periodo = chave === "todas" ? "de 2020-21 a 2025-26" : "em " + rotuloTemporada(+chave);
-    $("gCorrLer").innerHTML = "<b>Como ler:</b> cada célula é a correlação de Spearman entre dois atributos dos jogadores " + periodo +
-      " com ≥ " + graf.dados.min_entradas + " entradas (n = " + fmtInt(m.n) + "). Vai de −1 a +1: perto de +1, quando um sobe o outro tende " +
-      "a subir; perto de −1, quando um sobe o outro tende a descer; perto de 0, não há relação monotônica. Azul = positiva, vermelho = negativa.";
+    $("gCorrLer").innerHTML = "Jogadores com ≥ " + graf.dados.min_entradas + " entradas " + periodo + " (n = " + fmtInt(m.n) +
+      "). +1: sobem juntos; −1: um sobe e o outro desce; 0: sem relação.";
     var v = m.variaveis;
-    $("gCorr").innerHTML = "<thead><tr><th></th>" + v.map(function (x) { return "<th scope=\"col\">" + esc(x) + "</th>"; }).join("") +
-      "</tr></thead><tbody>" + m.matriz.map(function (linha, i) {
-        return "<tr><th scope=\"row\">" + esc(v[i]) + "</th>" + linha.map(function (r, j) {
-          var cor = Math.abs(r) > 0.6 ? "#fff" : "#111";
-          return '<td style="background:' + corCorr(r) + ";color:" + cor + '" title="' + esc(v[i]) + " × " + esc(v[j]) + ": " +
-            fmt(r, 2) + '">' + fmt(r, 2) + "</td>";
+    // só a metade de baixo (a matriz é simétrica) e sem a diagonal
+    $("gCorr").innerHTML = "<thead><tr><th></th>" + v.slice(0, -1).map(function (x) { return "<th scope=\"col\">" + esc(x) + "</th>"; }).join("") +
+      "</tr></thead><tbody>" + m.matriz.slice(1).map(function (linha, k) {
+        var i = k + 1;
+        return "<tr><th scope=\"row\">" + esc(v[i]) + "</th>" + linha.slice(0, -1).map(function (r, j) {
+          if (j >= i) return '<td class="g-corr__vazio"></td>';
+          return '<td style="background:' + corCorr(r) + '" title="' + esc(v[i]) + " × " + esc(v[j]) + ": " + fmt(r, 2) + '">' +
+            fmtSinal(r, 2) + "</td>";
         }).join("") + "</tr>";
       }).join("") + "</tbody>";
   }

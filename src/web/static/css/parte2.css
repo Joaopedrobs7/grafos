@@ -247,7 +247,9 @@
 .g-corr { border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px; }
 .g-corr th { font-weight: 600; color: var(--luar-fraco); padding: 6px 10px; text-align: right; white-space: nowrap; }
 .g-corr thead th { text-align: center; }
-.g-corr td { width: 84px; height: 44px; text-align: center; color: #111; font-weight: 600; }
+.g-corr { border-collapse: separate; border-spacing: 3px; }
+.g-corr td { width: 92px; height: 46px; text-align: center; color: var(--luar); font-weight: 600; font-size: 15px; }
+.g-corr td.g-corr__vazio { background: transparent; }
 .g-figuras { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-top: 12px; }
 .g-figuras figure { background: #fff; padding: 8px; }
 .g-figuras img { width: 100%; height: auto; display: block; }

@@ -56,12 +56,8 @@
       <p class="p2-contagem" id="contagem" aria-live="polite"></p>
     </div>
     <!-- [IA] Claude – explicação do que os números significam -->
-    <p class="p2-nota g-como-ler"><b>Como ler:</b> cada ponto é um jogador do time na temporada. Cada seta <b>X → Y</b> é uma
-      substituição: Y entrou em quadra no lugar de X. O <b>peso</b> da seta é quantos pontos de saldo o time ganhou (+) ou perdeu (−)
-      a cada 12 minutos com Y em quadra, comparado ao trecho anterior com X; por exemplo, −5 quer dizer que, depois dessa troca, o
-      time passou a ter 5 pontos a menos de saldo a cada 12 minutos. O <b>impacto médio</b> do jogador é a média dos pesos das trocas
-      em que ele entrou, ponderada por quantas vezes cada troca aconteceu. <b>Clique num jogador</b> (no grafo ou na tabela) para
-      abrir a ficha dele.</p>
+    <p class="p2-nota g-como-ler">Cada seta <b>X → Y</b> é uma troca: Y entrou no lugar de X. O peso é quanto o saldo do time
+      mudou a cada 12 min depois da troca. Clique num jogador para ver a ficha.</p>
 
     <div class="p2-palco">
       <figure class="p2-quadro">
@@ -174,9 +170,8 @@
           <div class="p2-dica" id="gDica" hidden></div>
         </div>
         <figcaption class="p2-legenda">
-          <span class="p2-legenda__item"><span class="g-quadrante" aria-hidden="true"></span>impacto &gt; 0 e minutos &lt; mediana da temporada</span>
-          <span class="p2-legenda__item">uma bolinha por jogador-temporada com ≥ <span id="gMin">30</span> entradas; cor = time</span>
-          <span class="p2-legenda__item">impacto = saldo por 12 min depois − antes, média das entradas</span>
+          <span class="p2-legenda__item"><span class="g-quadrante" aria-hidden="true"></span>impacto &gt; 0 e minutos &lt; mediana</span>
+          <span class="p2-legenda__item">cor = time, jogadores com ≥ <span id="gMin">30</span> entradas</span>
         </figcaption>
       </figure>
     </section>
