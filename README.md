@@ -83,6 +83,33 @@ python -m src.avd.tabelas        # tabelas de apoio à AVD     -> out/avd/tabela
 Nas tabelas de apoio, a média de um time na temporada só é calculada quando o atributo existe em pelo menos 80% dos
 jogos, sem imputação. As colunas de detalhe (quartos, banco, garrafão etc.) faltam em 50,2% das linhas de 2000 e 99,9% de 2021.
 
+<!-- [IA] Claude – Neo4j local para visualizar o grafo de rotação -->
+### Visualizar no Neo4j (local)
+
+O Neo4j serve só para visualizar e explorar o grafo de rotação. Caminhos, ciclos e camadas vêm dos JSON de
+`out/parte2/` (algoritmos do grupo). Nenhum algoritmo do Neo4j/GDS é usado.
+
+```bash
+docker compose -f docker-compose.neo4j.yml up -d   # neo4j:5-community, volume em .neo4j/ (fora do git)
+python -m src.parte2.neo4j_export                  # importa jogadores, arcos e marcações (idempotente)
+docker compose -f docker-compose.neo4j.yml down    # para o container (os dados ficam em .neo4j/)
+```
+
+Abra http://localhost:7474 (usuário `neo4j`, senha `grafos2026`). Essa senha padrão vale **só para uso local**.
+Para trocar, defina `NEO4J_AUTH=neo4j/<senha>` antes do `up` e do export (no primeiro `up`, com `.neo4j/` vazio).
+Consultas prontas: `docs/neo4j/consultas.cypher`. Captura da rotação de MIL 2022: `docs/neo4j/rotacao_MIL_2022.png`.
+
+Modelo: `(X:Jogador)-[:SAIU_PARA]->(Y:Jogador)` é o arco X -> Y do CSV, ou seja, "Y entrou no lugar de X". O arco
+guarda `peso`, `ocorrencias`, saldos, minutos e `no_recorte_sem_ciclo`. As marcações de resultado são:
+
+| marcação | origem |
+|---|---|
+| label `:Principal` | fonte do Bellman-Ford de cada time-temporada |
+| label `:CicloNegativo`, arco `ciclo_negativo`, `custo_ciclo` | `bellman_ford.json` (com ciclo) |
+| label `:CaminhoBF`/`:DestinoBF`, arco `em_caminho_bf`, nó `custo_bf` | `bellman_ford.json` (recorte sem ciclo) |
+| arco `em_caminho_dijkstra`, `par_dijkstra` (1..5) | `dijkstra.json` |
+| nó `camada_bfs`, `ordem_dfs`, `prof_dfs`, label `:FonteBusca` | `bfs_dfs.json` |
+
 <!-- [IA] Claude – roteiro do mapa surpresa, testado em 23/11 -->
 ### Mapa surpresa (apresentação)
 

@@ -17,3 +17,5 @@ pyopenssl>=24.2
 # [IA] Claude – leitura e limpeza do dataset da Parte 2 (src/parte2/preparar.py)
 pandas>=2.2
 pyyaml>=6.0
+# [IA] Claude – driver oficial do Neo4j, só para src/parte2/neo4j_export.py (visualização local)
+neo4j>=5.20
