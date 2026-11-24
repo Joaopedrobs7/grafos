@@ -68,7 +68,7 @@
   })();
 
   /* ------------------------------------------------------------ abas */
-  var abas = [$("abaGrafo"), $("abaAlg")], paineis = [$("painelGrafo"), $("painelAlg")];
+  var abas = [$("abaGrafo"), $("abaGraf"), $("abaAlg")], paineis = [$("painelGrafo"), $("painelGraf"), $("painelAlg")];
   function abrirAba(i, focar) {
     abas.forEach(function (a, k) {
       var sel = k === i;
@@ -77,16 +77,16 @@
       paineis[k].hidden = !sel;
     });
     if (focar) abas[i].focus();
-    var hash = i === 1 ? "#algoritmos" : "";
+    var hash = i === 2 ? "#algoritmos" : i === 1 ? "#graficos" : "";
     if (location.hash !== hash) history.replaceState(null, "", location.pathname + location.search + hash);
-    if (i === 1) carregarBench(); else desenhar();
+    if (i === 2) carregarBench(); else if (i === 1) carregarGraficos(); else desenhar();
   }
   abas.forEach(function (a, i) {
     a.addEventListener("click", function () { abrirAba(i, false); });
     a.addEventListener("keydown", function (ev) {
       if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") {
         ev.preventDefault();
-        abrirAba((i + 1) % abas.length, true);
+        abrirAba((i + (ev.key === "ArrowRight" ? 1 : abas.length - 1)) % abas.length, true);
       }
     });
   });
@@ -160,7 +160,7 @@
     estado.dados = d;
     estado.selecionado = null;
     estado.sobre = null;
-    $("contagem").innerHTML = "<b>" + d.nos.length + "</b> jogadores · <b>" + fmtInt(d.arcos.length) +
+    $("contagem").innerHTML = "<b>" + d.nos.length + "</b> jogadores, <b>" + fmtInt(d.arcos.length) +
       "</b> arcos · <b>" + fmtInt(d.arcos_negativos) + "</b> com peso negativo";
     var btnDij = document.querySelector('[data-modo="dijkstra"]');
     btnDij.hidden = !d.dijkstra;
@@ -628,6 +628,178 @@
     }).join("");
   }
 
+  /* ------------------------------------------------------------ aba Gráficos */
+  /* [IA] Claude – versões interativas dos gráficos escolhidos pelo grupo: dispersão impacto × minutos (cor por time,
+     nome nas bolinhas, quadrante impacto > 0 e minutos < mediana da temporada) e barras do impacto médio por time
+     (5 maiores e 5 menores destacados). Os números vêm prontos de api/parte2/graficos. */
+  var PALETA = ["#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F", "#EDC948", "#B07AA1", "#FF9DA7", "#9C755F",
+    "#BAB0AC", "#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD", "#8C564B", "#E377C2", "#7F7F7F", "#BCBD22",
+    "#17BECF", "#AEC7E8", "#FFBB78", "#98DF8A", "#FF9896", "#C5B0D5", "#C49C94", "#F7B6D2", "#DBDB8D", "#9EDAE5", "#393B79"];
+  var graf = { dados: null, cor: {}, pontos: [], layout: null, sobre: null };
+  var gTemp = $("gTemporada"), gTime = $("gTime");
+
+  function carregarGraficos() {
+    if (graf.dados) { desenharBolinhas(); return; }
+    if (graf.dados === false) return;
+    graf.dados = false;
+    json("api/parte2/graficos").then(function (d) {
+      var times = {};
+      d.jogadores.forEach(function (p) { times[p[1]] = 1; });
+      Object.keys(times).sort().forEach(function (t, i) { graf.cor[t] = PALETA[i % PALETA.length]; });
+      var anos = {};
+      d.jogadores.forEach(function (p) { anos[p[2]] = 1; });
+      var lista = Object.keys(anos).map(Number).sort();
+      gTemp.innerHTML = '<option value="todas">todas (2020-21 a 2025-26)</option>' + lista.slice().reverse().map(function (a) {
+        return '<option value="' + a + '">' + rotuloTemporada(a) + "</option>";
+      }).join("");
+      gTemp.value = String(lista[lista.length - 1]);
+      gTime.innerHTML = '<option value="">todos</option>' + Object.keys(times).sort().map(function (t) {
+        return '<option value="' + esc(t) + '">' + esc(t) + "</option>";
+      }).join("");
+      $("gMin").textContent = d.min_entradas;
+      graf.dados = d;
+      atualizarGraficos();
+    }).catch(function (e) {
+      graf.dados = null;
+      $("gContagem").textContent = "não foi possível carregar os gráficos: " + e.message;
+    });
+  }
+
+  function mediana(v) {
+    if (!v.length) return 0;
+    var s = v.slice().sort(function (a, b) { return a - b; }), m = s.length >> 1;
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+
+  function atualizarGraficos() {
+    var d = graf.dados, temp = gTemp.value, time = gTime.value;
+    var daTemp = d.jogadores.filter(function (p) { return temp === "todas" || String(p[2]) === temp; });
+    // a mediana de minutos é a da temporada (ou de todas), não muda com o filtro de time
+    graf.mediana = mediana(daTemp.map(function (p) { return p[3]; }));
+    graf.pontos = daTemp.filter(function (p) { return !time || p[1] === time; });
+    var quad = graf.pontos.filter(function (p) { return p[4] > 0 && p[3] < graf.mediana; }).length;
+    $("gContagem").innerHTML = "<b>" + fmtInt(graf.pontos.length) + "</b> jogadores, <b>" + fmtInt(quad) +
+      "</b> no quadrante, mediana de minutos <b>" + fmt(graf.mediana, 0) + "</b>";
+    desenharBolinhas();
+    montarBarras();
+  }
+  gTemp.addEventListener("change", atualizarGraficos);
+  gTime.addEventListener("change", atualizarGraficos);
+
+  function desenharBolinhas() {
+    var tela = $("gTela"), area = $("gArea");
+    if (!graf.dados || paineis[1].hidden) return;
+    var dpr = window.devicePixelRatio || 1, larg = area.clientWidth, alt = Math.max(360, Math.min(620, Math.round(larg * 0.58)));
+    tela.width = larg * dpr; tela.height = alt * dpr; tela.style.height = alt + "px";
+    var ctx = tela.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, larg, alt);
+    var todos = graf.dados.jogadores.filter(function (p) { return gTemp.value === "todas" || String(p[2]) === gTemp.value; });
+    var mx = { e: 56, d: 16, t: 16, b: 44 };
+    var xs = todos.map(function (p) { return p[3]; }), ys = todos.map(function (p) { return p[4]; });
+    var x0 = Math.min.apply(null, xs) * 0.95, x1 = Math.max.apply(null, xs) * 1.03;
+    var y0 = Math.min(Math.min.apply(null, ys), -1) - 0.5, y1 = Math.max(Math.max.apply(null, ys), 1) + 0.5;
+    var X = function (v) { return mx.e + (v - x0) / (x1 - x0) * (larg - mx.e - mx.d); };
+    var Y = function (v) { return mx.t + (y1 - v) / (y1 - y0) * (alt - mx.t - mx.b); };
+    graf.layout = { X: X, Y: Y };
+    // quadrante destacado e linhas de referência
+    ctx.fillStyle = "rgba(255,179,71,.10)";
+    ctx.fillRect(X(x0), Y(y1), X(graf.mediana) - X(x0), Y(0) - Y(y1));
+    ctx.strokeStyle = LUAR_FRACO; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X(x0), Y(0)); ctx.lineTo(X(x1), Y(0)); ctx.stroke();
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(X(graf.mediana), Y(y1)); ctx.lineTo(X(graf.mediana), Y(y0)); ctx.stroke();
+    ctx.setLineDash([]);
+    // eixos (marcas simples)
+    ctx.fillStyle = LUAR_FRACO; ctx.font = "12px 'DM Sans', sans-serif";
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    for (var yv = Math.ceil(y0 / 2.5) * 2.5; yv <= y1; yv += 2.5) ctx.fillText(fmtSinal(yv, 1), mx.e - 8, Y(yv));
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    var passoX = (x1 - x0) > 1500 ? 500 : 200;
+    for (var xv = Math.ceil(x0 / passoX) * passoX; xv <= x1; xv += passoX) ctx.fillText(fmtInt(xv), X(xv), alt - mx.b + 8);
+    ctx.fillText("minutos em quadra medidos nas trocas (tracejado = mediana " + fmt(graf.mediana, 0) + " min)", (mx.e + larg) / 2, alt - 18);
+    ctx.save(); ctx.translate(14, (mx.t + alt - mx.b) / 2); ctx.rotate(-Math.PI / 2);
+    ctx.textBaseline = "middle"; ctx.fillText("impacto (pontos por 12 min)", 0, 0); ctx.restore();
+    // bolinhas
+    var r = graf.pontos.length > 400 ? 3.5 : 5;
+    graf.pontos.forEach(function (p) {
+      ctx.beginPath(); ctx.arc(X(p[3]), Y(p[4]), r, 0, Math.PI * 2);
+      ctx.fillStyle = graf.cor[p[1]]; ctx.fill();
+      if (graf.sobre === p) { ctx.lineWidth = 2; ctx.strokeStyle = LUAR; ctx.stroke(); }
+    });
+    // nomes: primeiro os do quadrante (maior impacto antes), depois os demais por |impacto|; pula o que colidir
+    var noQuad = function (p) { return p[4] > 0 && p[3] < graf.mediana; };
+    var ordem = graf.pontos.slice().sort(function (a, b) {
+      var qa = noQuad(a), qb = noQuad(b);
+      if (qa !== qb) return qa ? -1 : 1;
+      return qa ? b[4] - a[4] : Math.abs(b[4]) - Math.abs(a[4]);
+    });
+    // o rótulo do quadrante entra primeiro na lista de áreas ocupadas
+    ctx.font = "600 12px 'DM Sans', sans-serif";
+    var rq = "impacto > 0 e minutos < mediana", xq = X(x0) + 8, yq = Y(y1) + 6;
+    var caixas = [[xq, yq, xq + ctx.measureText(rq).width, yq + 14]];
+    var todasTemp = gTemp.value === "todas";
+    ordem.forEach(function (p) {
+      var q = noQuad(p);
+      ctx.font = (q ? "600 12px" : "11px") + " 'DM Sans', sans-serif";
+      var nome = todasTemp ? p[0] + " " + String(p[2] % 100).padStart(2, "0") + "-" + String((p[2] + 1) % 100).padStart(2, "0") : p[0];
+      var w = ctx.measureText(nome).width, x = X(p[3]) + r + 2, y = Y(p[4]) - r - 12;
+      if (x + w > larg - 4) x = X(p[3]) - r - 2 - w;
+      var c = [x, y, x + w, y + 13];
+      for (var k = 0; k < caixas.length; k++) {
+        var o = caixas[k];
+        if (!(c[2] < o[0] || c[0] > o[2] || c[3] < o[1] || c[1] > o[3])) return;
+      }
+      caixas.push(c);
+      ctx.fillStyle = q ? LUAR : "rgba(181,168,149,.8)";
+      ctx.textAlign = "left"; ctx.textBaseline = "top";
+      ctx.fillText(nome, x, y);
+    });
+    ctx.fillStyle = TOCHA; ctx.font = "600 12px 'DM Sans', sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "top";
+    ctx.fillText(rq, xq, yq);
+  }
+
+  function pontoEm(ev) {
+    if (!graf.layout) return null;
+    var b = $("gTela").getBoundingClientRect(), mxp = ev.clientX - b.left, myp = ev.clientY - b.top, melhor = null, dist = 64;
+    graf.pontos.forEach(function (p) {
+      var dx = graf.layout.X(p[3]) - mxp, dy = graf.layout.Y(p[4]) - myp, d2 = dx * dx + dy * dy;
+      if (d2 < dist) { dist = d2; melhor = p; }
+    });
+    return melhor;
+  }
+  $("gTela").addEventListener("mousemove", function (ev) {
+    var p = pontoEm(ev), dica = $("gDica");
+    if (p !== graf.sobre) { graf.sobre = p; desenharBolinhas(); }
+    if (!p) { dica.hidden = true; return; }
+    dica.innerHTML = "<strong>" + esc(p[0]) + "</strong><dl><dt>time</dt><dd>" + esc(p[1]) + " " + rotuloTemporada(p[2]) +
+      "</dd><dt>impacto</dt><dd>" + fmtSinal(p[4], 2) + "</dd><dt>minutos</dt><dd>" + fmt(p[3], 0) +
+      "</dd><dt>entradas</dt><dd>" + fmtInt(p[5]) + "</dd></dl>";
+    var b = $("gArea").getBoundingClientRect();
+    dica.style.left = Math.min(ev.clientX - b.left + 14, b.width - 200) + "px";
+    dica.style.top = (ev.clientY - b.top + 14) + "px";
+    dica.hidden = false;
+  });
+  $("gTela").addEventListener("mouseleave", function () { $("gDica").hidden = true; graf.sobre = null; desenharBolinhas(); });
+
+  function montarBarras() {
+    var chave = gTemp.value === "todas" ? "todas" : gTemp.value, lin = graf.dados.times[chave] || [];
+    var n = lin.length, maxAbs = Math.max.apply(null, lin.map(function (t) { return Math.abs(t[1]); }).concat([0.1]));
+    $("gTimesNota").textContent = (chave === "todas" ? "Média de 2020-21 a 2025-26" : "Temporada " + rotuloTemporada(+chave)) +
+      ", ponderada pelas ocorrências. Os 5 maiores e os 5 menores estão destacados.";
+    $("gBarras").innerHTML = lin.slice().reverse().map(function (t, i) {
+      var classe = i < 5 ? " is-maior" : i >= n - 5 ? " is-menor" : "";
+      var larg = Math.abs(t[1]) / maxAbs * 50, esq = t[1] >= 0 ? 50 : 50 - larg;
+      var sel = gTime.value === t[0] ? ' style="outline:2px solid ' + CESAR + ';outline-offset:2px"' : "";
+      return '<li class="g-barra' + classe + '"' + sel + '><span class="g-barra__time">' + esc(t[0]) +
+        '</span><span class="g-barra__trilho"><span class="g-barra__zero"></span><span class="g-barra__valor" style="left:' +
+        esq + "%;width:" + larg + '%"></span></span><span class="g-barra__num">' + fmtSinal(t[1], 2) + "</span></li>";
+    }).join("");
+  }
+
+  window.addEventListener("resize", function () { if (graf.dados) desenharBolinhas(); });
+
   /* ------------------------------------------------------------ início */
-  if (location.hash === "#algoritmos") abrirAba(1, false);
+  if (location.hash === "#algoritmos") abrirAba(2, false);
+  else if (location.hash === "#graficos") abrirAba(1, false);
 })();

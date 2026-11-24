@@ -219,3 +219,16 @@
 .p2-escala-grafo .p2-tabela { table-layout: fixed; min-width: 760px; }
 .p2-escala-grafo .p2-tabela th:first-child { width: 14%; }
 .p2-escala-grafo .p2-tabela th:nth-child(2) { width: 16%; }
+
+/* [IA] Claude – aba Gráficos (bolinhas e barras por time) */
+.g-quadrante { display: inline-block; width: 16px; height: 12px; background: rgba(255, 179, 71, .22); box-shadow: inset 0 0 0 1px rgba(255, 179, 71, .6); }
+.g-barras { list-style: none; display: grid; gap: 4px; margin-top: 12px; }
+.g-barra { display: grid; grid-template-columns: 48px minmax(0, 1fr) 64px; align-items: center; gap: 10px; font-size: 14px; }
+.g-barra__time { font: 600 14px/1 var(--f-pixel); }
+.g-barra__trilho { position: relative; height: 16px; }
+.g-barra__zero { position: absolute; top: -3px; bottom: -3px; left: 50%; width: 1px; background: var(--luar-fraco); }
+.g-barra__valor { position: absolute; top: 2px; height: 12px; background: var(--noite-4); }
+.g-barra.is-maior .g-barra__valor { background: var(--pos); }
+.g-barra.is-menor .g-barra__valor { background: var(--neg); }
+.g-barra__num { text-align: right; font-variant-numeric: tabular-nums; color: var(--luar-fraco); }
+.g-barra.is-maior .g-barra__num, .g-barra.is-menor .g-barra__num { color: var(--luar); }

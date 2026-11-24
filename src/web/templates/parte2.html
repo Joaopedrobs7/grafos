@@ -30,6 +30,7 @@
     </div>
     <div class="p2-abas" role="tablist" aria-label="Seções da Parte 2">
       <button class="p2-aba" role="tab" id="abaGrafo" aria-controls="painelGrafo" aria-selected="true">Grafo</button>
+      <button class="p2-aba" role="tab" id="abaGraf" aria-controls="painelGraf" aria-selected="false" tabindex="-1">Gráficos</button>
       <button class="p2-aba" role="tab" id="abaAlg" aria-controls="painelAlg" aria-selected="false" tabindex="-1">Algoritmos</button>
     </div>
     <p class="pill" data-servidor-pill title="Instância que respondeu">
@@ -110,6 +111,42 @@
           <tbody></tbody>
         </table>
       </div>
+    </section>
+  </section>
+
+  <!-- [IA] Claude – aba Gráficos: versões interativas dos gráficos escolhidos pelo grupo -->
+  <section class="p2-painel" role="tabpanel" id="painelGraf" aria-labelledby="abaGraf" hidden>
+    <div class="p2-barra">
+      <label class="p2-campo">
+        <span class="p2-campo__rotulo">Temporada</span>
+        <select id="gTemporada"></select>
+      </label>
+      <label class="p2-campo">
+        <span class="p2-campo__rotulo">Time</span>
+        <select id="gTime"></select>
+      </label>
+      <p class="p2-contagem" id="gContagem" aria-live="polite"></p>
+    </div>
+
+    <section class="p2-bloco" aria-labelledby="bolinhasTitulo">
+      <h2 class="p2-subtitulo" id="bolinhasTitulo">Impacto ao entrar × minutos em quadra</h2>
+      <figure class="p2-quadro">
+        <div class="p2-quadro__area" id="gArea">
+          <canvas id="gTela" role="img" aria-label="Dispersão: impacto ao entrar por minutos em quadra, uma bolinha por jogador-temporada"></canvas>
+          <div class="p2-dica" id="gDica" hidden></div>
+        </div>
+        <figcaption class="p2-legenda">
+          <span class="p2-legenda__item"><span class="g-quadrante" aria-hidden="true"></span>impacto &gt; 0 e minutos &lt; mediana da temporada</span>
+          <span class="p2-legenda__item">uma bolinha por jogador-temporada com ≥ <span id="gMin">30</span> entradas; cor = time</span>
+          <span class="p2-legenda__item">impacto = saldo por 12 min depois − antes, média das entradas</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="p2-bloco" aria-labelledby="timesTitulo">
+      <h2 class="p2-subtitulo" id="timesTitulo">Impacto médio das trocas por time</h2>
+      <p class="p2-nota" id="gTimesNota"></p>
+      <ol class="g-barras" id="gBarras"></ol>
     </section>
   </section>
 

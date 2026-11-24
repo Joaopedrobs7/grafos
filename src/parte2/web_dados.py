@@ -183,6 +183,43 @@ def montar_benchmark(relatorio: dict) -> dict:
             "fracoes": relatorio.get("fracoes"), "tempos": tempos, "escalabilidade": escala}
 
 
+# ---------------------------------------------------------------- gráficos escolhidos pelo grupo (versão interativa)
+
+# [IA] Claude – dados das versões interativas dos gráficos "impacto x minutos" e X6 (mesmas definições de
+# src/parte2/graficos_avd.py: impacto ponderado pelas ocorrências, >= 30 entradas no gráfico de bolinhas)
+def montar_graficos(arestas: list[dict], jogadores: list[dict], min_entradas: int = 30) -> dict:
+    chega: dict[str, list[float]] = {}
+    times: dict[tuple[str, int | None], list[float]] = {}
+    for a in arestas:
+        oc, peso, ano = int(a["ocorrencias"]), float(a["peso"]), int(a["temporada"])
+        c = chega.setdefault(a["destino"], [0.0, 0])
+        c[0] += peso * oc
+        c[1] += oc
+        for chave in ((a["time"], ano), (a["time"], None)):
+            t = times.setdefault(chave, [0.0, 0])
+            t[0] += peso * oc
+            t[1] += oc
+    pontos = []
+    for j in jogadores:
+        soma, ent = chega.get(j["no"], (0.0, 0))
+        if ent >= min_entradas:
+            pontos.append([j["nome"], j["time"], int(j["temporada"]), _num(float(j["minutos_medidos"]), 1),
+                           _num(soma / ent, 3), ent])
+    por_time = {}
+    for (time, ano), (soma, oc) in times.items():
+        por_time.setdefault("todas" if ano is None else str(ano), []).append([time, _num(soma / oc, 3), oc])
+    for v in por_time.values():
+        v.sort(key=lambda x: x[1])
+    return {"min_entradas": min_entradas,
+            "colunas_jogadores": ["nome", "time", "temporada", "minutos", "impacto", "entradas"],
+            "jogadores": pontos, "colunas_times": ["time", "impacto", "ocorrencias"], "times": por_time,
+            "definicoes": {
+                "impacto": "média do peso das trocas em que o jogador entrou (saldo por 12 min depois − antes), "
+                           "ponderada pelas ocorrências",
+                "minutos": "minutos em quadra medidos nos trechos antes e depois das trocas 1 por 1",
+                "impacto_time": "média do peso de todas as trocas do time, ponderada pelas ocorrências"}}
+
+
 # ---------------------------------------------------------------- main
 
 def _gravar(caminho: Path, dados) -> None:
@@ -199,6 +236,7 @@ def main(pasta: Path = PASTA, resultados: Path = RESULTADOS, saida: Path = SAIDA
     for (time, ano), d in componentes.items():
         _gravar(saida / "rotacao" / nome_arquivo(time, ano), d)
     _gravar(saida / "indice.json", montar_indice(componentes, bellman, dijkstra))
+    _gravar(saida / "graficos.json", montar_graficos(arestas, jogadores))
     relatorio = resultados / "parte2_report.json"
     if relatorio.exists():
         _gravar(saida / "benchmark.json", montar_benchmark(json.loads(relatorio.read_text(encoding="utf-8"))))

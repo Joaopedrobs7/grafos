@@ -403,3 +403,15 @@ def test_web_dados_com_grafo_sintetico(tmp_path):
     ind = json.loads((res / "web" / "indice.json").read_text(encoding="utf-8"))
     assert ind["V"] == 3 and ind["E"] == 5 and ind["temporadas"][0]["times"][0]["time"] == "AAA"
     assert not (res / "web" / "benchmark.json").exists()        # sem parte2_report.json, sem benchmark
+
+
+# [IA] Claude – dados dos gráficos interativos da Parte 2 (impacto x minutos e times)
+def test_parte2_graficos(cliente):
+    r = cliente.get("/api/parte2/graficos")
+    assert r.status_code == 200
+    d = r.get_json()
+    assert d["colunas_jogadores"] == ["nome", "time", "temporada", "minutos", "impacto", "entradas"]
+    assert d["jogadores"] and all(p[5] >= d["min_entradas"] for p in d["jogadores"])
+    assert set(d["times"]) >= {"todas", "2025"} and len(d["times"]["todas"]) == 30
+    impactos = [t[1] for t in d["times"]["todas"]]
+    assert impactos == sorted(impactos)  # ordenado do menor para o maior

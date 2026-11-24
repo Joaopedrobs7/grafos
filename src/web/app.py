@@ -17,6 +17,7 @@ Rotas:
   /api/carga           ?n=500 resolve o m08 n vezes (máx 2000) (gera CPU para testar o Auto Scaling)
   /api/parte2/indice               temporadas e times do grafo de rotação (out/parte2/web/indice.json)
   /api/parte2/rotacao/<time>/<ano> nós, arcos, ciclo negativo e caminhos de um time-temporada
+  /api/parte2/graficos             dados dos gráficos interativos (impacto x minutos e times)
   /api/parte2/benchmark            tempos médios e escalabilidade (resumo de out/parte2/parte2_report.json)
 """
 from __future__ import annotations
@@ -334,6 +335,14 @@ def api_parte2_rotacao(sigla: str, ano: int):
     resp = _parte2_json(f"rotacao/{sigla}_{ano}.json")
     if resp is None:
         return _erro(f"time-temporada {sigla} {ano} não existe", 404)
+    return resp
+
+
+@app.get("/api/parte2/graficos")
+def api_parte2_graficos():
+    resp = _parte2_json("graficos.json")
+    if resp is None:
+        return _erro("gráficos da Parte 2 não gerados: rode python -m src.parte2.web_dados", 503)
     return resp
 
 
