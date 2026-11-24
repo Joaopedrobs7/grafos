@@ -1,41 +1,148 @@
 <!doctype html>
-<!-- [IA] Claude – página provisória da Parte 2 (dataset maior e comparação de algoritmos). A branch entrega2
-     substitui este template pela página de verdade; a rota /parte2 em src/web/app.py continua a mesma. -->
+<!-- [IA] Claude – página da Parte 2: grafo de rotação de um time-temporada (canvas 2D), destaques do ciclo negativo e
+     do caminho sem ciclo que os algoritmos do grupo calcularam, tabela de jogadores e aba com os números do benchmark.
+     Os dados vêm pré-calculados de api/parte2/* (src/parte2/web_dados.py); o navegador só desenha. -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Parte 2 em construção | Teoria dos Grafos</title>
+<title>Parte 2, grafo de rotação | Teoria dos Grafos</title>
+<meta name="description" content="Grafo de rotação da NBA (2020-21 a 2025-26): cada arco é uma substituição, com peso igual à variação do saldo por 12 minutos. Ciclos negativos, caminhos e tempos de BFS, DFS, Dijkstra e Bellman-Ford.">
 <meta name="theme-color" content="#1A1612">
 <link rel="icon" href="static/favicon.svg">
+<link rel="preload" href="static/fonts/PixelifySans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="static/css/app.css">
-<link rel="stylesheet" href="static/css/menu.css">
+<link rel="stylesheet" href="static/css/parte2.css">
 <script>document.documentElement.classList.add("js");</script>
 </head>
-<body class="menu">
-<canvas class="menu__parede" id="parede" aria-hidden="true"></canvas>
+<body class="p2">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
-<header class="menu__topo">
-  <p class="pill" data-servidor-pill title="Instância que respondeu">
-    <span class="pill__ponto" aria-hidden="true"></span>
-    <span class="pill__inst" data-servidor-inst>conectando</span>
-    <span class="pill__zona" data-servidor-zona></span>
-  </p>
+<header class="p2-topo">
+  <div class="p2-topo__linha">
+    <a class="p2-voltar" href="./" aria-label="Voltar ao menu de projetos">
+      <svg viewBox="0 0 4 7" shape-rendering="crispEdges" aria-hidden="true"><path d="M3 0h1v7H3zM2 1h1v5H2zM1 2h1v3H1zM0 3h1v1H0z"/></svg>
+      <span>Projetos</span>
+    </a>
+    <div class="p2-marca">
+      <span class="p2-marca__parte">Parte 2</span>
+      <h1 class="p2-marca__titulo">Grafo de rotação</h1>
+    </div>
+    <div class="p2-abas" role="tablist" aria-label="Seções da Parte 2">
+      <button class="p2-aba" role="tab" id="abaGrafo" aria-controls="painelGrafo" aria-selected="true">Grafo</button>
+      <button class="p2-aba" role="tab" id="abaAlg" aria-controls="painelAlg" aria-selected="false" tabindex="-1">Algoritmos</button>
+    </div>
+    <p class="pill" data-servidor-pill title="Instância que respondeu">
+      <span class="pill__ponto" aria-hidden="true"></span>
+      <span class="pill__inst" data-servidor-inst>conectando</span>
+      <span class="pill__zona" data-servidor-zona></span>
+    </p>
+  </div>
 </header>
 
-<main class="menu__palco">
-  <div class="obra">
-    <div class="obra__cena" aria-hidden="true">
-      <canvas id="obraAluno" width="64" height="96"></canvas>
-      <svg class="obra__cadeado" viewBox="0 0 9 10" shape-rendering="crispEdges"><path d="M2 0h5v1H2zM1 1h1v3H1zM7 1h1v3H7zM0 4h9v6H0z"/><path fill="#1A1612" d="M4 6h1v2H4z"/></svg>
+<main class="p2-main" id="conteudo">
+  <!-- ======================================================== aba Grafo -->
+  <section class="p2-painel" role="tabpanel" id="painelGrafo" aria-labelledby="abaGrafo">
+    <div class="p2-barra">
+      <label class="p2-campo">
+        <span class="p2-campo__rotulo">Temporada</span>
+        <select id="selTemporada"></select>
+      </label>
+      <label class="p2-campo">
+        <span class="p2-campo__rotulo">Time</span>
+        <select id="selTime"></select>
+      </label>
+      <p class="p2-contagem" id="contagem" aria-live="polite"></p>
     </div>
-    <h1>Parte 2 em construção</h1>
-    <p>Aqui vão entrar um grafo bem maior que os labirintos, o benchmark de BFS, DFS, Dijkstra e Bellman-Ford sobre ele e a análise dos dados.</p>
-    <a class="btn btn--cesar px" href="./">Voltar ao menu</a>
-  </div>
+
+    <div class="p2-palco">
+      <figure class="p2-quadro">
+        <div class="p2-quadro__area" id="area">
+          <canvas id="tela" role="img" aria-label="Grafo de rotação do time-temporada escolhido"></canvas>
+          <div class="p2-dica" id="dica" hidden></div>
+          <p class="p2-carregando" id="carregando">carregando…</p>
+        </div>
+        <figcaption class="p2-legenda">
+          <span class="p2-legenda__item">
+            <span class="p2-escala" aria-hidden="true"></span>
+            <span><span class="p2-escala__ponta">−20</span> peso do arco <span class="p2-escala__ponta">+20</span></span>
+          </span>
+          <span class="p2-legenda__item">X <span aria-hidden="true">→</span><span class="sr-only">para</span> Y: Y entrou no lugar de X</span>
+          <span class="p2-legenda__item">tamanho do nó: minutos medidos</span>
+        </figcaption>
+      </figure>
+
+      <aside class="p2-lado" aria-labelledby="destacarTitulo">
+        <h2 class="p2-subtitulo" id="destacarTitulo">Destacar</h2>
+        <div class="p2-modos" role="group" aria-label="Destaque no grafo">
+          <button class="p2-modo" type="button" data-modo="ciclo" aria-pressed="false">
+            <span class="p2-modo__nome">Ciclo negativo</span>
+            <span class="p2-modo__alg">Bellman-Ford</span>
+          </button>
+          <button class="p2-modo" type="button" data-modo="sem_ciclo" aria-pressed="false">
+            <span class="p2-modo__nome">Caminho sem ciclo</span>
+            <span class="p2-modo__alg">descer na rotação, Bellman-Ford</span>
+          </button>
+          <button class="p2-modo" type="button" data-modo="dijkstra" aria-pressed="false" hidden>
+            <span class="p2-modo__nome">Par do Dijkstra</span>
+            <span class="p2-modo__alg">Johnson no recorte sem ciclo</span>
+          </button>
+        </div>
+        <div class="p2-detalhe" id="detalhe" aria-live="polite"></div>
+      </aside>
+    </div>
+
+    <section class="p2-jogadores" aria-labelledby="jogadoresTitulo">
+      <div class="p2-jogadores__cabeca">
+        <h2 class="p2-subtitulo" id="jogadoresTitulo">Jogadores</h2>
+        <p class="p2-nota" id="notaImpacto"></p>
+      </div>
+      <div class="p2-rolagem">
+        <table class="p2-tabela" id="tabelaJogadores">
+          <thead>
+            <tr>
+              <th scope="col" aria-sort="none"><button type="button" data-ordem="nome">Jogador</button></th>
+              <th scope="col" class="num" aria-sort="descending"><button type="button" data-ordem="minutos">Minutos</button></th>
+              <th scope="col" class="num" aria-sort="none"><button type="button" data-ordem="entradas">Entradas</button></th>
+              <th scope="col" class="num" aria-sort="none"><button type="button" data-ordem="impacto_medio">Impacto médio</button></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <!-- ======================================================== aba Algoritmos -->
+  <section class="p2-painel" role="tabpanel" id="painelAlg" aria-labelledby="abaAlg" hidden>
+    <p class="p2-fatos" id="fatosBench"></p>
+
+    <section class="p2-bloco" aria-labelledby="temposTitulo">
+      <h2 class="p2-subtitulo" id="temposTitulo">Tempo médio por tarefa</h2>
+      <div class="p2-rolagem">
+        <table class="p2-tabela" id="tabelaTempos">
+          <thead>
+            <tr>
+              <th scope="col">Algoritmo</th>
+              <th scope="col">Grafo</th>
+              <th scope="col" class="num">Tarefas</th>
+              <th scope="col" class="num">Média</th>
+              <th scope="col" class="num">Mínimo</th>
+              <th scope="col" class="num">Máximo</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="p2-bloco" aria-labelledby="escalaTitulo">
+      <h2 class="p2-subtitulo" id="escalaTitulo">Escalabilidade</h2>
+      <div id="escalas"></div>
+    </section>
+  </section>
 </main>
 
-<script src="static/js/pixel.js"></script>
-<script src="static/js/menu.js"></script>
+<script src="static/js/parte2.js"></script>
 </body>
 </html>
