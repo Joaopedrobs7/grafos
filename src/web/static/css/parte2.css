@@ -232,3 +232,11 @@
 .g-barra.is-menor .g-barra__valor { background: var(--neg); }
 .g-barra__num { text-align: right; font-variant-numeric: tabular-nums; color: var(--luar-fraco); }
 .g-barra.is-maior .g-barra__num, .g-barra.is-menor .g-barra__num { color: var(--luar); }
+
+/* [IA] Claude – textos "Como ler" e cabeçalho das barras */
+.g-como-ler { max-width: 92ch; line-height: 1.55; margin: 4px 0 14px; }
+.g-como-ler b { color: var(--luar); font-weight: 600; }
+.g-dica-texto { margin-top: 6px; max-width: 240px; color: var(--luar-fraco); font-size: 13px; line-height: 1.4; }
+.g-barra--cab { color: var(--luar-fraco); font-size: 12px; }
+.g-barra__eixo { display: flex; justify-content: space-between; }
+.p2-tabela th small { display: block; font-weight: 400; font-size: 11px; color: var(--luar-fraco); }

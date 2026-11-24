@@ -55,6 +55,12 @@
       </label>
       <p class="p2-contagem" id="contagem" aria-live="polite"></p>
     </div>
+    <!-- [IA] Claude – explicação do que os números significam -->
+    <p class="p2-nota g-como-ler"><b>Como ler:</b> cada ponto é um jogador do time na temporada. Cada seta <b>X → Y</b> é uma
+      substituição: Y entrou em quadra no lugar de X. O <b>peso</b> da seta é quantos pontos de saldo o time ganhou (+) ou perdeu (−)
+      a cada 12 minutos com Y em quadra, comparado ao trecho anterior com X; por exemplo, −5 quer dizer que, depois dessa troca, o
+      time passou a ter 5 pontos a menos de saldo a cada 12 minutos. O <b>impacto médio</b> do jogador é a média dos pesos das trocas
+      em que ele entrou.</p>
 
     <div class="p2-palco">
       <figure class="p2-quadro">
@@ -66,10 +72,10 @@
         <figcaption class="p2-legenda">
           <span class="p2-legenda__item">
             <span class="p2-escala" aria-hidden="true"></span>
-            <span><span class="p2-escala__ponta">−20</span> peso do arco <span class="p2-escala__ponta">+20</span></span>
+            <span><span class="p2-escala__ponta">−20 piora</span> peso da troca (pts de saldo a cada 12 min, depois − antes) <span class="p2-escala__ponta">melhora +20</span></span>
           </span>
           <span class="p2-legenda__item">X <span aria-hidden="true">→</span><span class="sr-only">para</span> Y: Y entrou no lugar de X</span>
-          <span class="p2-legenda__item">tamanho do nó: minutos medidos</span>
+          <span class="p2-legenda__item">tamanho do nó: minutos em quadra</span>
         </figcaption>
       </figure>
 
@@ -105,7 +111,7 @@
               <th scope="col" aria-sort="none"><button type="button" data-ordem="nome">Jogador</button></th>
               <th scope="col" class="num" aria-sort="descending"><button type="button" data-ordem="minutos">Minutos</button></th>
               <th scope="col" class="num" aria-sort="none"><button type="button" data-ordem="entradas">Entradas</button></th>
-              <th scope="col" class="num" aria-sort="none"><button type="button" data-ordem="impacto_medio">Impacto médio</button></th>
+              <th scope="col" class="num" aria-sort="none"><button type="button" data-ordem="impacto_medio">Impacto médio<small> pts/12 min</small></button></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -130,6 +136,7 @@
 
     <section class="p2-bloco" aria-labelledby="bolinhasTitulo">
       <h2 class="p2-subtitulo" id="bolinhasTitulo">Impacto ao entrar × minutos em quadra</h2>
+      <p class="p2-nota g-como-ler" id="gComoLer"></p>
       <figure class="p2-quadro">
         <div class="p2-quadro__area" id="gArea">
           <canvas id="gTela" role="img" aria-label="Dispersão: impacto ao entrar por minutos em quadra, uma bolinha por jogador-temporada"></canvas>

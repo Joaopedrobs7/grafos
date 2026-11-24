@@ -161,7 +161,7 @@
     estado.selecionado = null;
     estado.sobre = null;
     $("contagem").innerHTML = "<b>" + d.nos.length + "</b> jogadores, <b>" + fmtInt(d.arcos.length) +
-      "</b> arcos · <b>" + fmtInt(d.arcos_negativos) + "</b> com peso negativo";
+      "</b> trocas diferentes (arcos), <b>" + fmtInt(d.arcos_negativos) + "</b> delas com peso negativo";
     var btnDij = document.querySelector('[data-modo="dijkstra"]');
     btnDij.hidden = !d.dijkstra;
     if (estado.modo === "dijkstra" && !d.dijkstra) estado.modo = null;
@@ -239,12 +239,12 @@
     return '<ol class="p2-passos">' + passos.map(function (p, k) {
       return '<li class="p2-passo"><span class="p2-passo__n">' + (k + 1) + '</span>' +
         '<span class="p2-passo__arco">' + esc(nomeNo(p.de)) + " <span>→</span> " + esc(nomeNo(p.para)) + "</span>" +
-        '<span class="p2-passo__peso ' + classeSinal(p.peso) + '">' + fmtSinal(p.peso, 2) + "</span>" +
-        '<span class="p2-passo__acum">acumulado ' + fmt(p.acumulado, 2) + "</span></li>";
+        '<span class="p2-passo__peso ' + classeSinal(p.peso) + '">' + fmtSinal(p.peso, 2) + " pts</span>" +
+        '<span class="p2-passo__acum">acumulado ' + fmtSinal(p.acumulado, 2) + " pts</span></li>";
     }).join("") + "</ol>";
   }
   function total(rotulo, v) {
-    return '<p class="p2-total"><span>' + rotulo + "</span><span>" + fmt(v, 2) + "</span></p>";
+    return '<p class="p2-total"><span>' + rotulo + "</span><span>" + fmtSinal(v, 2) + " pts por 12 min</span></p>";
   }
 
   function selecionar(i) {
@@ -529,9 +529,9 @@
     if (i === null) { dica.hidden = true; return; }
     var d = estado.dados, n = d.nos[i];
     dica.innerHTML = "<strong>" + esc(n.nome) + "</strong><dl>" +
-      "<dt>Minutos</dt><dd>" + fmt(n.minutos, 1) + "</dd>" +
-      "<dt>Entradas</dt><dd>" + fmtInt(n.entradas) + "</dd>" +
-      "<dt>Impacto médio</dt><dd>" + (n.impacto_medio === null ? "–" : fmtSinal(n.impacto_medio, 2)) + "</dd>" +
+      "<dt>Minutos em quadra</dt><dd>" + fmt(n.minutos, 1) + "</dd>" +
+      "<dt>Entradas (trocas)</dt><dd>" + fmtInt(n.entradas) + "</dd>" +
+      "<dt>Impacto médio</dt><dd>" + (n.impacto_medio === null ? "–" : fmtSinal(n.impacto_medio, 2) + " pts/12 min") + "</dd>" +
       "<dt>Arcos que saem</dt><dd>" + d.saidas[i].length + "</dd>" +
       "<dt>Arcos que chegam</dt><dd>" + d.chegadas[i].length + "</dd></dl>";
     dica.hidden = false;
@@ -680,6 +680,13 @@
     var quad = graf.pontos.filter(function (p) { return p[4] > 0 && p[3] < graf.mediana; }).length;
     $("gContagem").innerHTML = "<b>" + fmtInt(graf.pontos.length) + "</b> jogadores, <b>" + fmtInt(quad) +
       "</b> no quadrante, mediana de minutos <b>" + fmt(graf.mediana, 0) + "</b>";
+    var ex = graf.pontos.filter(function (p) { return p[4] > 0 && p[3] < graf.mediana; })
+      .sort(function (x, y) { return y[4] - x[4]; })[0] || graf.pontos.slice().sort(function (x, y) { return y[4] - x[4]; })[0];
+    $("gComoLer").innerHTML = ex ? "<b>Como ler:</b> cada bolinha é um jogador numa temporada. No eixo vertical, o <b>impacto</b>: " +
+      "quantos pontos de saldo o time ganhou (+) ou perdeu (−) a cada 12 minutos depois que o jogador entrou, comparado ao trecho " +
+      "anterior com quem ele substituiu. Exemplo: <b>" + esc(ex[0]) + "</b> (" + esc(ex[1]) + " " + rotuloTemporada(ex[2]) + ") está em <b>" +
+      fmtSinal(ex[4], 2) + "</b>: quando entrou, o saldo do time ficou, em média, " + fmt(Math.abs(ex[4]), 2) + " pontos " +
+      (ex[4] >= 0 ? "melhor" : "pior") + " a cada 12 minutos; ele somou " + fmt(ex[3], 0) + " minutos em quadra em " + fmtInt(ex[5]) + " entradas." : "";
     desenharBolinhas();
     montarBarras();
   }
@@ -719,7 +726,7 @@
     for (var xv = Math.ceil(x0 / passoX) * passoX; xv <= x1; xv += passoX) ctx.fillText(fmtInt(xv), X(xv), alt - mx.b + 8);
     ctx.fillText("minutos em quadra medidos nas trocas (tracejado = mediana " + fmt(graf.mediana, 0) + " min)", (mx.e + larg) / 2, alt - 18);
     ctx.save(); ctx.translate(14, (mx.t + alt - mx.b) / 2); ctx.rotate(-Math.PI / 2);
-    ctx.textBaseline = "middle"; ctx.fillText("impacto (pontos por 12 min)", 0, 0); ctx.restore();
+    ctx.textBaseline = "middle"; ctx.fillText("impacto: mudança no saldo do time a cada 12 min ao entrar (pts)", 0, 0); ctx.restore();
     // bolinhas
     var r = graf.pontos.length > 400 ? 3.5 : 5;
     graf.pontos.forEach(function (p) {
@@ -773,8 +780,10 @@
     if (p !== graf.sobre) { graf.sobre = p; desenharBolinhas(); }
     if (!p) { dica.hidden = true; return; }
     dica.innerHTML = "<strong>" + esc(p[0]) + "</strong><dl><dt>time</dt><dd>" + esc(p[1]) + " " + rotuloTemporada(p[2]) +
-      "</dd><dt>impacto</dt><dd>" + fmtSinal(p[4], 2) + "</dd><dt>minutos</dt><dd>" + fmt(p[3], 0) +
-      "</dd><dt>entradas</dt><dd>" + fmtInt(p[5]) + "</dd></dl>";
+      "</dd><dt>impacto</dt><dd>" + fmtSinal(p[4], 2) + " pts/12 min</dd><dt>minutos em quadra</dt><dd>" + fmt(p[3], 0) +
+      "</dd><dt>entradas</dt><dd>" + fmtInt(p[5]) + "</dd></dl><p class=\"g-dica-texto\">Quando " + esc(p[0].split(" ")[0]) +
+      " entrou, o saldo do time a cada 12 min ficou, em média, " + fmt(Math.abs(p[4]), 2) + " pontos " +
+      (p[4] >= 0 ? "melhor" : "pior") + " do que antes da troca.</p>";
     var b = $("gArea").getBoundingClientRect();
     dica.style.left = Math.min(ev.clientX - b.left + 14, b.width - 200) + "px";
     dica.style.top = (ev.clientY - b.top + 14) + "px";
@@ -785,13 +794,23 @@
   function montarBarras() {
     var chave = gTemp.value === "todas" ? "todas" : gTemp.value, lin = graf.dados.times[chave] || [];
     var n = lin.length, maxAbs = Math.max.apply(null, lin.map(function (t) { return Math.abs(t[1]); }).concat([0.1]));
-    $("gTimesNota").textContent = (chave === "todas" ? "Média de 2020-21 a 2025-26" : "Temporada " + rotuloTemporada(+chave)) +
-      ", ponderada pelas ocorrências. Os 5 maiores e os 5 menores estão destacados.";
-    $("gBarras").innerHTML = lin.slice().reverse().map(function (t, i) {
+    var periodo = chave === "todas" ? "de 2020-21 a 2025-26" : "em " + rotuloTemporada(+chave);
+    var topo = lin[lin.length - 1];
+    $("gTimesNota").innerHTML = "<b>Como ler:</b> para cada time, a média do peso de todas as substituições " + periodo +
+      " (ponderada por quantas vezes cada troca aconteceu). O valor é a <b>mudança no saldo de pontos do time a cada 12 minutos</b>: " +
+      "positivo = depois das trocas o time passou a ter saldo melhor do que antes; negativo = pior. " +
+      (topo ? "Exemplo: <b>" + esc(topo[0]) + " " + fmtSinal(topo[1], 2) + "</b> = nas " + fmtInt(topo[2]) + " substituições do " +
+        esc(topo[0]) + " " + periodo + ", o time passou a ter, em média, " + fmt(Math.abs(topo[1]), 2) + " pontos " +
+        (topo[1] >= 0 ? "a mais" : "a menos") + " de saldo a cada 12 minutos depois da troca. " : "") +
+      "Os 5 maiores e os 5 menores estão destacados.";
+    $("gBarras").innerHTML = '<li class="g-barra g-barra--cab" aria-hidden="true"><span></span><span class="g-barra__eixo">' +
+      '<span>← piora depois da troca</span><span>0</span><span>melhora depois da troca →</span></span>' +
+      '<span class="g-barra__num">pts / 12 min</span></li>' + lin.slice().reverse().map(function (t, i) {
       var classe = i < 5 ? " is-maior" : i >= n - 5 ? " is-menor" : "";
       var larg = Math.abs(t[1]) / maxAbs * 50, esq = t[1] >= 0 ? 50 : 50 - larg;
       var sel = gTime.value === t[0] ? ' style="outline:2px solid ' + CESAR + ';outline-offset:2px"' : "";
-      return '<li class="g-barra' + classe + '"' + sel + '><span class="g-barra__time">' + esc(t[0]) +
+      var dica = esc(t[0]) + ": " + fmtSinal(t[1], 2) + " pontos de saldo a cada 12 minutos depois da troca (média de " + fmtInt(t[2]) + " substituições)";
+      return '<li class="g-barra' + classe + '"' + sel + ' title="' + dica + '"><span class="g-barra__time">' + esc(t[0]) +
         '</span><span class="g-barra__trilho"><span class="g-barra__zero"></span><span class="g-barra__valor" style="left:' +
         esq + "%;width:" + larg + '%"></span></span><span class="g-barra__num">' + fmtSinal(t[1], 2) + "</span></li>";
     }).join("");
