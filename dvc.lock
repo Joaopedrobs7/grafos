@@ -5,40 +5,66 @@ stages:
     deps:
     - path: src/parte2/baixar.py
       hash: md5
-      md5: 3ef3481862c5205f7d8b2ab071b0c337
-      size: 3186
+      md5: 9d5928f65314eebeeafcbba42a091555
+      size: 3346
     outs:
     - path: data/dataset_parte2/raw
       hash: md5
-      md5: 9eaf817d2bb09f440c40a43af7d480a2.dir
-      size: 47980493
-      nfiles: 5
+      md5: 4456b7ac17cdaf0b36ed3bb4fffb28c2.dir
+      size: 988678986
+      nfiles: 6
   preparar:
     cmd: python -m src.parte2.preparar
     deps:
     - path: data/dataset_parte2/raw
       hash: md5
-      md5: 9eaf817d2bb09f440c40a43af7d480a2.dir
-      size: 47980493
-      nfiles: 5
+      md5: 4456b7ac17cdaf0b36ed3bb4fffb28c2.dir
+      size: 988678986
+      nfiles: 6
     - path: src/parte2/preparar.py
       hash: md5
-      md5: 407792e3e80174c9e0a8a532e7ce1bdb
-      size: 6451
+      md5: f9f3411bd9e8bcda464a44c8cf19391c
+      size: 6587
     params:
       params.yaml:
         preparar:
           tipos:
           - 2
-          - 4
-          - 5
-          - 6
-          temporada_min: 1946
-          temporada_max: 2026
+          temporada_min: 2000
+          temporada_max: 2025
           sinal_peso: -1
     outs:
     - path: data/dataset_parte2/processed
       hash: md5
-      md5: 0d35b4d54041de43bf13505dc7c78bd0.dir
-      size: 8097099
+      md5: 547157bfe20dc70610614be64fd25b83.dir
+      size: 46672
+      nfiles: 2
+  rotacao:
+    cmd: python -m src.parte2.rotacao
+    deps:
+    - path: data/dataset_parte2/raw
+      hash: md5
+      md5: 4456b7ac17cdaf0b36ed3bb4fffb28c2.dir
+      size: 988678986
+      nfiles: 6
+    - path: src/parte2/preparar.py
+      hash: md5
+      md5: f9f3411bd9e8bcda464a44c8cf19391c
+      size: 6587
+    - path: src/parte2/rotacao.py
+      hash: md5
+      md5: 852f86e38d25b1152f256beeabc69be4
+      size: 13913
+    params:
+      params.yaml:
+        rotacao:
+          temporada_min: 2020
+          temporada_max: 2025
+          min_ocorrencias: 2
+          min_minutos: 3
+    outs:
+    - path: data/dataset_parte2/rotacao
+      hash: md5
+      md5: c9b92ad7f7fd2f9a6470cdc3b91098b2.dir
+      size: 2333847
       nfiles: 3

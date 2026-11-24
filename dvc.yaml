@@ -14,3 +14,13 @@ stages:
     - preparar
     outs:
     - data/dataset_parte2/processed
+  rotacao:
+    cmd: python -m src.parte2.rotacao
+    deps:
+    - data/dataset_parte2/raw
+    - src/parte2/preparar.py
+    - src/parte2/rotacao.py
+    params:
+    - rotacao
+    outs:
+    - data/dataset_parte2/rotacao
