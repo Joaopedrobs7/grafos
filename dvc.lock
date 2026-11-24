@@ -5,14 +5,14 @@ stages:
     deps:
     - path: src/parte2/baixar.py
       hash: md5
-      md5: 9d5928f65314eebeeafcbba42a091555
-      size: 3346
+      md5: c2c136c896abcf73a59bf21e78b31fe1
+      size: 3419
     outs:
     - path: data/dataset_parte2/raw
       hash: md5
-      md5: 4456b7ac17cdaf0b36ed3bb4fffb28c2.dir
-      size: 988678986
-      nfiles: 6
+      md5: c40dd9be47b95db32fcf7924e2f85a2d.dir
+      size: 1380485481
+      nfiles: 7
   preparar:
     cmd: python -m src.parte2.preparar
     deps:

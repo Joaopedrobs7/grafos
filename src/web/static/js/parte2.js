@@ -1084,8 +1084,8 @@
     var chave = gTemp.value, m = graf.dados.correlacao[chave];
     if (!m) return;
     var periodo = chave === "todas" ? "de 2020-21 a 2025-26" : "em " + rotuloTemporada(+chave);
-    $("gCorrLer").innerHTML = "Jogadores com ≥ " + graf.dados.min_entradas + " entradas " + periodo + " (n = " + fmtInt(m.n) +
-      "). +1: sobem juntos; −1: um sobe e o outro desce; 0: sem relação.";
+    $("gCorrLer").innerHTML = "Estatísticas por 36 min dos jogadores com ≥ " + graf.dados.min_entradas + " entradas " + periodo +
+      " (n = " + fmtInt(m.n) + "). +1: sobem juntos; −1: um sobe e o outro desce; 0: sem relação.";
     var v = m.variaveis;
     // só a metade de baixo (a matriz é simétrica) e sem a diagonal
     $("gCorr").innerHTML = "<thead><tr><th></th>" + v.slice(0, -1).map(function (x) { return "<th scope=\"col\">" + esc(x) + "</th>"; }).join("") +

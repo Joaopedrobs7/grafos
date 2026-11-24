@@ -6,63 +6,139 @@
   },
   "e4_correlacao_spearman": {
     "n": 2085,
-    "n_completos": 2083,
+    "n_completos": 2085,
     "faltantes": {
       "impacto": 0,
-      "minutos": 0,
-      "entradas": 0,
-      "altura": 0,
-      "peso": 2,
-      "ano do draft": 0
+      "pontos/36": 0,
+      "assist./36": 0,
+      "rebotes/36": 0,
+      "roubos/36": 0,
+      "tocos/36": 0,
+      "erros/36": 0,
+      "% arremesso real": 0,
+      "taxa de 3": 0,
+      "plus-minus/36": 0
     },
     "matriz": {
       "impacto": {
         "impacto": 1.0,
-        "minutos": 0.081,
-        "entradas": -0.001,
-        "altura": 0.005,
-        "peso": -0.005,
-        "ano do draft": -0.014
+        "pontos/36": 0.109,
+        "assist./36": 0.103,
+        "rebotes/36": 0.043,
+        "roubos/36": 0.029,
+        "tocos/36": 0.011,
+        "erros/36": 0.053,
+        "% arremesso real": 0.119,
+        "taxa de 3": -0.018,
+        "plus-minus/36": 0.241
       },
-      "minutos": {
-        "impacto": 0.081,
-        "minutos": 1.0,
-        "entradas": 0.719,
-        "altura": 0.029,
-        "peso": 0.055,
-        "ano do draft": 0.055
+      "pontos/36": {
+        "impacto": 0.109,
+        "pontos/36": 1.0,
+        "assist./36": 0.321,
+        "rebotes/36": 0.01,
+        "roubos/36": -0.121,
+        "tocos/36": -0.112,
+        "erros/36": 0.55,
+        "% arremesso real": 0.252,
+        "taxa de 3": -0.195,
+        "plus-minus/36": 0.136
       },
-      "entradas": {
-        "impacto": -0.001,
-        "minutos": 0.719,
-        "entradas": 1.0,
-        "altura": -0.058,
-        "peso": -0.038,
-        "ano do draft": 0.073
+      "assist./36": {
+        "impacto": 0.103,
+        "pontos/36": 0.321,
+        "assist./36": 1.0,
+        "rebotes/36": -0.243,
+        "roubos/36": 0.31,
+        "tocos/36": -0.313,
+        "erros/36": 0.642,
+        "% arremesso real": -0.17,
+        "taxa de 3": -0.098,
+        "plus-minus/36": 0.121
       },
-      "altura": {
-        "impacto": 0.005,
-        "minutos": 0.029,
-        "entradas": -0.058,
-        "altura": 1.0,
-        "peso": 0.74,
-        "ano do draft": 0.062
+      "rebotes/36": {
+        "impacto": 0.043,
+        "pontos/36": 0.01,
+        "assist./36": -0.243,
+        "rebotes/36": 1.0,
+        "roubos/36": -0.096,
+        "tocos/36": 0.652,
+        "erros/36": 0.103,
+        "% arremesso real": 0.282,
+        "taxa de 3": -0.545,
+        "plus-minus/36": 0.065
       },
-      "peso": {
-        "impacto": -0.005,
-        "minutos": 0.055,
-        "entradas": -0.038,
-        "altura": 0.74,
-        "peso": 1.0,
-        "ano do draft": -0.11
+      "roubos/36": {
+        "impacto": 0.029,
+        "pontos/36": -0.121,
+        "assist./36": 0.31,
+        "rebotes/36": -0.096,
+        "roubos/36": 1.0,
+        "tocos/36": 0.027,
+        "erros/36": 0.148,
+        "% arremesso real": -0.196,
+        "taxa de 3": -0.039,
+        "plus-minus/36": 0.089
       },
-      "ano do draft": {
-        "impacto": -0.014,
-        "minutos": 0.055,
-        "entradas": 0.073,
-        "altura": 0.062,
-        "peso": -0.11,
-        "ano do draft": 1.0
+      "tocos/36": {
+        "impacto": 0.011,
+        "pontos/36": -0.112,
+        "assist./36": -0.313,
+        "rebotes/36": 0.652,
+        "roubos/36": 0.027,
+        "tocos/36": 1.0,
+        "erros/36": -0.018,
+        "% arremesso real": 0.234,
+        "taxa de 3": -0.41,
+        "plus-minus/36": 0.04
+      },
+      "erros/36": {
+        "impacto": 0.053,
+        "pontos/36": 0.55,
+        "assist./36": 0.642,
+        "rebotes/36": 0.103,
+        "roubos/36": 0.148,
+        "tocos/36": -0.018,
+        "erros/36": 1.0,
+        "% arremesso real": -0.068,
+        "taxa de 3": -0.373,
+        "plus-minus/36": -0.07
+      },
+      "% arremesso real": {
+        "impacto": 0.119,
+        "pontos/36": 0.252,
+        "assist./36": -0.17,
+        "rebotes/36": 0.282,
+        "roubos/36": -0.196,
+        "tocos/36": 0.234,
+        "erros/36": -0.068,
+        "% arremesso real": 1.0,
+        "taxa de 3": -0.205,
+        "plus-minus/36": 0.333
+      },
+      "taxa de 3": {
+        "impacto": -0.018,
+        "pontos/36": -0.195,
+        "assist./36": -0.098,
+        "rebotes/36": -0.545,
+        "roubos/36": -0.039,
+        "tocos/36": -0.41,
+        "erros/36": -0.373,
+        "% arremesso real": -0.205,
+        "taxa de 3": 1.0,
+        "plus-minus/36": 0.028
+      },
+      "plus-minus/36": {
+        "impacto": 0.241,
+        "pontos/36": 0.136,
+        "assist./36": 0.121,
+        "rebotes/36": 0.065,
+        "roubos/36": 0.089,
+        "tocos/36": 0.04,
+        "erros/36": -0.07,
+        "% arremesso real": 0.333,
+        "taxa de 3": 0.028,
+        "plus-minus/36": 1.0
       }
     }
   },

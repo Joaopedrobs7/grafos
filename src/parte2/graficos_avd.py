@@ -3,8 +3,8 @@
 
 - E1 (exploratório): histograma do peso das trocas, linha no zero, negativos e positivos em cores
   diferentes, mediana marcada;
-- E4 (exploratório): matriz de correlação de Spearman entre impacto, minutos, entradas, altura, peso e
-  ano do draft (jogador-temporada com >= 30 entradas), valor escrito em cada célula, escala -1 a +1;
+- E4 (exploratório): matriz de correlação de Spearman entre o impacto e as estatísticas de jogo por 36 min
+  (PlayerStatistics.csv; jogador-temporada com >= 30 entradas), valor escrito em cada célula, escala -1 a +1;
 - impacto x minutos (explanatório): uma bolinha por jogador-temporada com >= 30 entradas, quadrante
   "impacto > 0 e minutos < mediana" destacado, cor por time e nome do jogador;
 - X6 (explanatório): times mais eficientes em trocas, média das 6 temporadas, 30 times ordenados, zero
@@ -78,7 +78,39 @@ def dados(rot: Path = ROT, raw: Path = RAW) -> tuple[pd.DataFrame, pd.DataFrame]
     jog = jog.merge(pl, on="personId", how="left")
     jog["altura_cm"] = (jog["heightInches"] * 2.54).round(1)
     jog["peso_kg"] = (jog["bodyWeightLbs"] * 0.4536).round(1)
+    est = estatisticas_36(raw)
+    if est is not None:
+        jog = jog.merge(est, on=["personId", "temporada"], how="left")
     return arcos, jog
+
+
+# [IA] Claude – estatísticas de jogo por 36 minutos (temporada regular), somando todos os jogos do jogador na temporada
+COLS_CORRELACAO = {"impacto": "impacto", "pontos36": "pontos/36", "assist36": "assist./36", "rebotes36": "rebotes/36",
+                   "roubos36": "roubos/36", "tocos36": "tocos/36", "erros36": "erros/36",
+                   "arremesso_real": "% arremesso real", "taxa_de_3": "taxa de 3", "pm36": "plus-minus/36"}
+
+
+def estatisticas_36(raw: Path = RAW) -> pd.DataFrame | None:
+    caminho = raw / "PlayerStatistics.csv"
+    if not caminho.exists():
+        return None
+    cols = ["personId", "gameId", "numMinutes", "points", "assists", "reboundsTotal", "steals", "blocks", "turnovers",
+            "fieldGoalsAttempted", "threePointersAttempted", "freeThrowsAttempted", "plusMinusPoints"]
+    ps = pd.read_csv(caminho, usecols=cols, low_memory=False)
+    for c in cols:
+        ps[c] = pd.to_numeric(ps[c], errors="coerce")
+    ps["temporada"] = ps["gameId"] // 10**5 % 100 + 2000
+    ps = ps[(ps["gameId"] // 10**7 == 2) & (ps["numMinutes"] > 0)]
+    g = ps.groupby(["personId", "temporada"]).sum(numeric_only=True)
+    por36 = lambda c: g[c] / g["numMinutes"] * 36
+    return pd.DataFrame({
+        "pontos36": por36("points"), "assist36": por36("assists"), "rebotes36": por36("reboundsTotal"),
+        "roubos36": por36("steals"), "tocos36": por36("blocks"), "erros36": por36("turnovers"),
+        # true shooting: pontos / (2 × (arremessos + 0,44 × lances livres))
+        "arremesso_real": g["points"] / (2 * (g["fieldGoalsAttempted"] + 0.44 * g["freeThrowsAttempted"])),
+        "taxa_de_3": g["threePointersAttempted"] / g["fieldGoalsAttempted"],
+        "pm36": por36("plusMinusPoints"),
+    }).reset_index()
 
 
 def e1_histograma(arcos: pd.DataFrame, destino: Path) -> dict:
@@ -100,22 +132,25 @@ def e1_histograma(arcos: pd.DataFrame, destino: Path) -> dict:
 
 
 def e4_correlacao(jog: pd.DataFrame, destino: Path) -> dict:
+    """Spearman entre o impacto e as estatísticas de jogo por 36 min (metade de baixo da matriz)."""
+    import numpy as np
     plt = _plt()
-    cols = {"impacto": "impacto", "minutos_medidos": "minutos", "entradas": "entradas",
-            "altura_cm": "altura", "peso_kg": "peso", "draftYear": "ano do draft"}
+    cols = {k: v for k, v in COLS_CORRELACAO.items() if k in jog.columns}
     base = jog[jog["entradas"] >= MIN_ENTRADAS][list(cols)].rename(columns=cols)
     c = base.corr(method="spearman")
-    fig, ax = plt.subplots(figsize=(6.6, 5.6))
-    im = ax.imshow(c.values, cmap="RdBu", vmin=-1, vmax=1)
-    ax.set_xticks(range(len(c)), c.columns, rotation=35, ha="right")
-    ax.set_yticks(range(len(c)), c.index)
-    for i in range(len(c)):
-        for j in range(len(c)):
+    n = len(c)
+    fig, ax = plt.subplots(figsize=(9.5, 7.8))
+    for i in range(1, n):
+        for j in range(i):
             v = c.values[i, j]
-            ax.text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=9, color="white" if abs(v) > 0.6 else "black")
-    fig.colorbar(im, ax=ax, label="correlação de Spearman (−1 a +1)", shrink=0.85)
-    ax.set_title(f"Correlação de Spearman por jogador-temporada\n(≥ {MIN_ENTRADAS} entradas, n = {_mil(base.dropna().shape[0])})")
-    ax.spines[:].set_visible(False)
+            ax.add_patch(plt.Rectangle((j, n - 1 - i), 0.94, 0.94, color=POS if v >= 0 else NEG, alpha=0.12 + 0.75 * min(abs(v), 1)))
+            ax.text(j + 0.47, n - 1 - i + 0.47, f"{v:+.2f}".replace(".", ","), ha="center", va="center", fontsize=9.5, weight="bold")
+    ax.set_xlim(0, n - 1); ax.set_ylim(0, n - 1)
+    ax.set_xticks([j + 0.47 for j in range(n - 1)], c.columns[:-1], rotation=35, ha="right")
+    ax.set_yticks([n - 1 - i + 0.47 for i in range(1, n)], c.index[1:])
+    ax.tick_params(length=0); ax.spines[:].set_visible(False)
+    ax.set_title(f"Correlação de Spearman: impacto × estatísticas de jogo por 36 min\n(jogador-temporada com ≥ {MIN_ENTRADAS} entradas, "
+                 f"n = {_mil(base.dropna().shape[0])}; azul = positiva, vermelho = negativa)")
     fig.tight_layout(); fig.savefig(destino, dpi=160); plt.close(fig)
     return {"n": int(len(base)), "n_completos": int(base.dropna().shape[0]),
             "faltantes": {k: int(v) for k, v in base.isna().sum().items()},

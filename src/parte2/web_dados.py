@@ -234,8 +234,8 @@ def montar_graficos(arestas: list[dict], jogadores: list[dict], min_entradas: in
         hist[str(ano)] = histograma(g["peso"])
     from .graficos_avd import dados as _dados_avd
     _, jog = _dados_avd()
-    cols = {"impacto": "impacto", "minutos_medidos": "minutos", "entradas": "entradas", "altura_cm": "altura",
-            "peso_kg": "peso", "draftYear": "ano do draft"}
+    from .graficos_avd import COLS_CORRELACAO
+    cols = {k: v for k, v in COLS_CORRELACAO.items() if k in jog.columns}
     corr = {}
     base_tudo = jog[jog["entradas"] >= min_entradas]
     for chave, base in [("todas", base_tudo)] + [(str(a), g) for a, g in base_tudo.groupby("temporada")]:
