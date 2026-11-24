@@ -1,6 +1,6 @@
 <!doctype html>
-<!-- [IA] Claude – tela de seleção de projeto, no estilo do menu de um videogame: a Parte 1 (labirinto) está
-     liberada e a Parte 2 (dataset e comparação de algoritmos) aparece trancada até existir. -->
+<!-- [IA] Claude – tela de seleção de projeto, no estilo do menu de um videogame: Parte 1 (labirinto) e
+     Parte 2 (grafo de rotação e comparação de algoritmos). -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -69,18 +69,23 @@
         <span class="cartucho__acao" aria-hidden="true">Jogar</span>
       </a>
 
-      <a class="cartucho cartucho--trancado px" role="link" tabindex="0" aria-disabled="true" data-slot data-trancado
-         aria-describedby="slot2Desc">
-        <span class="cartucho__arte" aria-hidden="true">
-          <svg viewBox="0 0 9 10" shape-rendering="crispEdges"><path d="M2 0h5v1H2zM1 1h1v3H1zM7 1h1v3H7zM0 4h9v6H0z"/><path fill="#120F0C" d="M4 6h1v2H4z"/></svg>
+      <!-- [IA] Claude – Parte 2 liberada: leva à página do grafo de rotação (/parte2) -->
+      <a class="cartucho px" href="parte2" data-slot aria-describedby="slot2Desc">
+        <span class="cartucho__arte cartucho__arte--grafo" aria-hidden="true">
+          <svg viewBox="0 0 22 14" shape-rendering="crispEdges">
+            <path fill="#4A3E33" d="M4 3h7v1H4zM13 3h1v1h-1zM5 4h1v1H5zM6 5h1v1H6zM7 6h1v1H7zM8 7h1v1H8zM14 4h1v1h-1zM15 5h1v1h-1zM16 6h1v1h-1zM10 10h6v1h-6z"/>
+            <path fill="#FF5470" d="M4 4h1v5H4z"/>
+            <path fill="#35C8F0" d="M12 4h1v5h-1zM17 7h1v2h-1z"/>
+            <path fill="#EFE6D8" d="M1 0h3v3H1zM11 0h3v3h-3zM9 8h3v3H9zM16 9h3v3h-3zM3 9h3v3H3z"/>
+            <path fill="#FFB347" d="M18 1h3v3h-3z"/>
+          </svg>
         </span>
         <span class="cartucho__texto">
-          <span class="cartucho__parte">Parte 2
-            <span class="cartucho__selo">Em breve</span>
-          </span>
-          <span class="cartucho__nome">Dataset e comparação de algoritmos</span>
-          <span class="cartucho__desc" id="slot2Desc">Um grafo maior, o benchmark dos algoritmos e a análise dos dados.</span>
+          <span class="cartucho__parte">Parte 2</span>
+          <span class="cartucho__nome">Grafo de rotação</span>
+          <span class="cartucho__desc" id="slot2Desc">Substituições da NBA de 2020-21 a 2025-26 como arcos com peso. Ciclos negativos, caminhos e o benchmark de BFS, DFS, Dijkstra e <span class="nw">Bellman-Ford</span>.</span>
         </span>
+        <span class="cartucho__acao" aria-hidden="true">Abrir</span>
       </a>
     </div>
     <p class="escolha__aviso" id="aviso" role="status" aria-live="polite"></p>

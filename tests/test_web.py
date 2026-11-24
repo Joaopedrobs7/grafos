@@ -1,6 +1,7 @@
 # [IA] Claude – testes da aplicação web (rotas, página 404) e da exportação standalone do labirinto
 import json
 import re
+from pathlib import Path
 
 import pytest
 
@@ -22,14 +23,15 @@ def cliente():
 
 
 # ---------------------------------------------------------------- rotas
-# [IA] Claude – "/" é o menu de projetos; a Parte 1 mora em /parte1 e a Parte 2 (provisória) em /parte2
+# [IA] Claude – "/" é o menu de projetos; a Parte 1 mora em /parte1 e a Parte 2 (grafo de rotação) em /parte2
 def test_raiz_e_o_menu_de_projetos(cliente):
     r = cliente.get("/")
     assert r.status_code == 200 and r.mimetype == "text/html"
     html = r.get_data(as_text=True)
     assert "Escolha o projeto" in html
     assert 'href="parte1"' in html                       # relativo: funciona atrás de um prefixo de caminho
-    assert 'aria-disabled="true"' in html and "Parte 2" in html
+    assert 'href="parte2"' in html and "Parte 2" in html     # slot da Parte 2 liberado
+    assert 'aria-disabled="true"' not in html and "data-trancado" not in html
     assert "static/js/menu.js" in html and "static/js/app.js" not in html
 
 
@@ -43,11 +45,15 @@ def test_parte1_carrega_o_labirinto(cliente):
     assert cliente.get("/static/js/app.js").status_code == 200
 
 
-def test_parte2_e_a_pagina_provisoria(cliente):
+def test_parte2_carrega_a_pagina_do_grafo_de_rotacao(cliente):
     r = cliente.get("/parte2")
     assert r.status_code == 200 and r.mimetype == "text/html"
     html = r.get_data(as_text=True)
-    assert "Parte 2 em construção" in html and 'href="./"' in html
+    assert "Grafo de rotação" in html and 'href="./"' in html
+    assert "static/js/parte2.js" in html and "static/css/parte2.css" in html
+    assert 'role="tablist"' in html and "Algoritmos" in html
+    for arquivo in ("js/parte2.js", "css/parte2.css"):
+        assert cliente.get(f"/static/{arquivo}").status_code == 200
 
 
 @pytest.mark.parametrize("antigo, destino", [
@@ -293,3 +299,175 @@ def test_exportador_recusa_template_quebrado(tmp_path, cabeca, corpo, motivo):
     template, saida = _projeto(tmp_path, cabeca, corpo)
     with pytest.raises(ValueError, match=motivo):
         gerar_html_interativo(saida, [], extras=[M01], template=template)
+
+
+# ---------------------------------------------------------------- API da Parte 2 (dados pré-calculados)
+# [IA] Claude – rotas api/parte2/* leem out/parte2/web/ (src/parte2/web_dados.py); nenhum algoritmo roda no pedido
+def test_parte2_indice(cliente):
+    r = cliente.get("/api/parte2/indice")
+    assert r.status_code == 200 and r.mimetype == "application/json"
+    d = r.get_json()
+    assert d["grafo"] == "rotacao" and d["componentes"] == 180
+    assert d["V"] == 3507 and d["E"] == 21672
+    assert [t["ano"] for t in d["temporadas"]] == list(range(2020, 2026))
+    assert sum(len(t["times"]) for t in d["temporadas"]) == d["componentes"]
+    assert sum(t["arcos"] for temp in d["temporadas"] for t in temp["times"]) == d["E"]
+
+
+def test_parte2_rotacao_de_um_time(cliente):
+    r = cliente.get("/api/parte2/rotacao/ATL/2020")
+    assert r.status_code == 200
+    d = r.get_json()
+    assert d["time"] == "ATL" and d["temporada"] == 2020
+    n = len(d["nos"])
+    assert all(0 <= a[0] < n and 0 <= a[1] < n for a in d["arcos"])
+    minutos = [no["minutos"] for no in d["nos"]]
+    assert minutos == sorted(minutos, reverse=True)                 # nós em ordem de minutos
+    assert d["arcos_negativos"] == sum(a[2] < 0 for a in d["arcos"])
+    pesos = {(a[0], a[1]): a[2] for a in d["arcos"]}
+    bf = d["bellman_ford"]
+    assert bf["status"] == "CICLO_NEGATIVO" and bf["ciclo"][0] == bf["ciclo"][-1]
+    for passos, custo in ((bf["passos"], bf["custo"]), (d["sem_ciclo"]["passos"], d["sem_ciclo"]["custo"])):
+        assert all(pesos[(p["de"], p["para"])] == p["peso"] for p in passos)   # todo passo é um arco do grafo
+        assert passos[-1]["acumulado"] == pytest.approx(custo, abs=1e-3)
+    assert bf["custo"] < 0
+    sc = d["sem_ciclo"]
+    assert sc["status"] == "OK" and sc["caminho"][0] == sc["fonte"] and sc["caminho"][-1] == sc["destino"]
+    assert all(minutos[p["de"]] >= minutos[p["para"]] for p in sc["passos"])  # recorte "descer na rotação"
+
+
+def test_parte2_rotacao_com_par_do_dijkstra(cliente):
+    d = cliente.get("/api/parte2/rotacao/hou/2020").get_json()     # sigla em minúsculas também vale
+    dj = d["dijkstra"]
+    assert dj["caminho_igual"] is True
+    assert dj["custo_reconvertido"] == pytest.approx(dj["custo_bellman_ford"])
+    assert dj["passos"][-1]["acumulado"] == pytest.approx(dj["custo_reconvertido"], abs=1e-3)
+
+
+@pytest.mark.parametrize("url, status", [
+    ("/api/parte2/rotacao/XYZ/2020", 404), ("/api/parte2/rotacao/ATL/1999", 404),
+    ("/api/parte2/rotacao/A..B/2020", 400), ("/api/parte2/rotacao/ATL/vinte", 404),
+])
+def test_parte2_rotacao_invalida(cliente, url, status):
+    r = cliente.get(url)
+    assert r.status_code == status
+
+
+def test_parte2_benchmark(cliente):
+    r = cliente.get("/api/parte2/benchmark")
+    assert r.status_code == 200
+    d = r.get_json()
+    assert d["repeticoes"] >= 5 and d["fracoes"] == [0.1, 0.5, 1.0]
+    assert {t["algoritmo"] for t in d["tempos"]} == {"BFS", "DFS", "Dijkstra", "Bellman-Ford"}
+    assert all(t["min_ms"] <= t["media_ms"] <= t["max_ms"] for t in d["tempos"])
+    algs = {(e["grafo"], e["algoritmo"]) for e in d["escalabilidade"]}
+    for g, a in algs:
+        assert sorted(e["amostra"] for e in d["escalabilidade"] if (e["grafo"], e["algoritmo"]) == (g, a)) == [0.1, 0.5, 1.0]
+
+
+def test_parte2_sem_dados_responde_503(cliente, tmp_path, monkeypatch):
+    import src.web.app as web
+    monkeypatch.setattr(web, "PARTE2_WEB", tmp_path)
+    assert cliente.get("/api/parte2/indice").status_code == 503
+    assert cliente.get("/api/parte2/benchmark").status_code == 503
+    assert cliente.get("/api/parte2/rotacao/ATL/2020").status_code == 404
+
+
+def test_web_dados_com_grafo_sintetico(tmp_path):
+    """web_dados só remonta o que a frente de algoritmos gravou (ciclo e caminho vêm do JSON)."""
+    import csv as _csv
+    from src.parte2 import rotacao_casos as rc, web_dados
+    pasta = tmp_path / "rotacao"
+    pasta.mkdir()
+    arcos = [("A1", "A2", -3.0), ("A2", "A1", 1.0), ("A1", "A3", 2.0), ("A2", "A3", -4.0), ("A3", "A1", 0.5)]
+    minutos = {"A1": 500, "A2": 400, "A3": 300}
+    rot = lambda j: f"Jogador {j}|AAA|2024"  # noqa: E731
+    with (pasta / "arestas_rotacao.csv").open("w", encoding="utf-8", newline="") as f:
+        w = _csv.writer(f)
+        w.writerow(["origem", "destino", "peso", "temporada", "time", "ocorrencias"])
+        for u, v, p in arcos:
+            w.writerow([rot(u), rot(v), p, 2024, "AAA", 2])
+    with (pasta / "jogadores.csv").open("w", encoding="utf-8", newline="") as f:
+        w = _csv.writer(f)
+        w.writerow(["no", "nome", "minutos_medidos", "entradas", "impacto_medio"])
+        for j, m in minutos.items():
+            w.writerow([rot(j), f"Jogador {j}", m, 3, ""])
+    res = tmp_path / "out"
+    rc.main(pasta / "arestas_rotacao.csv", pasta / "jogadores.csv", res)
+    web_dados.main(pasta, res, res / "web")
+    d = json.loads((res / "web" / "rotacao" / "AAA_2024.json").read_text(encoding="utf-8"))
+    assert [n["nome"] for n in d["nos"]] == ["Jogador A1", "Jogador A2", "Jogador A3"]
+    assert d["arcos"][0] == [0, 1, -3.0, 2] and d["arcos_negativos"] == 2
+    assert d["bellman_ford"]["status"] == "CICLO_NEGATIVO"
+    assert d["bellman_ford"]["passos"][-1]["acumulado"] == pytest.approx(d["bellman_ford"]["custo"])
+    assert d["sem_ciclo"]["caminho"] == [0, 1, 2] and d["sem_ciclo"]["custo"] == pytest.approx(-7.0)
+    ind = json.loads((res / "web" / "indice.json").read_text(encoding="utf-8"))
+    assert ind["V"] == 3 and ind["E"] == 5 and ind["temporadas"][0]["times"][0]["time"] == "AAA"
+    assert not (res / "web" / "benchmark.json").exists()        # sem parte2_report.json, sem benchmark
+
+
+
+# [IA] Claude – nós do JSON de rotação: personId (foto) e impacto médio ponderado pelas ocorrências
+def test_web_dados_personid_e_impacto_ponderado():
+    from src.parte2 import web_dados
+    rot = lambda j: f"Jogador {j}|AAA|2024"  # noqa: E731
+    arestas = [{"origem": rot(u), "destino": rot(v), "peso": p, "ocorrencias": oc, "temporada": 2024, "time": "AAA"}
+               for u, v, p, oc in [("A1", "A3", 2.0, 1), ("A2", "A3", -4.0, 3), ("A3", "A1", 1.0, 2)]]
+    jogadores = [{"no": rot(j), "personId": pid, "nome": f"Jogador {j}", "minutos_medidos": m}
+                 for j, pid, m in [("A1", "101", 500), ("A2", "102", 400), ("A3", "103", 300)]]
+    vazio = {"com_ciclo": {"componentes": []}, "sem_ciclo": {"componentes": []}}
+    d = web_dados.montar_componentes(jogadores, arestas, vazio, {})[("AAA", 2024)]
+    a3 = next(n for n in d["nos"] if n["nome"] == "Jogador A3")
+    assert a3["personId"] == 103 and a3["entradas"] == 4
+    assert a3["impacto_medio"] == pytest.approx((2.0 * 1 - 4.0 * 3) / 4)   # -2.5 (a média simples seria -1.0)
+    a2 = next(n for n in d["nos"] if n["nome"] == "Jogador A2")
+    assert a2["entradas"] == 0 and a2["impacto_medio"] is None
+
+
+def test_rotacao_json_real_tem_personid_e_impacto_ponderado():
+    pasta = Path(__file__).resolve().parents[1] / "out" / "parte2" / "web" / "rotacao"
+    arquivos = sorted(pasta.glob("*.json")) if pasta.exists() else []
+    if not arquivos:
+        pytest.skip("out/parte2/web/rotacao ainda não gerado")
+    d = json.loads(arquivos[-1].read_text(encoding="utf-8"))
+    assert all("personId" in n for n in d["nos"]) and any(n["personId"] for n in d["nos"])
+    i = max(range(len(d["nos"])), key=lambda k: d["nos"][k]["entradas"])
+    chegam = [a for a in d["arcos"] if a[1] == i]
+    ent = sum(a[3] for a in chegam)
+    assert d["nos"][i]["entradas"] == ent
+    assert d["nos"][i]["impacto_medio"] == pytest.approx(sum(a[2] * a[3] for a in chegam) / ent, abs=1e-3)
+
+# [IA] Claude – dados dos gráficos interativos da Parte 2 (impacto x minutos e times)
+def test_parte2_graficos(cliente):
+    r = cliente.get("/api/parte2/graficos")
+    assert r.status_code == 200
+    d = r.get_json()
+    assert d["colunas_jogadores"] == ["nome", "time", "temporada", "minutos", "impacto", "entradas"]
+    assert d["jogadores"] and all(p[5] >= d["min_entradas"] for p in d["jogadores"])
+    assert set(d["times"]) >= {"todas", "2025"} and len(d["times"]["todas"]) == 30
+    impactos = [t[1] for t in d["times"]["todas"]]
+    assert impactos == sorted(impactos)  # ordenado do menor para o maior
+
+
+# [IA] Claude – faixa H3 (percentis por minuto em quadra), barras 100% H1 (categorias do peso por placar) e figuras
+def test_parte2_graficos_exploratorios_e_figuras(cliente):
+    d = cliente.get("/api/parte2/graficos").get_json()
+    assert "histograma" not in d and "correlacao" not in d
+    assert set(d["h3"]) >= {"todas", "2020", "2025"} and set(d["h1"]) >= {"todas", "2020", "2025"}
+    for chave, fs in d["h3"].items():
+        assert [f["minutos"] for f in fs][:3] == ["1", "2", "3"] and fs[-1]["minutos"].endswith("+")
+        for f in fs:
+            assert f["p10"] <= f["p25"] <= f["mediana"] <= f["p75"] <= f["p90"]
+            assert f["n"] > 0 and 0 <= f["pct_extremos"] <= 100 and 0 <= f["pct_negativos"] <= 100
+    assert len(d["categorias_h1"]) == 5
+    for chave, gs in d["h1"].items():
+        assert [g["grupo"] for g in gs] == ["até 5 pts", "6 a 15 pts", "mais de 15 pts"]
+        for g in gs:
+            assert abs(sum(g["pcts"]) - 100) < 0.05 and sum(g["contagens"]) == g["n"]
+    # as contagens das temporadas somam o total de "todas", e H3 e H1 cobrem as mesmas trocas
+    for qual in ("h3", "h1"):
+        assert sum(g["n"] for g in d[qual]["todas"]) == sum(g["n"] for c, gs in d[qual].items() if c != "todas" for g in gs)
+    assert sum(f["n"] for f in d["h3"]["todas"]) == sum(g["n"] for g in d["h1"]["todas"])
+    r = cliente.get("/api/parte2/figura/tempo_por_tamanho.png")
+    assert r.status_code == 200 and r.mimetype == "image/png"
+    assert cliente.get("/api/parte2/figura/nao_existe.png").status_code == 404

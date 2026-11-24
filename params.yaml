@@ -3,4 +3,10 @@ preparar:
   tipos: [2]
   temporada_min: 2000
   temporada_max: 2025
-  sinal_peso: -1
+
+# [IA] Claude – grafo de rotação (substituições do jogada a jogada); o grupo decide e justifica no PDF
+rotacao:
+  temporada_min: 2020      # 2020-21: primeira temporada completa no formato novo do jogada a jogada
+  temporada_max: 2025      # 2025-26: última temporada completa
+  min_ocorrencias: 2       # a troca X -> Y precisa ter acontecido pelo menos 2 vezes na temporada
+  min_minutos: 3           # minutos mínimos somados antes e depois da troca, por arco (evita divisão por quase zero)

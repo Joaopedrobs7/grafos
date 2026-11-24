@@ -4,7 +4,7 @@
 Rotas:
   /                    menu de projetos (Parte 1 liberada, Parte 2 trancada até existir)
   /parte1              labirinto interativo (calcula os caminhos no servidor); /labirinto redireciona para cá
-  /parte2              Parte 2 (dataset e comparação de algoritmos); por enquanto, página provisória
+  /parte2              Parte 2: grafo de rotação por time-temporada e números do benchmark (dados pré-calculados)
   /health              health check do Target Group do ALB
   /api/info            identifica a instância EC2 que respondeu (prova do balanceamento)
   /api/mapas           lista de mapas
@@ -15,11 +15,16 @@ Rotas:
   /api/resolver        ?mapa=m03_tres_chaves&alg=DIJKSTRA  -> resultado resumido
   /api/historico       últimas consultas gravadas no RDS (desligado sem DB_HOST)
   /api/carga           ?n=500 resolve o m08 n vezes (máx 2000) (gera CPU para testar o Auto Scaling)
+  /api/parte2/indice               temporadas e times do grafo de rotação (out/parte2/web/indice.json)
+  /api/parte2/rotacao/<time>/<ano> nós, arcos, ciclo negativo e caminhos de um time-temporada
+  /api/parte2/graficos             dados dos gráficos interativos (impacto x minutos e times)
+  /api/parte2/benchmark            tempos médios e escalabilidade (resumo de out/parte2/parte2_report.json)
 """
 from __future__ import annotations
 
 import logging
 import os
+import re
 import socket
 import time
 import urllib.request
@@ -38,6 +43,7 @@ from . import db
 RAIZ = Path(__file__).resolve().parents[2]
 PASTAS = [RAIZ / "data" / "mapas", RAIZ / "data" / "mapas_grupo"]
 TEMPLATES = Path(__file__).parent / "templates"
+PARTE2_WEB = RAIZ / "out" / "parte2" / "web"  # gerado por python -m src.parte2.web_dados
 
 app = Flask(__name__)
 log = logging.getLogger(__name__)
@@ -290,6 +296,78 @@ def api_carga():
     for _ in range(n):
         resolver(grafo_estados(m08), "BELLMAN_FORD")
     return jsonify(execucoes=n, tempo_s=round(time.perf_counter() - t, 3), servidor=info_servidor())
+
+
+# [IA] Claude – API da página da Parte 2: só lê os JSON pré-calculados (src/parte2/web_dados.py), com cache.
+# O servidor não roda algoritmo nenhum para a Parte 2; o navegador só desenha.
+SIGLA_TIME = re.compile(r"^[A-Z]{2,4}$")
+
+
+@lru_cache(maxsize=256)
+def _parte2_texto(caminho: str, mtime: float) -> str:
+    return Path(caminho).read_text(encoding="utf-8")
+
+
+def _parte2_json(relativo: str):
+    caminho = PARTE2_WEB / relativo
+    try:
+        texto = _parte2_texto(str(caminho), caminho.stat().st_mtime)
+    except OSError:
+        return None
+    resp = _json_pronto(texto)
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
+
+
+@app.get("/api/parte2/indice")
+def api_parte2_indice():
+    resp = _parte2_json("indice.json")
+    if resp is None:
+        return _erro("dados da Parte 2 não gerados: rode python -m src.parte2.web_dados", 503)
+    return resp
+
+
+@app.get("/api/parte2/rotacao/<sigla>/<int:ano>")
+def api_parte2_rotacao(sigla: str, ano: int):
+    sigla = sigla.upper()
+    if not SIGLA_TIME.match(sigla):
+        return _erro("sigla de time inválida", 400)
+    resp = _parte2_json(f"rotacao/{sigla}_{ano}.json")
+    if resp is None:
+        return _erro(f"time-temporada {sigla} {ano} não existe", 404)
+    return resp
+
+
+@app.get("/api/parte2/graficos")
+def api_parte2_graficos():
+    resp = _parte2_json("graficos.json")
+    if resp is None:
+        return _erro("gráficos da Parte 2 não gerados: rode python -m src.parte2.web_dados", 503)
+    return resp
+
+
+# [IA] Claude – figuras PNG de comparação dos algoritmos (out/parte2/graficos), só nomes conhecidos
+FIGURAS_PARTE2 = {"tempo_por_algoritmo", "tempo_por_tamanho", "bfs_x_dfs", "caminhos_dijkstra"}
+
+
+@app.get("/api/parte2/figura/<nome>.png")
+def api_parte2_figura(nome: str):
+    if nome not in FIGURAS_PARTE2:
+        return _erro("figura desconhecida", 404)
+    pasta = RAIZ / "out" / "parte2" / "graficos"
+    if not (pasta / f"{nome}.png").exists():
+        return _erro("figura não gerada: rode python -m src.parte2.rotacao_graficos", 503)
+    resp = send_from_directory(pasta, f"{nome}.png", mimetype="image/png")
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
+
+
+@app.get("/api/parte2/benchmark")
+def api_parte2_benchmark():
+    resp = _parte2_json("benchmark.json")
+    if resp is None:
+        return _erro("benchmark da Parte 2 não gerado: rode python -m src.parte2.web_dados", 503)
+    return resp
 
 
 if __name__ == "__main__":

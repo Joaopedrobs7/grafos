@@ -50,27 +50,67 @@ python -m src.cli --mapa ./data/mapas/m03_tres_chaves.txt --interactive --out ./
 pytest -q
 ```
 
-<!-- [IA] Claude – comandos da Parte 2 -->
-**Parte 2** (o `arestas.csv` já está no repositório; os dados brutos vêm do DVC):
+<!-- [IA] Claude – comandos da Parte 2 (grafo de rotação por padrão; partidas com --grafo partidas) -->
+**Parte 2** (o `arestas.csv` de partidas está no repositório; `rotacao/` e os dados brutos vêm do DVC). Com
+`--dataset ./data/dataset_parte2/`, a CLI usa o **grafo de rotação** (`rotacao/arestas_rotacao.csv`, nó `Nome|TIM|ano`)
+quando ele existe; `--grafo partidas` usa o grafo de partidas (`arestas.csv`, nó `TIME|ano`, saídas em `out/parte2/partidas/`).
 
 ```bash
+# grafo de rotação (padrão) -> out/parte2/
 python -m src.cli --dataset ./data/dataset_parte2/                                       # |V| e |E|
-python -m src.cli --dataset ./data/dataset_parte2/ --alg BFS --source "ATL|2000"
-python -m src.cli --dataset ./data/dataset_parte2/ --alg DFS --source "ATL|2000"
-python -m src.cli --dataset ./data/dataset_parte2/ --alg DIJKSTRA --source "ATL|2000" --target "SAN|2000"
-python -m src.cli --dataset ./data/dataset_parte2/ --alg BELLMAN_FORD --source "ATL|2000"
+python -m src.cli --dataset ./data/dataset_parte2/ --alg BFS --source "Brook Lopez|MIL|2022"
+python -m src.cli --dataset ./data/dataset_parte2/ --alg DFS --source "Brook Lopez|MIL|2022"
+python -m src.cli --dataset ./data/dataset_parte2/ --alg DIJKSTRA --source "Brook Lopez|MIL|2022" --target "Jae Crowder|MIL|2022" --out ./out/parte2/
+python -m src.cli --dataset ./data/dataset_parte2/ --alg BELLMAN_FORD --source "Brook Lopez|MIL|2022"
 python -m src.cli --dataset ./data/dataset_parte2/ --benchmark --out ./out/parte2/       # tempos e escalabilidade
 
-python -m src.parte2.buscas      # BFS/DFS de 3 fontes        -> out/parte2/bfs_dfs.json
-python -m src.parte2.caminhos    # Dijkstra em 5 pares        -> out/parte2/dijkstra.json
-python -m src.parte2.bellman     # com ciclo e sem ciclo      -> out/parte2/bellman_ford.json
-python -m src.parte2.graficos    # gráficos de comparação     -> out/parte2/graficos/
+python -m src.parte2.rotacao_casos       # BFS/DFS, Bellman-Ford, Dijkstra -> out/parte2/{bfs_dfs,bellman_ford,dijkstra}.json
+python -m src.parte2.rotacao_desempenho  # benchmark e escalabilidade      -> out/parte2/parte2_report.json, complexidade.csv
+python -m src.parte2.rotacao_graficos    # gráficos de comparação          -> out/parte2/graficos/
+python -m src.parte2.graficos_avd        # 4 gráficos de dados (AVD): H3, H1, impacto x minutos, X6 -> out/parte2/graficos_avd/
+python -m src.parte2.web_dados           # JSON da página /parte2 do site  -> out/parte2/web/ (rodar depois do casos_rotacao)
+dvc repro casos_rotacao                  # os três comandos acima
+
+# grafo de partidas -> out/parte2/partidas/
+python -m src.cli --dataset ./data/dataset_parte2/ --grafo partidas --alg DIJKSTRA --source "ATL|2000" --target "SAN|2000"
+python -m src.cli --dataset ./data/dataset_parte2/ --grafo partidas --benchmark   # partidas_report.json
+python -m src.parte2.buscas      # BFS/DFS de 3 fontes        -> out/parte2/partidas/bfs_dfs.json
+python -m src.parte2.caminhos    # Dijkstra em 5 pares        -> out/parte2/partidas/dijkstra.json
+python -m src.parte2.bellman     # com ciclo e sem ciclo      -> out/parte2/partidas/bellman_ford.json
+python -m src.parte2.graficos    # gráficos de comparação     -> out/parte2/partidas/graficos/
 python -m src.avd.descricao      # descrição do grafo         -> out/avd/
 python -m src.avd.tabelas        # tabelas de apoio à AVD     -> out/avd/tabelas/ (precisa dos dados brutos)
 ```
 
 Nas tabelas de apoio, a média de um time na temporada só é calculada quando o atributo existe em pelo menos 80% dos
 jogos, sem imputação. As colunas de detalhe (quartos, banco, garrafão etc.) faltam em 50,2% das linhas de 2000 e 99,9% de 2021.
+
+<!-- [IA] Claude – Neo4j local para visualizar o grafo de rotação -->
+### Visualizar no Neo4j (local)
+
+O Neo4j serve só para visualizar e explorar o grafo de rotação. Caminhos, ciclos e camadas vêm dos JSON de
+`out/parte2/` (algoritmos do grupo). Nenhum algoritmo do Neo4j/GDS é usado.
+
+```bash
+docker compose -f docker-compose.neo4j.yml up -d   # neo4j:5-community, volume em .neo4j/ (fora do git)
+python -m src.parte2.neo4j_export                  # importa jogadores, arcos e marcações (idempotente)
+docker compose -f docker-compose.neo4j.yml down    # para o container (os dados ficam em .neo4j/)
+```
+
+Abra http://localhost:7474 (usuário `neo4j`, senha `grafos2026`). Essa senha padrão vale **só para uso local**.
+Para trocar, defina `NEO4J_AUTH=neo4j/<senha>` antes do `up` e do export (no primeiro `up`, com `.neo4j/` vazio).
+Consultas prontas: `docs/neo4j/consultas.cypher`. Captura da rotação de MIL 2022: `docs/neo4j/rotacao_MIL_2022.png`.
+
+Modelo: `(X:Jogador)-[:SAIU_PARA]->(Y:Jogador)` é o arco X -> Y do CSV, ou seja, "Y entrou no lugar de X". O arco
+guarda `peso`, `ocorrencias`, saldos, minutos e `no_recorte_sem_ciclo`. As marcações de resultado são:
+
+| marcação | origem |
+|---|---|
+| label `:Principal` | fonte do Bellman-Ford de cada time-temporada |
+| label `:CicloNegativo`, arco `ciclo_negativo`, `custo_ciclo` | `bellman_ford.json` (com ciclo) |
+| label `:CaminhoBF`/`:DestinoBF`, arco `em_caminho_bf`, nó `custo_bf` | `bellman_ford.json` (recorte sem ciclo) |
+| arco `em_caminho_dijkstra`, `par_dijkstra` (1..5) | `dijkstra.json` |
+| nó `camada_bfs`, `ordem_dfs`, `prof_dfs`, label `:FonteBusca` | `bfs_dfs.json` |
 
 <!-- [IA] Claude – roteiro do mapa surpresa, testado em 23/11 -->
 ### Mapa surpresa (apresentação)
@@ -183,8 +223,10 @@ push na `main` e, no console, **Auto Scaling Group → Atualização da instânc
 | Branch | Papel |
 |---|---|
 | `main` | integração: Parte 1 + Parte 2, com o menu de projetos em `/`. É o que vai para produção. |
-| `entrega1-parcial` | entrega da Parte 1 (fica congelada como foi entregue) |
 | `entrega2` | desenvolvimento da Parte 2; entra na `main` por pull request |
+
+Versões entregues ficam em **tags** (não em branches): `entrega1` (Parte 1, 17/11/2026) e `ex05-rds`
+(Cloud, Exercício 05). Para ver uma delas: `git checkout entrega1`.
 
 - **AWS:** o Auto Scaling Group faz deploy da `main` (`deploy/boot.sh`, `BRANCH=main`); `/api/info`
   mostra a versão em execução (`main@<commit>`).
@@ -197,17 +239,33 @@ Dataset: [Historical NBA Data and Player Box Scores](https://www.kaggle.com/data
 (licença CC0). Os arquivos não vão para o git: o **DVC** guarda o snapshot usado pelo grupo no drive
 compartilhado do Google Drive (o Kaggle atualiza o dataset todo dia; o `dvc.lock` fixa a versão).
 
-<!-- [IA] Claude – descrição do modelo atual e dos casos implementados -->
-Modelagem: **nó = time + temporada**, ex. `LAL|2024` (temporada 2024-25); há **um arco em cada sentido** entre dois
-times que se enfrentaram na temporada; **peso de A para B = −(saldo médio de pontos de A sobre B)**, então é negativo
-quando A leva vantagem no confronto. Recorte: temporada regular de 2000 a 2025.
+<!-- [IA] Claude – descrição do grafo de partidas atualizada (peso sem inversão de sinal, saídas em out/parte2/partidas/) -->
+Grafo de **partidas**: **nó = time + temporada**, ex. `LAL|2024` (temporada 2024-25); há **um arco em cada sentido** entre dois
+times que se enfrentaram na temporada; **peso de A para B = saldo médio de pontos de A sobre B**, então é positivo
+quando A leva vantagem no confronto. Saídas em `out/parte2/partidas/` (`partidas_report.json`). Recorte: temporada regular de 2000 a 2025.
 
 | Caso | Como é calculado |
 |---|---|
-| Dijkstra (5 pares) | custo `w' = -log P(vitória) = log(1 + exp(w / s))`, com `s = 13,712 · √3 / π ≈ 7,56` |
+| Dijkstra (5 pares) | custo `w' = -log P(vitória) = log(1 + exp(-w / s))`, com `s = 13,712 · √3 / π ≈ 7,56` |
 | Bellman-Ford com ciclo | subgrafo de cada temporada (ciclo negativo nas 26) |
 | Bellman-Ford sem ciclo | em cada temporada, só arcos do time de maior saldo para o de menor (grafo acíclico) |
 | Escalabilidade | 10%, 50% e 100% das **temporadas** (V = 91, 390, 777; E = 2.613, 11.255, 22.404), com o nó `INICIO` ligado a uma entrada por temporada |
+
+<!-- [IA] Claude – casos dos algoritmos no grafo de rotação (src/parte2/rotacao_casos.py) -->
+**Grafo de rotação** (`data/dataset_parte2/rotacao/`, estágio `rotacao`): nó = jogador em um time-temporada
+(`Nome|TIM|ano`, 2020 a 2025); arco X → Y = Y entrou no lugar de X; peso = saldo por 12 min com Y em quadra − saldo
+por 12 min do trecho anterior com X. 3.507 nós, 21.672 arcos, 180 componentes (time × temporada). "Principal" de um
+time-temporada = jogador com mais `minutos_medidos` (desempate pelo rótulo).
+
+| Caso | Como é calculado | Saída |
+|---|---|---|
+| BFS/DFS (3 fontes) | temporadas 2020, 2022 e 2025 (1ª, do meio e última); time com mais arcos; fonte = principal | `out/parte2/bfs_dfs.json` |
+| Bellman-Ford com ciclo | subgrafo de cada time-temporada, fonte = principal (ciclo negativo em 180 de 180) | `out/parte2/bellman_ford.json` |
+| Bellman-Ford sem ciclo | recorte "descer na rotação": só arcos X → Y com minutos(X) > minutos(Y) (acíclico); destino = nó de menor distância (status OK em 180 de 180) | `out/parte2/bellman_ford.json` |
+| Dijkstra (5 pares) | o Dijkstra do grupo recusa os pesos originais; no recorte sem ciclo, Johnson: `h(v)` = Bellman-Ford a partir de uma super-fonte com arcos de peso 0, `w' = w + h(u) − h(v) ≥ 0`, custo original = `custo' − h(s) + h(t)`; temporadas 2020, 2021, 2023, 2024, 2025; caminho e custo conferidos com o Bellman-Ford | `out/parte2/dijkstra.json` |
+| Benchmark | 5 execuções (`time.perf_counter`) por tarefa | `out/parte2/parte2_report.json` |
+| Escalabilidade | 10%, 50% e 100% dos time-temporadas (semente 42), nó `INICIO` ligado ao principal de cada um; grafo completo (V = 352, 1.743, 3.508; E = 2.069, 11.030, 21.852) e recorte sem ciclo (E = 1.062, 5.724, 11.341) | `out/parte2/parte2_report.json`, `out/parte2/complexidade.csv` |
+| Gráficos | tempo por algoritmo, tempo × tamanho com crescimento teórico, BFS × DFS, caminhos Dijkstra × Bellman-Ford | `out/parte2/graficos/` |
 
 ```bash
 dvc pull            # baixa raw/ e processed/ do drive do grupo (1ª vez abre o login do Google)
@@ -218,8 +276,10 @@ dvc repro           # refaz só o que mudou: baixar (Kaggle) -> preparar (params
 |---|---|---|
 | `baixar` | `python -m src.parte2.baixar` | `data/dataset_parte2/raw/` (CSV do Kaggle + `MANIFESTO.json` com SHA-256) |
 | `preparar` | `python -m src.parte2.preparar` | `data/dataset_parte2/processed/arestas.csv`, `nos.csv`, `relatorio_preparacao.json` |
+| `rotacao` | `python -m src.parte2.rotacao` | `data/dataset_parte2/rotacao/arestas_rotacao.csv`, `jogadores.csv`, `trocas.csv` (uma linha por troca), `relatorio_rotacao.json` |
+| `casos_rotacao` | `rotacao_casos`, `rotacao_desempenho`, `rotacao_graficos` | `out/parte2/*.json`, `complexidade.csv`, `graficos/*.png` (cache: false, versionados no git) |
 
-`params.yaml` controla a limpeza (tipos de jogo, intervalo de temporadas, sinal do peso). A temporada e o tipo
+`params.yaml` controla a limpeza (tipos de jogo, intervalo de temporadas) e o recorte da rotação. A temporada e o tipo
 de jogo vêm do `gameId` (ex.: os playoffs da "bolha" de 2020 pertencem à temporada 2019-20).
 
 **Acesso ao remoto (cada integrante, uma vez):** o e-mail precisa estar em *Usuários de teste* no projeto
@@ -257,7 +317,8 @@ src/parte2/          dataset da NBA: baixar, preparar, buscas, caminhos, bellman
 src/avd/             descrição do grafo e tabelas de apoio à análise exploratória
 tests/               pytest (algorithms, bfs, dfs, dijkstra, bellman_ford, estados, io, traco, web, parte2, avd)
 out/parte1/          saídas geradas da Parte 1
-out/parte2/          parte2_report.json, resultados dos algoritmos e gráficos de comparação
+out/parte2/          grafo de rotação: parte2_report.json, resultados dos algoritmos, graficos/, graficos_avd/, web/
+out/parte2/partidas/ grafo de partidas: partidas_report.json, resultados e graficos/
 out/avd/             descrição do grafo e tabelas de apoio (out/avd/tabelas/)
 ```
 
@@ -303,6 +364,6 @@ Esse uso precisa constar na Declaração de Uso de IA (`docs/DECLARACAO_IA.pdf`)
 - Declaração em edição (Google Docs): <https://docs.google.com/document/d/114ikHSDgZ674UKYB-E7fYnSYn1WqNbiF/edit>
 - Versão final assinada: `docs/DECLARACAO_IA.pdf`.
 - A primeira versão de `io.py`, `estados.py`, `graph.py` e `algorithms.py` (25/10) foi um protótipo gerado com IA só
-  para validar o funcionamento do projeto; em 17/11 o grupo reescreveu esses arquivos à mão (branch `entrega1-parcial`).
+  para validar o funcionamento do projeto; em 17/11 o grupo reescreveu esses arquivos à mão (commits `58cd061` e `3899ee2`).
   Em `algorithms.py` restam apenas os ganchos de visualização `observador=None`, marcados com `# [IA]`, que não alteram
   a lógica.

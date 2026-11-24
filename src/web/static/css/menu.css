@@ -97,6 +97,8 @@
   overflow: hidden;
 }
 .cartucho__arte canvas { image-rendering: pixelated; }
+/* [IA] Claude – miniatura da Parte 2: um grafinho em pixel (nós claros, arcos nas cores do peso) */
+.cartucho__arte--grafo svg { width: 88px; height: 56px; }
 .cartucho__texto { display: grid; gap: 4px; min-width: 0; }
 .cartucho__parte { font: 600 15px/1.2 var(--f-pixel); color: var(--tocha); }
 .cartucho__nome { font: 700 24px/1.05 var(--f-pixel); letter-spacing: -0.005em; }
@@ -196,6 +198,7 @@
   .cartucho { grid-template-columns: 64px minmax(0, 1fr); gap: 14px; padding: 12px 14px 14px 12px; min-height: 0; }
   .cartucho__arte { width: 64px; height: 64px; align-self: start; }
   .cartucho--trancado .cartucho__arte svg { width: 18px; height: 20px; }
+  .cartucho__arte--grafo svg { width: 55px; height: 35px; }
   .cartucho__nome { font-size: 22px; }
   .cartucho__desc { font-size: 14px; }
   .cartucho__acao { grid-column: 2; justify-self: start; margin-top: 2px; }

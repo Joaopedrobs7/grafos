@@ -1,41 +1,255 @@
 <!doctype html>
-<!-- [IA] Claude – página provisória da Parte 2 (dataset maior e comparação de algoritmos). A branch entrega2
-     substitui este template pela página de verdade; a rota /parte2 em src/web/app.py continua a mesma. -->
+<!-- [IA] Claude – página da Parte 2: grafo de rotação de um time-temporada (canvas 2D), destaques do ciclo negativo e
+     do caminho sem ciclo que os algoritmos do grupo calcularam, tabela de jogadores e aba com os números do benchmark.
+     Os dados vêm pré-calculados de api/parte2/* (src/parte2/web_dados.py); o navegador só desenha. -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Parte 2 em construção | Teoria dos Grafos</title>
+<title>Parte 2, grafo de rotação | Teoria dos Grafos</title>
+<meta name="description" content="Grafo de rotação da NBA (2020-21 a 2025-26): cada arco é uma substituição, com peso igual à variação do saldo por 12 minutos. Ciclos negativos, caminhos e tempos de BFS, DFS, Dijkstra e Bellman-Ford.">
 <meta name="theme-color" content="#1A1612">
 <link rel="icon" href="static/favicon.svg">
+<link rel="preload" href="static/fonts/PixelifySans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="static/css/app.css">
-<link rel="stylesheet" href="static/css/menu.css">
+<link rel="stylesheet" href="static/css/parte2.css">
 <script>document.documentElement.classList.add("js");</script>
 </head>
-<body class="menu">
-<canvas class="menu__parede" id="parede" aria-hidden="true"></canvas>
+<body class="p2">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
-<header class="menu__topo">
-  <p class="pill" data-servidor-pill title="Instância que respondeu">
-    <span class="pill__ponto" aria-hidden="true"></span>
-    <span class="pill__inst" data-servidor-inst>conectando</span>
-    <span class="pill__zona" data-servidor-zona></span>
-  </p>
+<header class="p2-topo">
+  <div class="p2-topo__linha">
+    <a class="p2-voltar" href="./" aria-label="Voltar ao menu de projetos">
+      <svg viewBox="0 0 4 7" shape-rendering="crispEdges" aria-hidden="true"><path d="M3 0h1v7H3zM2 1h1v5H2zM1 2h1v3H1zM0 3h1v1H0z"/></svg>
+      <span>Projetos</span>
+    </a>
+    <div class="p2-marca">
+      <span class="p2-marca__parte">Parte 2</span>
+      <h1 class="p2-marca__titulo">Grafo de rotação</h1>
+    </div>
+    <div class="p2-abas" role="tablist" aria-label="Seções da Parte 2">
+      <button class="p2-aba" role="tab" id="abaGrafo" aria-controls="painelGrafo" aria-selected="true">Grafo</button>
+      <button class="p2-aba" role="tab" id="abaGraf" aria-controls="painelGraf" aria-selected="false" tabindex="-1">Gráficos</button>
+      <button class="p2-aba" role="tab" id="abaAlg" aria-controls="painelAlg" aria-selected="false" tabindex="-1">Algoritmos</button>
+    </div>
+    <p class="pill" data-servidor-pill title="Instância que respondeu">
+      <span class="pill__ponto" aria-hidden="true"></span>
+      <span class="pill__inst" data-servidor-inst>conectando</span>
+      <span class="pill__zona" data-servidor-zona></span>
+    </p>
+  </div>
 </header>
 
-<main class="menu__palco">
-  <div class="obra">
-    <div class="obra__cena" aria-hidden="true">
-      <canvas id="obraAluno" width="64" height="96"></canvas>
-      <svg class="obra__cadeado" viewBox="0 0 9 10" shape-rendering="crispEdges"><path d="M2 0h5v1H2zM1 1h1v3H1zM7 1h1v3H7zM0 4h9v6H0z"/><path fill="#1A1612" d="M4 6h1v2H4z"/></svg>
+<main class="p2-main" id="conteudo">
+  <!-- ======================================================== aba Grafo -->
+  <section class="p2-painel" role="tabpanel" id="painelGrafo" aria-labelledby="abaGrafo">
+    <div class="p2-barra">
+      <label class="p2-campo">
+        <span class="p2-campo__rotulo">Temporada</span>
+        <select id="selTemporada"></select>
+      </label>
+      <label class="p2-campo">
+        <span class="p2-campo__rotulo">Time</span>
+        <select id="selTime"></select>
+      </label>
+      <p class="p2-contagem" id="contagem" aria-live="polite"></p>
     </div>
-    <h1>Parte 2 em construção</h1>
-    <p>Aqui vão entrar um grafo bem maior que os labirintos, o benchmark de BFS, DFS, Dijkstra e Bellman-Ford sobre ele e a análise dos dados.</p>
-    <a class="btn btn--cesar px" href="./">Voltar ao menu</a>
-  </div>
+    <!-- [IA] Claude – explicação do que os números significam -->
+    <p class="p2-nota g-como-ler">Cada seta <b>X → Y</b> é uma troca: Y entrou no lugar de X. O peso é quanto o saldo do time
+      mudou a cada 12 min depois da troca. Clique num jogador para ver a ficha.</p>
+
+    <div class="p2-palco">
+      <figure class="p2-quadro">
+        <div class="p2-quadro__area" id="area">
+          <canvas id="tela" role="img" tabindex="0" aria-label="Grafo de rotação do time-temporada escolhido"
+                  aria-describedby="telaTeclado"></canvas>
+          <p class="sr-only" id="telaTeclado">Com o grafo em foco, as setas escolhem o jogador seguinte ou o anterior e Esc fecha a ficha.</p>
+          <div class="p2-dica" id="dica" hidden></div>
+          <p class="p2-carregando" id="carregando">carregando…</p>
+        </div>
+        <!-- [IA] Claude – legenda que muda com a seleção: com um jogador escolhido, explica as duas direções dos arcos -->
+        <!-- [IA] Claude – legenda em frases curtas: o que se vê e o que significa -->
+        <figcaption class="p2-legenda" id="legenda">
+          <span class="p2-legenda__item">
+            <span class="p2-escala" aria-hidden="true"></span>
+            <span>Cor da seta: <span class="g-leg-neg">vermelho</span>, o time piorou depois da troca; <span class="g-leg-pos">azul</span>, melhorou</span>
+          </span>
+          <span class="p2-legenda__item" data-legenda="geral">Seta de X para Y: Y entrou no lugar de X</span>
+          <span class="p2-legenda__item" data-legenda="sel" hidden>
+            <svg class="p2-traco" viewBox="0 0 36 10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5"/><path d="M27 1l8 4-8 4z"/></svg>
+            <span>Cheia: entraram no lugar dele</span>
+          </span>
+          <span class="p2-legenda__item" data-legenda="sel" hidden>
+            <svg class="p2-traco p2-traco--chega" viewBox="0 0 36 10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5"/><path d="M27 1l8 4-8 4z"/></svg>
+            <span>Tracejada: ele entrou no lugar do outro</span>
+          </span>
+          <span class="p2-legenda__item"><span class="p2-aneis" aria-hidden="true"><span class="p2-anel"></span><span class="p2-anel p2-anel--neg"></span></span>Anel azul: o time melhora quando ele entra; vermelho: piora. Maior = mais minutos</span>
+          <span class="p2-legenda__item p2-legenda__fonte">Fotos: NBA.com</span>
+        </figcaption>
+      </figure>
+
+      <aside class="p2-lado" id="lado" aria-label="Ficha do jogador e destaques do grafo">
+        <div class="p2-detalhe" id="detalhe"></div>
+        <p class="sr-only" id="aviso" aria-live="polite"></p>
+        <h2 class="p2-subtitulo p2-lado__titulo" id="destacarTitulo">Destacar</h2>
+        <div class="p2-modos" role="group" aria-labelledby="destacarTitulo">
+          <button class="p2-modo" type="button" data-modo="ciclo" aria-pressed="false">
+            <span class="p2-modo__nome">Ciclo negativo</span>
+            <span class="p2-modo__alg">Bellman-Ford</span>
+          </button>
+          <button class="p2-modo" type="button" data-modo="sem_ciclo" aria-pressed="false">
+            <span class="p2-modo__nome">Caminho sem ciclo</span>
+            <span class="p2-modo__alg">descer na rotação, Bellman-Ford</span>
+          </button>
+          <button class="p2-modo" type="button" data-modo="dijkstra" aria-pressed="false" hidden>
+            <span class="p2-modo__nome">Par do Dijkstra</span>
+            <span class="p2-modo__alg">Johnson no recorte sem ciclo</span>
+          </button>
+        </div>
+        <div class="p2-detalhe p2-detalhe--modo" id="detalheModo" aria-live="polite"></div>
+      </aside>
+    </div>
+
+    <section class="p2-jogadores" aria-labelledby="jogadoresTitulo">
+      <div class="p2-jogadores__cabeca">
+        <h2 class="p2-subtitulo" id="jogadoresTitulo">Jogadores</h2>
+        <p class="p2-nota" id="notaImpacto"></p>
+      </div>
+      <div class="p2-rolagem">
+        <table class="p2-tabela" id="tabelaJogadores">
+          <thead>
+            <tr>
+              <th scope="col" aria-sort="none"><button type="button" data-ordem="nome">Jogador</button></th>
+              <th scope="col" class="num" aria-sort="descending"><button type="button" data-ordem="minutos">Minutos</button></th>
+              <th scope="col" class="num" aria-sort="none"><button type="button" data-ordem="entradas">Entradas</button></th>
+              <th scope="col" class="num" aria-sort="none"><button type="button" data-ordem="impacto_medio">Impacto médio<small> pts/12 min</small></button></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <!-- [IA] Claude – aba Gráficos: versões interativas dos gráficos escolhidos pelo grupo -->
+  <section class="p2-painel" role="tabpanel" id="painelGraf" aria-labelledby="abaGraf" hidden>
+    <div class="p2-barra">
+      <label class="p2-campo">
+        <span class="p2-campo__rotulo">Temporada</span>
+        <select id="gTemporada"></select>
+      </label>
+      <label class="p2-campo">
+        <span class="p2-campo__rotulo">Time</span>
+        <select id="gTime"></select>
+      </label>
+      <p class="p2-contagem" id="gContagem" aria-live="polite"></p>
+    </div>
+
+    <!-- [IA] Claude – H3 (faixa por minuto em quadra) e H1 (barras 100% por placar); canvas, respondem ao filtro de temporada -->
+    <section class="p2-bloco" aria-labelledby="h3Titulo">
+      <p class="g-tipo">Exploratório</p>
+      <h2 class="p2-subtitulo" id="h3Titulo">Tempo do substituto em quadra</h2>
+      <p class="p2-nota g-como-ler">Peso das trocas conforme o tempo que o substituto ficou em quadra.</p>
+      <figure class="p2-quadro">
+        <div class="p2-quadro__area" id="gH3Area">
+          <canvas id="gH3" class="g-expl" tabindex="0" role="img" aria-label="Mediana e faixa do peso das trocas por minuto do substituto em quadra"></canvas>
+        </div>
+        <figcaption class="p2-legenda">
+          <span class="p2-legenda__item"><span class="g-ico-linha" aria-hidden="true"></span>linha = mediana</span>
+          <span class="p2-legenda__item"><span class="g-ico-faixa" aria-hidden="true"></span>faixa = 80% das trocas (do 10º ao 90º percentil)</span>
+          <span class="p2-legenda__item"><span class="g-ico-faixa g-ico-faixa--forte" aria-hidden="true"></span>parte escura = 50% das trocas</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="p2-bloco" aria-labelledby="h1Titulo">
+      <p class="g-tipo">Exploratório</p>
+      <h2 class="p2-subtitulo" id="h1Titulo">Placar no momento da troca</h2>
+      <p class="p2-nota g-como-ler">Como o peso das trocas se distribui conforme a diferença no placar no momento da troca.</p>
+      <figure class="p2-quadro">
+        <div class="p2-quadro__area" id="gH1Area">
+          <canvas id="gH1" class="g-expl" tabindex="0" role="img" aria-label="Barras 100% do peso das trocas por diferença no placar no momento da troca"></canvas>
+        </div>
+        <figcaption class="p2-legenda">
+          <span class="p2-legenda__item"><span class="g-ico-cat g-ico-cat--0" aria-hidden="true"></span>piorou muito (&lt; −30)</span>
+          <span class="p2-legenda__item"><span class="g-ico-cat g-ico-cat--1" aria-hidden="true"></span>piorou (−30 a −5)</span>
+          <span class="p2-legenda__item"><span class="g-ico-cat g-ico-cat--2" aria-hidden="true"></span>perto de zero (−5 a +5)</span>
+          <span class="p2-legenda__item"><span class="g-ico-cat g-ico-cat--3" aria-hidden="true"></span>melhorou (+5 a +30)</span>
+          <span class="p2-legenda__item"><span class="g-ico-cat g-ico-cat--4" aria-hidden="true"></span>melhorou muito (&gt; +30)</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="p2-bloco" aria-labelledby="bolinhasTitulo">
+      <p class="g-tipo">Explanatório</p>
+      <h2 class="p2-subtitulo" id="bolinhasTitulo">Impacto ao entrar × minutos em quadra</h2>
+      <p class="p2-nota g-como-ler" id="gComoLer"></p>
+      <figure class="p2-quadro">
+        <div class="p2-quadro__area" id="gArea">
+          <canvas id="gTela" role="img" aria-label="Dispersão: impacto ao entrar por minutos em quadra, uma bolinha por jogador-temporada"></canvas>
+          <div class="p2-dica" id="gDica" hidden></div>
+        </div>
+        <figcaption class="p2-legenda">
+          <span class="p2-legenda__item"><span class="g-quadrante" aria-hidden="true"></span>impacto &gt; 0 e minutos &lt; mediana</span>
+          <span class="p2-legenda__item">cor = time, jogadores com ≥ <span id="gMin">30</span> entradas</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="p2-bloco" aria-labelledby="timesTitulo">
+      <p class="g-tipo">Explanatório</p>
+      <h2 class="p2-subtitulo" id="timesTitulo">Impacto médio das trocas por time</h2>
+      <p class="p2-nota" id="gTimesNota"></p>
+      <ol class="g-barras" id="gBarras"></ol>
+    </section>
+  </section>
+
+  <!-- ======================================================== aba Algoritmos -->
+  <section class="p2-painel" role="tabpanel" id="painelAlg" aria-labelledby="abaAlg" hidden>
+    <p class="p2-fatos" id="fatosBench"></p>
+
+    <section class="p2-bloco" aria-labelledby="temposTitulo">
+      <h2 class="p2-subtitulo" id="temposTitulo">Tempo médio por tarefa</h2>
+      <div class="p2-rolagem">
+        <table class="p2-tabela" id="tabelaTempos">
+          <thead>
+            <tr>
+              <th scope="col">Algoritmo</th>
+              <th scope="col">Grafo</th>
+              <th scope="col" class="num">Tarefas</th>
+              <th scope="col" class="num">Média</th>
+              <th scope="col" class="num">Mínimo</th>
+              <th scope="col" class="num">Máximo</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="p2-bloco" aria-labelledby="escalaTitulo">
+      <h2 class="p2-subtitulo" id="escalaTitulo">Escalabilidade</h2>
+      <div id="escalas"></div>
+    </section>
+
+    <!-- [IA] Claude – gráficos de comparação dos algoritmos (os mesmos PNGs do relatório) -->
+    <section class="p2-bloco" aria-labelledby="figTitulo">
+      <h2 class="p2-subtitulo" id="figTitulo">Gráficos de comparação dos algoritmos</h2>
+      <div class="g-figuras">
+        <figure><img src="api/parte2/figura/tempo_por_algoritmo.png" alt="Tempo médio por algoritmo" loading="lazy">
+          <figcaption>Tempo médio por algoritmo e tarefa (média de 5 execuções, em milissegundos).</figcaption></figure>
+        <figure><img src="api/parte2/figura/tempo_por_tamanho.png" alt="Tempo por tamanho do grafo" loading="lazy">
+          <figcaption>Tempo de cada algoritmo com 10%, 50% e 100% dos time-temporadas, ao lado do crescimento previsto pela complexidade.</figcaption></figure>
+        <figure><img src="api/parte2/figura/bfs_x_dfs.png" alt="BFS e DFS nas 3 fontes" loading="lazy">
+          <figcaption>BFS × DFS a partir das 3 fontes: nós por camada da BFS e profundidade e tipos de arco da DFS.</figcaption></figure>
+        <figure><img src="api/parte2/figura/caminhos_dijkstra.png" alt="Caminhos do Dijkstra e do Bellman-Ford" loading="lazy">
+          <figcaption>Os 5 pares: custo do caminho do Dijkstra (com Johnson) e do Bellman-Ford, em pontos de saldo por 12 min.</figcaption></figure>
+      </div>
+    </section>
+  </section>
 </main>
 
-<script src="static/js/pixel.js"></script>
-<script src="static/js/menu.js"></script>
+<script src="static/js/parte2.js"></script>
 </body>
 </html>

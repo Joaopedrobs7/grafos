@@ -2,8 +2,7 @@
 """Baixa os arquivos do dataset "Historical NBA Data and Player Box Scores" (Kaggle, licença CC0).
 
 Uso:
-    python -m src.parte2.baixar                 # arquivos leves (jogos, times, jogadores)
-    python -m src.parte2.baixar --tudo          # inclui as estatísticas por jogador (~850 MB)
+    python -m src.parte2.baixar                 # jogos, times, jogadores, jogada a jogada e estatísticas por jogador (~1,4 GB)
 
 O Kaggle atualiza o dataset todo dia; quem fixa a versão usada pelo grupo é o DVC (dvc.lock +
 remoto). O manifesto `raw/MANIFESTO.json` registra tamanho e SHA-256 de cada arquivo baixado.
@@ -23,7 +22,10 @@ DATASET = "eoinamoore/historical-nba-data-and-player-box-scores"
 RAIZ = Path(__file__).resolve().parents[2]
 DESTINO = RAIZ / "data" / "dataset_parte2" / "raw"
 LEVES = ["Games.csv", "TeamStatistics.csv", "TeamHistories.csv", "Players.csv"]
-PESADOS = ["PlayerStatistics.csv"]
+# [IA] Claude – o grafo de rotação (substituições) sai do jogada a jogada; as estatísticas por jogador
+# alimentam a matriz de correlação (impacto × estatísticas de jogo por 36 min)
+JOGADA_A_JOGADA = ["PlayByPlay.parquet", "PlayerStatistics.csv"]
+PESADOS: list[str] = []
 
 
 def _kaggle() -> str:
@@ -63,10 +65,10 @@ def baixar(arquivos: list[str], destino: Path = DESTINO) -> dict:
 
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--tudo", action="store_true", help="inclui PlayerStatistics.csv (~390 MB)")
+    ap.add_argument("--tudo", action="store_true", help="(mantido por compatibilidade; já baixa tudo que o projeto usa)")
     ap.add_argument("--destino", type=Path, default=DESTINO)
     args = ap.parse_args(argv)
-    m = baixar(LEVES + (PESADOS if args.tudo else []), args.destino)
+    m = baixar(LEVES + JOGADA_A_JOGADA + (PESADOS if args.tudo else []), args.destino)
     for nome, info in m["arquivos"].items():
         print(f"  {nome:22s} {info['bytes'] / 1e6:8.1f} MB  {info['sha256'][:12]}")
 

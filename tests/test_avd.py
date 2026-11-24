@@ -6,7 +6,7 @@ import pytest
 
 from src.avd.tabelas import gerar, por_time_temporada
 
-PARAMS = {"tipos": [2], "temporada_min": 2000, "temporada_max": 2000, "sinal_peso": -1}
+PARAMS = {"tipos": [2], "temporada_min": 2000, "temporada_max": 2000}
 
 
 @pytest.fixture

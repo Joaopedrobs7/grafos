@@ -5,40 +5,131 @@ stages:
     deps:
     - path: src/parte2/baixar.py
       hash: md5
-      md5: 3ef3481862c5205f7d8b2ab071b0c337
-      size: 3186
+      md5: c2c136c896abcf73a59bf21e78b31fe1
+      size: 3419
     outs:
     - path: data/dataset_parte2/raw
       hash: md5
-      md5: 9eaf817d2bb09f440c40a43af7d480a2.dir
-      size: 47980493
-      nfiles: 5
+      md5: c40dd9be47b95db32fcf7924e2f85a2d.dir
+      size: 1380485481
+      nfiles: 7
   preparar:
     cmd: python -m src.parte2.preparar
     deps:
     - path: data/dataset_parte2/raw
       hash: md5
-      md5: 9eaf817d2bb09f440c40a43af7d480a2.dir
-      size: 47980493
-      nfiles: 5
+      md5: c40dd9be47b95db32fcf7924e2f85a2d.dir
+      size: 1380485481
+      nfiles: 7
     - path: src/parte2/preparar.py
       hash: md5
-      md5: 407792e3e80174c9e0a8a532e7ce1bdb
-      size: 6451
+      md5: 162abfb886efae093226643a6cfb133e
+      size: 6873
     params:
       params.yaml:
         preparar:
           tipos:
           - 2
-          - 4
-          - 5
-          - 6
-          temporada_min: 1946
-          temporada_max: 2026
-          sinal_peso: -1
+          temporada_min: 2000
+          temporada_max: 2025
     outs:
     - path: data/dataset_parte2/processed
       hash: md5
-      md5: 0d35b4d54041de43bf13505dc7c78bd0.dir
-      size: 8097099
-      nfiles: 3
+      md5: 80dd6dd69b78af5a977f3dc454a66345.dir
+      size: 46694
+      nfiles: 2
+  rotacao:
+    cmd: python -m src.parte2.rotacao
+    deps:
+    - path: data/dataset_parte2/raw
+      hash: md5
+      md5: c40dd9be47b95db32fcf7924e2f85a2d.dir
+      size: 1380485481
+      nfiles: 7
+    - path: src/parte2/preparar.py
+      hash: md5
+      md5: 162abfb886efae093226643a6cfb133e
+      size: 6873
+    - path: src/parte2/rotacao.py
+      hash: md5
+      md5: 57311e6f4f5a5928bcb2ea1ac089e20f
+      size: 16182
+    params:
+      params.yaml:
+        rotacao:
+          temporada_min: 2020
+          temporada_max: 2025
+          min_ocorrencias: 2
+          min_minutos: 3
+    outs:
+    - path: data/dataset_parte2/rotacao
+      hash: md5
+      md5: 100cab9646edd75f3156e71c69d5bfc1.dir
+      size: 12011249
+      nfiles: 4
+  casos_rotacao:
+    cmd: python -m src.parte2.rotacao_casos && python -m 
+      src.parte2.rotacao_desempenho && python -m src.parte2.rotacao_graficos
+    deps:
+    - path: data/dataset_parte2/rotacao
+      hash: md5
+      md5: 100cab9646edd75f3156e71c69d5bfc1.dir
+      size: 12011249
+      nfiles: 4
+    - path: src/graphs/algorithms.py
+      hash: md5
+      md5: 8d652a4c4fc9f303b8b346d094900d5a
+      size: 6403
+    - path: src/graphs/graph.py
+      hash: md5
+      md5: 2b9ffcf2d66814a973760ead2aead981
+      size: 2376
+    - path: src/parte2/rotacao_casos.py
+      hash: md5
+      md5: db0488c884d553579e7a7520f2de92cb
+      size: 13173
+    - path: src/parte2/rotacao_desempenho.py
+      hash: md5
+      md5: 57dd43ce669619799ac55da930feda2d
+      size: 7545
+    - path: src/parte2/rotacao_graficos.py
+      hash: md5
+      md5: f790bba2faf1fb10a92540d1b8e995d9
+      size: 9986
+    outs:
+    - path: out/parte2/bellman_ford.json
+      hash: md5
+      md5: c6bb447ed249aad0658832ef8bc644d4
+      size: 188208
+    - path: out/parte2/bfs_dfs.json
+      hash: md5
+      md5: 92e8560ca533b3c65825924418401a74
+      size: 18808
+    - path: out/parte2/complexidade.csv
+      hash: md5
+      md5: 71a5622b525b2a6a9606c1a04e26b659
+      size: 2737
+    - path: out/parte2/dijkstra.json
+      hash: md5
+      md5: 6997d5060c1f127559900e9a7e67c12b
+      size: 6189
+    - path: out/parte2/graficos/bfs_x_dfs.png
+      hash: md5
+      md5: d11d5d28b333efad4dbfd452b82ec690
+      size: 103881
+    - path: out/parte2/graficos/caminhos_dijkstra.png
+      hash: md5
+      md5: 9ca13516831c6ce1012286e19ea4b20e
+      size: 104061
+    - path: out/parte2/graficos/tempo_por_algoritmo.png
+      hash: md5
+      md5: 4230cae2ebf808446bfa2673acd642d7
+      size: 78284
+    - path: out/parte2/graficos/tempo_por_tamanho.png
+      hash: md5
+      md5: 1a304236e650270ce0789aec0c45a0f0
+      size: 211715
+    - path: out/parte2/parte2_report.json
+      hash: md5
+      md5: 2ede3d15f03b4040a37d27203831812e
+      size: 182247

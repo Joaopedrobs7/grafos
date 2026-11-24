@@ -1,0 +1,81 @@
+{
+  "transformacao": "w' = -log P(vitória) = log(1 + exp(-w / s)), s = 13,712 · √3 / π ≈ 7,56",
+  "desvio_margem_jogo": 13.712134789019844,
+  "recusa_pesos_originais": "Dijkstra não aceita peso negativo. Use Bellman-Ford.",
+  "pares": [
+    {
+      "temporada": 2000,
+      "origem": "ATL|2000",
+      "destino": "ORL|2000",
+      "caminho": [
+        "ATL|2000",
+        "LAC|2000",
+        "ORL|2000"
+      ],
+      "n_arcos": 2,
+      "custo_transformado": 1.1209003283077155,
+      "probabilidade_cadeia": 0.32598616788776985,
+      "custo_original": 5.0
+    },
+    {
+      "temporada": 2006,
+      "origem": "ATL|2006",
+      "destino": "SAN|2006",
+      "caminho": [
+        "ATL|2006",
+        "GSW|2006",
+        "DAL|2006",
+        "SEA|2006",
+        "MIL|2006",
+        "SAN|2006"
+      ],
+      "n_arcos": 5,
+      "custo_transformado": 0.8114166357071537,
+      "probabilidade_cadeia": 0.44422831057420287,
+      "custo_original": 70.08333333333333
+    },
+    {
+      "temporada": 2013,
+      "origem": "ATL|2013",
+      "destino": "SAN|2013",
+      "caminho": [
+        "ATL|2013",
+        "LAC|2013",
+        "HOU|2013",
+        "SAN|2013"
+      ],
+      "n_arcos": 3,
+      "custo_transformado": 0.9069886406698852,
+      "probabilidade_cadeia": 0.4037381960468643,
+      "custo_original": 25.25
+    },
+    {
+      "temporada": 2019,
+      "origem": "BKN|2019",
+      "destino": "BOS|2019",
+      "caminho": [
+        "BKN|2019",
+        "SAC|2019",
+        "BOS|2019"
+      ],
+      "n_arcos": 2,
+      "custo_transformado": 0.8068871769734919,
+      "probabilidade_cadeia": 0.44624498815637215,
+      "custo_original": 16.0
+    },
+    {
+      "temporada": 2025,
+      "origem": "ATL|2025",
+      "destino": "SAN|2025",
+      "caminho": [
+        "ATL|2025",
+        "CLE|2025",
+        "SAN|2025"
+      ],
+      "n_arcos": 2,
+      "custo_transformado": 0.6506919410169358,
+      "probabilidade_cadeia": 0.5216846768196947,
+      "custo_original": 16.25
+    }
+  ]
+}

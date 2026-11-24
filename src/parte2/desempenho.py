@@ -103,12 +103,13 @@ def main(caminho: Path = ARESTAS, saida: Path = SAIDA) -> None:
               f"{l['complexidade']:15s} valor={l['valor_teorico']:14.1f} razão={l['razao_tempo_valor']:.3e}")
     saida.mkdir(parents=True, exist_ok=True)
     rel = {"repeticoes": REPETICOES, "semente": SEMENTE, "tarefas": tar, "escalabilidade": esc}
-    (saida / "parte2_report.json").write_text(json.dumps(rel, indent=2, ensure_ascii=False), encoding="utf-8")
+    # [IA] Claude – renomeado para partidas_report.json (saídas do grafo de partidas)
+    (saida / "partidas_report.json").write_text(json.dumps(rel, indent=2, ensure_ascii=False), encoding="utf-8")
     with (saida / "complexidade.csv").open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(linhas[0]))
         w.writeheader()
         w.writerows(linhas)
-    print(f"gravado: {saida / 'parte2_report.json'} e {saida / 'complexidade.csv'}")
+    print(f"gravado: {saida / 'partidas_report.json'} e {saida / 'complexidade.csv'}")
 
 
 if __name__ == "__main__":

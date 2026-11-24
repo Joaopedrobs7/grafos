@@ -9,7 +9,7 @@ from ..graphs.graph import Grafo, No
 
 RAIZ = Path(__file__).resolve().parents[2]
 ARESTAS = RAIZ / "data" / "dataset_parte2" / "arestas.csv"
-SAIDA = RAIZ / "out" / "parte2"
+SAIDA = RAIZ / "out" / "parte2" / "partidas"  # [IA] Claude – saídas do grafo de partidas
 
 
 def carregar(caminho: Path = ARESTAS) -> Grafo:
