@@ -193,7 +193,7 @@ def main(argv: list[str] | None = None) -> int:
                     help="Parte 2: grafo a usar (padrão: rotação, se existir; partidas grava em out/parte2/partidas)")
     ap.add_argument("--source", help="Parte 2: nó de origem (rotação: Nome|TIM|ano; partidas: TIME|ano)")
     ap.add_argument("--target", help="Parte 2: nó de destino (mesmo formato do --source)")
-    ap.add_argument("--benchmark", action="store_true", help="Parte 2: tempos e escalabilidade (parte2_report.json)")
+    ap.add_argument("--benchmark", action="store_true", help="Parte 2: tempos e escalabilidade (rotação: parte2_report.json; partidas: partidas_report.json)")
     ap.add_argument("--out", help="pasta de saída (padrão: out/parte1; rotação: out/parte2; partidas: out/parte2/partidas)")
     args = ap.parse_args(argv)
 

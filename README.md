@@ -67,6 +67,8 @@ python -m src.cli --dataset ./data/dataset_parte2/ --benchmark --out ./out/parte
 python -m src.parte2.rotacao_casos       # BFS/DFS, Bellman-Ford, Dijkstra -> out/parte2/{bfs_dfs,bellman_ford,dijkstra}.json
 python -m src.parte2.rotacao_desempenho  # benchmark e escalabilidade      -> out/parte2/parte2_report.json, complexidade.csv
 python -m src.parte2.rotacao_graficos    # gráficos de comparação          -> out/parte2/graficos/
+python -m src.parte2.graficos_avd        # 4 gráficos de dados (AVD)       -> out/parte2/graficos_avd/
+python -m src.parte2.web_dados           # JSON da página /parte2 do site  -> out/parte2/web/ (rodar depois do casos_rotacao)
 dvc repro casos_rotacao                  # os três comandos acima
 
 # grafo de partidas -> out/parte2/partidas/
@@ -237,14 +239,14 @@ Dataset: [Historical NBA Data and Player Box Scores](https://www.kaggle.com/data
 (licença CC0). Os arquivos não vão para o git: o **DVC** guarda o snapshot usado pelo grupo no drive
 compartilhado do Google Drive (o Kaggle atualiza o dataset todo dia; o `dvc.lock` fixa a versão).
 
-<!-- [IA] Claude – descrição do modelo atual e dos casos implementados -->
-Modelagem: **nó = time + temporada**, ex. `LAL|2024` (temporada 2024-25); há **um arco em cada sentido** entre dois
-times que se enfrentaram na temporada; **peso de A para B = −(saldo médio de pontos de A sobre B)**, então é negativo
-quando A leva vantagem no confronto. Recorte: temporada regular de 2000 a 2025.
+<!-- [IA] Claude – descrição do grafo de partidas atualizada (peso sem inversão de sinal, saídas em out/parte2/partidas/) -->
+Grafo de **partidas**: **nó = time + temporada**, ex. `LAL|2024` (temporada 2024-25); há **um arco em cada sentido** entre dois
+times que se enfrentaram na temporada; **peso de A para B = saldo médio de pontos de A sobre B**, então é positivo
+quando A leva vantagem no confronto. Saídas em `out/parte2/partidas/` (`partidas_report.json`). Recorte: temporada regular de 2000 a 2025.
 
 | Caso | Como é calculado |
 |---|---|
-| Dijkstra (5 pares) | custo `w' = -log P(vitória) = log(1 + exp(w / s))`, com `s = 13,712 · √3 / π ≈ 7,56` |
+| Dijkstra (5 pares) | custo `w' = -log P(vitória) = log(1 + exp(-w / s))`, com `s = 13,712 · √3 / π ≈ 7,56` |
 | Bellman-Ford com ciclo | subgrafo de cada temporada (ciclo negativo nas 26) |
 | Bellman-Ford sem ciclo | em cada temporada, só arcos do time de maior saldo para o de menor (grafo acíclico) |
 | Escalabilidade | 10%, 50% e 100% das **temporadas** (V = 91, 390, 777; E = 2.613, 11.255, 22.404), com o nó `INICIO` ligado a uma entrada por temporada |
@@ -277,7 +279,7 @@ dvc repro           # refaz só o que mudou: baixar (Kaggle) -> preparar (params
 | `rotacao` | `python -m src.parte2.rotacao` | `data/dataset_parte2/rotacao/arestas_rotacao.csv`, `jogadores.csv`, `relatorio_rotacao.json` |
 | `casos_rotacao` | `rotacao_casos`, `rotacao_desempenho`, `rotacao_graficos` | `out/parte2/*.json`, `complexidade.csv`, `graficos/*.png` (cache: false, versionados no git) |
 
-`params.yaml` controla a limpeza (tipos de jogo, intervalo de temporadas, sinal do peso). A temporada e o tipo
+`params.yaml` controla a limpeza (tipos de jogo, intervalo de temporadas) e o recorte da rotação. A temporada e o tipo
 de jogo vêm do `gameId` (ex.: os playoffs da "bolha" de 2020 pertencem à temporada 2019-20).
 
 **Acesso ao remoto (cada integrante, uma vez):** o e-mail precisa estar em *Usuários de teste* no projeto
@@ -315,7 +317,8 @@ src/parte2/          dataset da NBA: baixar, preparar, buscas, caminhos, bellman
 src/avd/             descrição do grafo e tabelas de apoio à análise exploratória
 tests/               pytest (algorithms, bfs, dfs, dijkstra, bellman_ford, estados, io, traco, web, parte2, avd)
 out/parte1/          saídas geradas da Parte 1
-out/parte2/          parte2_report.json, resultados dos algoritmos e gráficos de comparação
+out/parte2/          grafo de rotação: parte2_report.json, resultados dos algoritmos, graficos/, graficos_avd/, web/
+out/parte2/partidas/ grafo de partidas: partidas_report.json, resultados e graficos/
 out/avd/             descrição do grafo e tabelas de apoio (out/avd/tabelas/)
 ```
 
