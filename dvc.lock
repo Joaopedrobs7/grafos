@@ -52,8 +52,8 @@ stages:
       size: 6873
     - path: src/parte2/rotacao.py
       hash: md5
-      md5: 7c933e1803a7ea0c22bb555d4ba9cb1d
-      size: 14213
+      md5: 57311e6f4f5a5928bcb2ea1ac089e20f
+      size: 16182
     params:
       params.yaml:
         rotacao:
@@ -64,18 +64,18 @@ stages:
     outs:
     - path: data/dataset_parte2/rotacao
       hash: md5
-      md5: 1972708c2b13e49a8c7044dedac9e3f7.dir
-      size: 2340731
-      nfiles: 3
+      md5: 100cab9646edd75f3156e71c69d5bfc1.dir
+      size: 12011249
+      nfiles: 4
   casos_rotacao:
     cmd: python -m src.parte2.rotacao_casos && python -m 
       src.parte2.rotacao_desempenho && python -m src.parte2.rotacao_graficos
     deps:
     - path: data/dataset_parte2/rotacao
       hash: md5
-      md5: 1972708c2b13e49a8c7044dedac9e3f7.dir
-      size: 2340731
-      nfiles: 3
+      md5: 100cab9646edd75f3156e71c69d5bfc1.dir
+      size: 12011249
+      nfiles: 4
     - path: src/graphs/algorithms.py
       hash: md5
       md5: 8d652a4c4fc9f303b8b346d094900d5a
@@ -107,8 +107,8 @@ stages:
       size: 18808
     - path: out/parte2/complexidade.csv
       hash: md5
-      md5: c000b09a5c983eb767ff40cce39122c4
-      size: 2732
+      md5: 71a5622b525b2a6a9606c1a04e26b659
+      size: 2737
     - path: out/parte2/dijkstra.json
       hash: md5
       md5: 6997d5060c1f127559900e9a7e67c12b
@@ -123,13 +123,13 @@ stages:
       size: 104061
     - path: out/parte2/graficos/tempo_por_algoritmo.png
       hash: md5
-      md5: e94481469ad2733f82eea3bf4044ad6a
-      size: 77118
+      md5: 4230cae2ebf808446bfa2673acd642d7
+      size: 78284
     - path: out/parte2/graficos/tempo_por_tamanho.png
       hash: md5
-      md5: 8e40d069fdb603d71081799c4b75ea24
-      size: 208736
+      md5: 1a304236e650270ce0789aec0c45a0f0
+      size: 211715
     - path: out/parte2/parte2_report.json
       hash: md5
-      md5: 79930636629adf7c7859872f614946e7
-      size: 182278
+      md5: 2ede3d15f03b4040a37d27203831812e
+      size: 182247

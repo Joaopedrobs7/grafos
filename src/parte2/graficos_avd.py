@@ -1,16 +1,19 @@
 # [IA] Claude – código de desenho (matplotlib) dos 4 gráficos de dados da Parte 2 escolhidos pelo grupo
 """Gráficos de dados (AVD) da Parte 2, no grafo de rotação. Tipos e destaques escolhidos pelo grupo:
 
-- E1 (exploratório): histograma do peso das trocas, linha no zero, negativos e positivos em cores
-  diferentes, mediana marcada;
-- E4 (exploratório): matriz de correlação de Spearman entre o impacto e as estatísticas de jogo por 36 min
-  (PlayerStatistics.csv; jogador-temporada com >= 30 entradas), valor escrito em cada célula, escala -1 a +1;
+- H3 (exploratório): boxplot do peso de cada troca por tempo que o substituto ficou em quadra
+  (1–2, 2–4, 4–8 e 8+ min), com n e % de extremos (|peso| > 30) por grupo e linha no zero;
+- H1 (exploratório): boxplot do peso de cada troca pela diferença absoluta no placar no momento da troca
+  (até 5, 6 a 15 e mais de 15 pontos), com n e % de extremos por grupo e linha no zero;
 - impacto x minutos (explanatório): uma bolinha por jogador-temporada com >= 30 entradas, quadrante
   "impacto > 0 e minutos < mediana" destacado, cor por time e nome do jogador;
 - X6 (explanatório): times mais eficientes em trocas, média das 6 temporadas, 30 times ordenados, zero
   marcado, 5 melhores e 5 piores em cor forte e o resto em cinza.
 
-Definições: impacto de um jogador-temporada = média dos pesos dos arcos que chegam nele, ponderada pelas
+Definições: peso de uma troca (ocorrência) = 12 × (saldo depois / min depois − saldo antes / min antes),
+só trocas com os dois trechos de pelo menos 1 minuto (``trocas.csv``); nos boxplots a caixa vai do 1º ao
+3º quartil, a linha é a mediana e os bigodes vão até o dado mais distante dentro de 1,5 × IIQ (pontos além
+dos bigodes não são desenhados). Impacto de um jogador-temporada = média dos pesos dos arcos que chegam nele, ponderada pelas
 ocorrências; entradas = soma das ocorrências; impacto de um time = média dos pesos de todos os arcos do
 time, ponderada pelas ocorrências. Este módulo só calcula essas médias e desenha; não interpreta.
 
@@ -85,11 +88,6 @@ def dados(rot: Path = ROT, raw: Path = RAW) -> tuple[pd.DataFrame, pd.DataFrame]
 
 
 # [IA] Claude – estatísticas de jogo por 36 minutos (temporada regular), somando todos os jogos do jogador na temporada
-COLS_CORRELACAO = {"impacto": "impacto", "pontos36": "pontos/36", "assist36": "assist./36", "rebotes36": "rebotes/36",
-                   "roubos36": "roubos/36", "tocos36": "tocos/36", "erros36": "erros/36",
-                   "arremesso_real": "% arremesso real", "taxa_de_3": "taxa de 3", "pm36": "plus-minus/36"}
-
-
 def estatisticas_36(raw: Path = RAW) -> pd.DataFrame | None:
     caminho = raw / "PlayerStatistics.csv"
     if not caminho.exists():
@@ -113,48 +111,67 @@ def estatisticas_36(raw: Path = RAW) -> pd.DataFrame | None:
     }).reset_index()
 
 
-def e1_histograma(arcos: pd.DataFrame, destino: Path) -> dict:
-    plt = _plt()
-    w = arcos["peso"]
-    fig, ax = plt.subplots(figsize=(9, 4.8))
-    bins = range(-60, 62, 2)
-    ax.hist(w[w < 0], bins=bins, color=NEG, label=f"troca piora o time (peso < 0): {_mil(int((w < 0).sum()))}")
-    ax.hist(w[w >= 0], bins=bins, color=POS, label=f"troca melhora o time (peso ≥ 0): {_mil(int((w >= 0).sum()))}")
-    ax.axvline(0, color="black", lw=1.2)
-    med = float(w.median())
-    ax.axvline(med, color="black", lw=1, ls="--", label=f"mediana = {med:+.2f}")
-    ax.set_xlabel("peso do arco X → Y: saldo por 12 min depois da troca − antes (pontos)")
-    ax.set_ylabel("número de arcos (tipos de troca)")
-    ax.set_title(f"Distribuição do peso das trocas no grafo de rotação (2020-21 a 2025-26, {_mil(len(w))} arcos)")
-    ax.legend(frameon=False)
-    fig.tight_layout(); fig.savefig(destino, dpi=160); plt.close(fig)
-    return {"arcos": int(len(w)), "negativos": int((w < 0).sum()), "mediana": med}
+# [IA] Claude – grupos dos boxplots H3 e H1 (peso de cada troca) e resumo de cada grupo
+LIMITE_EXTREMO = 30.0
+GRUPOS_H3 = [("1–2 min", 1, 2), ("2–4 min", 2, 4), ("4–8 min", 4, 8), ("8+ min", 8, float("inf"))]
+GRUPOS_H1 = [("até 5 pts", 0, 5), ("6 a 15 pts", 6, 15), ("mais de 15 pts", 16, float("inf"))]
+CAIXA, BORDA = "#CFC8BD", "#57534E"
 
 
-def e4_correlacao(jog: pd.DataFrame, destino: Path) -> dict:
-    """Spearman entre o impacto e as estatísticas de jogo por 36 min (metade de baixo da matriz)."""
-    import numpy as np
+def trocas(rot: Path = ROT) -> pd.DataFrame:
+    """Uma linha por troca (trocas.csv, gravado por src/parte2/rotacao.py)."""
+    return pd.read_csv(rot / "trocas.csv")
+
+
+def grupos(t: pd.DataFrame, qual: str) -> list[tuple[str, pd.Series]]:
+    """[(rótulo, pesos)] na ordem dos grupos: H3 por minutos do substituto, H1 por diferença no placar."""
+    if qual == "h3":
+        return [(r, t.loc[(t["min_depois"] >= a) & (t["min_depois"] < b), "peso_ocorrencia"]) for r, a, b in GRUPOS_H3]
+    return [(r, t.loc[(t["placar"] >= a) & (t["placar"] <= b), "peso_ocorrencia"]) for r, a, b in GRUPOS_H1]
+
+
+def resumo_grupo(w: pd.Series) -> dict:
+    """n, quartis, bigodes (1,5 × IIQ, limitados ao dado), % de extremos e % de negativos."""
+    q1, med, q3 = (float(w.quantile(q)) for q in (0.25, 0.5, 0.75))
+    iiq = q3 - q1
+    dentro = w[(w >= q1 - 1.5 * iiq) & (w <= q3 + 1.5 * iiq)]
+    return {"n": int(len(w)), "q1": round(q1, 3), "mediana": round(med, 3), "q3": round(q3, 3),
+            "bigode_min": round(float(dentro.min()), 3), "bigode_max": round(float(dentro.max()), 3),
+            "pct_extremos": round(float((w.abs() > LIMITE_EXTREMO).mean() * 100), 2),
+            "pct_negativos": round(float((w < 0).mean() * 100), 2)}
+
+
+def boxplot_grupos(t: pd.DataFrame, qual: str, destino: Path) -> dict:
     plt = _plt()
-    cols = {k: v for k, v in COLS_CORRELACAO.items() if k in jog.columns}
-    base = jog[jog["entradas"] >= MIN_ENTRADAS][list(cols)].rename(columns=cols)
-    c = base.corr(method="spearman")
-    n = len(c)
-    fig, ax = plt.subplots(figsize=(9.5, 7.8))
-    for i in range(1, n):
-        for j in range(i):
-            v = c.values[i, j]
-            ax.add_patch(plt.Rectangle((j, n - 1 - i), 0.94, 0.94, color=POS if v >= 0 else NEG, alpha=0.12 + 0.75 * min(abs(v), 1)))
-            ax.text(j + 0.47, n - 1 - i + 0.47, f"{v:+.2f}".replace(".", ","), ha="center", va="center", fontsize=9.5, weight="bold")
-    ax.set_xlim(0, n - 1); ax.set_ylim(0, n - 1)
-    ax.set_xticks([j + 0.47 for j in range(n - 1)], c.columns[:-1], rotation=35, ha="right")
-    ax.set_yticks([n - 1 - i + 0.47 for i in range(1, n)], c.index[1:])
-    ax.tick_params(length=0); ax.spines[:].set_visible(False)
-    ax.set_title(f"Correlação de Spearman: impacto × estatísticas de jogo por 36 min\n(jogador-temporada com ≥ {MIN_ENTRADAS} entradas, "
-                 f"n = {_mil(base.dropna().shape[0])}; azul = positiva, vermelho = negativa)")
+    gs = grupos(t, qual)
+    res = {r: resumo_grupo(w) for r, w in gs}
+    fig, ax = plt.subplots(figsize=(9, 5.4))
+    ax.axhline(0, color="black", lw=1, zorder=1)
+    ax.boxplot([w.to_numpy() for _, w in gs], whis=1.5, showfliers=False, widths=0.55, patch_artist=True,
+               boxprops={"facecolor": CAIXA, "edgecolor": BORDA, "lw": 1}, whiskerprops={"color": BORDA, "lw": 1},
+               capprops={"color": BORDA, "lw": 1}, medianprops={"color": "black", "lw": 2.4}, zorder=2)
+    topo = max(v["bigode_max"] for v in res.values())
+    base = min(v["bigode_min"] for v in res.values())
+    for i, (r, v) in enumerate(res.items(), start=1):
+        ax.text(i, v["bigode_max"] + (topo - base) * 0.03, f"{v['pct_extremos']:.1f}% extremos".replace(".", ","),
+                ha="center", va="bottom", fontsize=9, color=NEG, weight="bold")
+        ax.text(i + 0.3, v["mediana"], f"{v['mediana']:+.2f}".replace(".", ","), ha="left", va="center", fontsize=8.5,
+                bbox={"facecolor": "white", "edgecolor": "none", "pad": 1.5}, zorder=3)
+    ax.set_xticks(range(1, len(res) + 1), [f"{r}\nn = {_mil(v['n'])}" for r, v in res.items()])
+    ax.set_ylim(base - (topo - base) * 0.06, topo + (topo - base) * 0.12)
+    ax.set_ylabel("peso da troca: saldo por 12 min depois − antes (pontos)")
+    total = _mil(sum(v["n"] for v in res.values()))
+    if qual == "h3":
+        ax.set_xlabel("tempo que o substituto ficou em quadra")
+        titulo = "Tempo do substituto em quadra"
+    else:
+        ax.set_xlabel("diferença no placar no momento da troca (pontos, em módulo)")
+        titulo = "Placar no momento da troca"
+    ax.set_title(f"{titulo}: peso de cada troca, 2020-21 a 2025-26 ({total} trocas)\n"
+                 f"caixa = 1º a 3º quartil; traço = mediana; bigodes = 1,5 × IIQ (pontos além deles omitidos); "
+                 f"extremos = |peso| > {LIMITE_EXTREMO:.0f}", fontsize=10)
     fig.tight_layout(); fig.savefig(destino, dpi=160); plt.close(fig)
-    return {"n": int(len(base)), "n_completos": int(base.dropna().shape[0]),
-            "faltantes": {k: int(v) for k, v in base.isna().sum().items()},
-            "matriz": c.round(3).to_dict()}
+    return {"trocas": int(sum(v["n"] for v in res.values())), "grupos": res}
 
 
 def _cores_times(times) -> dict:
@@ -220,15 +237,16 @@ def main(argv: list[str] | None = None) -> None:
     args = ap.parse_args(argv)
     SAIDA.mkdir(parents=True, exist_ok=True)
     arcos, jog = dados()
+    tr = trocas()
     resumo = {
-        "e1_histograma_peso": e1_histograma(arcos, SAIDA / "e1_histograma_peso.png"),
-        "e4_correlacao_spearman": e4_correlacao(jog, SAIDA / "e4_correlacao_spearman.png"),
+        "h3_tempo_em_quadra": boxplot_grupos(tr, "h3", SAIDA / "h3_tempo_em_quadra.png"),
+        "h1_placar_momento": boxplot_grupos(tr, "h1", SAIDA / "h1_placar_momento.png"),
         "impacto_x_minutos": bolinhas(jog, args.temporada, SAIDA / f"impacto_x_minutos_{args.temporada}.png"),
         "x6_times_trocas": x6_times(arcos, SAIDA / "x6_times_trocas.png"),
     }
     jog.to_csv(SAIDA / "jogadores_impacto.csv", index=False)
     (SAIDA / "resumo.json").write_text(json.dumps(resumo, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(json.dumps({k: {kk: vv for kk, vv in v.items() if kk not in ("matriz", "impacto_por_time")}
+    print(json.dumps({k: {kk: vv for kk, vv in v.items() if kk not in ("impacto_por_time",)}
                       for k, v in resumo.items()}, indent=2, ensure_ascii=False))
 
 

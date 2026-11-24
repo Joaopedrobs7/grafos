@@ -9,7 +9,9 @@ algoritmos (``out/parte2/bellman_ford.json``, ``dijkstra.json`` e ``parte2_repor
 - ``rotacao/<TIME>_<ano>.json``: um time-temporada — nós (jogador, minutos, entradas, impacto médio),
   arcos ``[i, j, peso, ocorrencias]`` (índices na lista de nós), o ciclo negativo que o Bellman-Ford do grupo
   devolveu, o caminho do recorte sem ciclo e, quando o time-temporada é um dos pares do Dijkstra, esse caminho;
-- ``benchmark.json``: tempos médios por algoritmo e tipo de grafo e a tabela de escalabilidade.
+- ``benchmark.json``: tempos médios por algoritmo e tipo de grafo e a tabela de escalabilidade;
+- ``graficos.json``: dados dos gráficos interativos (impacto × minutos, times e os boxplots H3 e H1 do peso
+  de cada troca, lidos de ``trocas.csv``).
 
 Nenhum algoritmo de busca ou caminho roda aqui: os ciclos e caminhos vêm prontos dos JSON da frente de
 algoritmos; este módulo só procura o peso de cada arco listado e soma os custos acumulados para exibição.
@@ -197,7 +199,7 @@ def montar_benchmark(relatorio: dict) -> dict:
 
 # [IA] Claude – dados das versões interativas dos gráficos "impacto x minutos" e X6 (mesmas definições de
 # src/parte2/graficos_avd.py: impacto ponderado pelas ocorrências, >= 30 entradas no gráfico de bolinhas)
-def montar_graficos(arestas: list[dict], jogadores: list[dict], min_entradas: int = 30) -> dict:
+def montar_graficos(arestas: list[dict], jogadores: list[dict], min_entradas: int = 30, trocas=None) -> dict:
     chega: dict[str, list[float]] = {}
     times: dict[tuple[str, int | None], list[float]] = {}
     for a in arestas:
@@ -220,29 +222,15 @@ def montar_graficos(arestas: list[dict], jogadores: list[dict], min_entradas: in
         por_time.setdefault("todas" if ano is None else str(ano), []).append([time, _num(soma / oc, 3), oc])
     for v in por_time.values():
         v.sort(key=lambda x: x[1])
-    # [IA] Claude – E1 (histograma do peso) e E4 (Spearman) por temporada, para a versão interativa
-    import pandas as pd
-    arc = pd.DataFrame(arestas).astype({"peso": float, "temporada": int})
-    largura = 2
-    bordas = list(range(-60, 62, largura))
-    def histograma(w):
-        cont, _ = __import__("numpy").histogram(w.clip(-59.999, 59.999), bins=bordas)
-        return {"bordas": bordas, "contagens": [int(c) for c in cont], "n": int(len(w)), "negativos": int((w < 0).sum()),
-                "mediana": _num(float(w.median()), 3)}
-    hist = {"todas": histograma(arc["peso"])}
-    for ano, g in arc.groupby("temporada"):
-        hist[str(ano)] = histograma(g["peso"])
-    from .graficos_avd import dados as _dados_avd
-    _, jog = _dados_avd()
-    from .graficos_avd import COLS_CORRELACAO
-    cols = {k: v for k, v in COLS_CORRELACAO.items() if k in jog.columns}
-    corr = {}
-    base_tudo = jog[jog["entradas"] >= min_entradas]
-    for chave, base in [("todas", base_tudo)] + [(str(a), g) for a, g in base_tudo.groupby("temporada")]:
-        m = base[list(cols)].rename(columns=cols).corr(method="spearman")
-        corr[chave] = {"variaveis": list(m.columns), "matriz": [[_num(float(v), 3) for v in linha] for linha in m.values],
-                       "n": int(base[list(cols)].dropna().shape[0])}
-    return {"min_entradas": min_entradas, "histograma": hist, "correlacao": corr,
+    # [IA] Claude – H3 (tempo do substituto em quadra) e H1 (placar no momento da troca): resumo do boxplot
+    # por grupo e por temporada, com as mesmas definições de src/parte2/graficos_avd.py
+    from .graficos_avd import grupos, resumo_grupo
+    caixas = {"h3": {}, "h1": {}}
+    if trocas is not None:
+        for chave, t in [("todas", trocas)] + [(str(a), g) for a, g in trocas.groupby("temporada")]:
+            for qual in caixas:
+                caixas[qual][chave] = [dict(grupo=r, **resumo_grupo(w)) for r, w in grupos(t, qual)]
+    return {"min_entradas": min_entradas, "h3": caixas["h3"], "h1": caixas["h1"],
             "colunas_jogadores": ["nome", "time", "temporada", "minutos", "impacto", "entradas"],
             "jogadores": pontos, "colunas_times": ["time", "impacto", "ocorrencias"], "times": por_time,
             "definicoes": {
@@ -268,7 +256,9 @@ def main(pasta: Path = PASTA, resultados: Path = RESULTADOS, saida: Path = SAIDA
     for (time, ano), d in componentes.items():
         _gravar(saida / "rotacao" / nome_arquivo(time, ano), d)
     _gravar(saida / "indice.json", montar_indice(componentes, bellman, dijkstra))
-    _gravar(saida / "graficos.json", montar_graficos(arestas, jogadores))
+    import pandas as pd
+    trocas = pd.read_csv(pasta / "trocas.csv") if (pasta / "trocas.csv").exists() else None
+    _gravar(saida / "graficos.json", montar_graficos(arestas, jogadores, trocas=trocas))
     relatorio = resultados / "parte2_report.json"
     if relatorio.exists():
         _gravar(saida / "benchmark.json", montar_benchmark(json.loads(relatorio.read_text(encoding="utf-8"))))

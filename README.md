@@ -67,7 +67,7 @@ python -m src.cli --dataset ./data/dataset_parte2/ --benchmark --out ./out/parte
 python -m src.parte2.rotacao_casos       # BFS/DFS, Bellman-Ford, Dijkstra -> out/parte2/{bfs_dfs,bellman_ford,dijkstra}.json
 python -m src.parte2.rotacao_desempenho  # benchmark e escalabilidade      -> out/parte2/parte2_report.json, complexidade.csv
 python -m src.parte2.rotacao_graficos    # gráficos de comparação          -> out/parte2/graficos/
-python -m src.parte2.graficos_avd        # 4 gráficos de dados (AVD)       -> out/parte2/graficos_avd/
+python -m src.parte2.graficos_avd        # 4 gráficos de dados (AVD): H3, H1, impacto x minutos, X6 -> out/parte2/graficos_avd/
 python -m src.parte2.web_dados           # JSON da página /parte2 do site  -> out/parte2/web/ (rodar depois do casos_rotacao)
 dvc repro casos_rotacao                  # os três comandos acima
 
@@ -276,7 +276,7 @@ dvc repro           # refaz só o que mudou: baixar (Kaggle) -> preparar (params
 |---|---|---|
 | `baixar` | `python -m src.parte2.baixar` | `data/dataset_parte2/raw/` (CSV do Kaggle + `MANIFESTO.json` com SHA-256) |
 | `preparar` | `python -m src.parte2.preparar` | `data/dataset_parte2/processed/arestas.csv`, `nos.csv`, `relatorio_preparacao.json` |
-| `rotacao` | `python -m src.parte2.rotacao` | `data/dataset_parte2/rotacao/arestas_rotacao.csv`, `jogadores.csv`, `relatorio_rotacao.json` |
+| `rotacao` | `python -m src.parte2.rotacao` | `data/dataset_parte2/rotacao/arestas_rotacao.csv`, `jogadores.csv`, `trocas.csv` (uma linha por troca), `relatorio_rotacao.json` |
 | `casos_rotacao` | `rotacao_casos`, `rotacao_desempenho`, `rotacao_graficos` | `out/parte2/*.json`, `complexidade.csv`, `graficos/*.png` (cache: false, versionados no git) |
 
 `params.yaml` controla a limpeza (tipos de jogo, intervalo de temporadas) e o recorte da rotação. A temporada e o tipo

@@ -12,6 +12,10 @@ Modelagem decidida pelo grupo:
 Recorte (params.yaml, seção ``rotacao``): temporada regular, temporadas completas no formato novo do
 jogada a jogada (2020-21 a 2025-26) e só trocas 1 por 1, em que o dado diz exatamente quem saiu por quem.
 Este módulo só lê, filtra e agrega tabelas; não monta o grafo nem roda algoritmos.
+
+Saídas em ``data/dataset_parte2/rotacao/``: ``arestas_rotacao.csv`` (arcos), ``jogadores.csv`` (nós),
+``trocas.csv`` (uma linha por troca com os dois trechos de pelo menos 1 minuto, com período, diferença
+absoluta no placar no momento da troca e o peso da ocorrência) e ``relatorio_rotacao.json``.
 """
 from __future__ import annotations
 
@@ -32,6 +36,7 @@ SAIDA = RAIZ / "data" / "dataset_parte2" / "rotacao"
 COLUNAS = ["gameId", "period", "clock", "orderNumber", "actionNumber", "actionType", "subType",
            "personId", "subsInPersonId", "teamId", "playerteamId", "scoreHome", "scoreAway"]
 MINUTOS_REFERENCIA = 12.0  # o peso é expresso em pontos de saldo por 12 minutos (um quarto)
+MIN_TRECHO_OCORRENCIA = 1.0  # [IA] Claude – minutos mínimos antes e depois para uma troca entrar em trocas.csv
 
 
 def _ler_jogada_a_jogada(raw: Path, temporada_min: int, temporada_max: int) -> pd.DataFrame:
@@ -135,7 +140,10 @@ def trechos(df: pd.DataFrame, jogos: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     validos = (pares["min_depois"] > 0) & (pares["min_antes"] > 0)
     rel["trocas_sem_tempo_antes_ou_depois_descartadas"] = int((~validos).sum())
     pares = pares[validos]
-    return pares[["temporada", "gameId", "teamId", "X", "Y", "saldo_antes", "min_antes",
+    # [IA] Claude – período e diferença absoluta no placar no momento da troca (usados nos gráficos H1/H3)
+    pares = pares.assign(periodo=pares["period"].astype(int),
+                         placar=(pares["pts_time"] - pares["pts_adv"]).abs().astype(int))
+    return pares[["temporada", "gameId", "teamId", "X", "Y", "periodo", "placar", "saldo_antes", "min_antes",
                   "saldo_depois", "min_depois"]].reset_index(drop=True), rel
 
 
@@ -155,6 +163,22 @@ def _rotulos(arcos: pd.DataFrame, raw: Path) -> dict:
     chaves.loc[dup, "rotulo"] = (chaves["nome"] + " #" + chaves["p"] + "|" + chaves["sigla"] + "|"
                                  + chaves["temporada"].astype(str))[dup]
     return {(r.p, r.teamId, r.temporada): (r.rotulo, r.nome, r.sigla) for r in chaves.itertuples()}
+
+
+# [IA] Claude – uma linha por troca (ocorrência) com os dois trechos completos, para os gráficos H1/H3
+def trocas_por_ocorrencia(tr: pd.DataFrame, raw: Path) -> pd.DataFrame:
+    """Trocas com os dois trechos de pelo menos ``MIN_TRECHO_OCORRENCIA`` minuto e o peso de cada uma.
+
+    peso_ocorrencia = 12 × (saldo_depois / min_depois − saldo_antes / min_antes), a mesma unidade do arco.
+    """
+    t = tr[(tr["min_antes"] >= MIN_TRECHO_OCORRENCIA) & (tr["min_depois"] >= MIN_TRECHO_OCORRENCIA)].copy()
+    sig = _siglas(pd.read_csv(raw / "TeamHistories.csv")).set_index(["teamId", "temporada_inicio"])["sigla"]
+    t["time"] = [sig.get((int(i), int(a)), str(i)) for i, a in zip(t["teamId"], t["temporada"])]
+    t["peso_ocorrencia"] = MINUTOS_REFERENCIA * (t["saldo_depois"] / t["min_depois"] - t["saldo_antes"] / t["min_antes"])
+    t = t.rename(columns={"X": "sai_personId", "Y": "entra_personId"})
+    cols = ["temporada", "time", "gameId", "periodo", "sai_personId", "entra_personId", "placar",
+            "saldo_antes", "min_antes", "saldo_depois", "min_depois", "peso_ocorrencia"]
+    return t.sort_values(["temporada", "gameId", "periodo"], kind="stable")[cols].round(4)
 
 
 def preparar_rotacao(params: dict, raw: Path = RAW, saida: Path = SAIDA) -> dict:
@@ -199,6 +223,7 @@ def preparar_rotacao(params: dict, raw: Path = RAW, saida: Path = SAIDA) -> dict
     arcos.sort_values(["temporada", "time", "origem", "destino"])[colunas].round(4).to_csv(
         saida / "arestas_rotacao.csv", index=False)
     nos.to_csv(saida / "jogadores.csv", index=False)
+    trocas_por_ocorrencia(tr, raw).to_csv(saida / "trocas.csv", index=False)
     rel.update({
         "parametros": params,
         "arcos": int(len(arcos)), "nos": int(len(nos)),

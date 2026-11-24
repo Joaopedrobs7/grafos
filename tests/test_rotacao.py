@@ -51,6 +51,9 @@ def test_trechos_antes_e_depois_calculados_a_mao():
     # 11 -> 10 aos 5:00: antes = o trecho de 11 (-3 em 3 min); depois 10 fica até o fim: 4-3 = +1 em 5 min
     assert t.loc[("11", "10"), ["saldo_antes", "min_antes", "saldo_depois", "min_depois"]].tolist() == \
         pytest.approx([-3, 3, 1, 5])
+    # [IA] Claude – período e diferença absoluta no placar no momento da troca (6 x 4 e 8 x 9)
+    assert t.loc[("10", "11"), ["periodo", "placar"]].tolist() == [1, 2]
+    assert t.loc[("11", "10"), ["periodo", "placar"]].tolist() == [1, 1]
 
 
 def test_formato_explicito_e_ponto_de_vista_do_visitante():
@@ -86,3 +89,8 @@ def test_preparar_rotacao_gera_arestas_com_peso_por_12_minutos(tmp_path):
     assert float(linhas[("Bia B|UMM|2024", "Ana A|UMM|2024")]["peso"]) == pytest.approx(1 / 5 * 12 - (-3) / 3 * 12)
     assert rel["arcos"] == 2 and rel["pesos_negativos"] == 1
     assert json.loads((tmp_path / "rot" / "relatorio_rotacao.json").read_text(encoding="utf-8"))["arcos"] == 2
+    # [IA] Claude – trocas.csv: uma linha por ocorrência, com o peso da própria troca na mesma unidade do arco
+    trocas = pd.read_csv(tmp_path / "rot" / "trocas.csv")
+    assert len(trocas) == 4 and set(trocas["time"]) == {"UMM"}
+    ida = trocas[(trocas["sai_personId"] == 10) & (trocas["entra_personId"] == 11)]
+    assert ida["peso_ocorrencia"].tolist() == pytest.approx([-18.0, -18.0]) and ida["placar"].tolist() == [2, 2]

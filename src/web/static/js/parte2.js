@@ -79,7 +79,12 @@
     if (focar) abas[i].focus();
     var hash = i === 2 ? "#algoritmos" : i === 1 ? "#graficos" : "";
     if (location.hash !== hash) history.replaceState(null, "", location.pathname + location.search + hash);
-    if (i === 2) carregarBench(); else if (i === 1) carregarGraficos(); else desenhar();
+    if (i === 2) carregarBench(); else if (i === 1) carregarGraficos(); else { medir(); desenhar(); }
+    // [IA] Claude – o painel acabou de aparecer: mede de novo com a largura real e redesenha (fotos já carregadas ficam no cache)
+    requestAnimationFrame(function () {
+      if (i === 0) { medir(); desenhar(); }
+      else if (i === 1 && graf.dados) { desenharBolinhas(); desenharTodasCaixas(); }
+    });
   }
   abas.forEach(function (a, i) {
     a.addEventListener("click", function () { abrirAba(i, false); });
@@ -875,7 +880,7 @@
   var gTemp = $("gTemporada"), gTime = $("gTime");
 
   function carregarGraficos() {
-    if (graf.dados) { desenharBolinhas(); desenharHistograma(); return; }
+    if (graf.dados) { desenharBolinhas(); desenharTodasCaixas(); return; }
     if (graf.dados === false) return;
     graf.dados = false;
     json("api/parte2/graficos").then(function (d) {
@@ -922,8 +927,7 @@
       "(pts a cada 12 min). Ex.: <b>" + esc(ex[0]) + "</b>, " + fmtSinal(ex[4], 2) + "." : "";
     desenharBolinhas();
     montarBarras();
-    desenharHistograma();
-    montarCorrelacao();
+    desenharTodasCaixas();
   }
   gTemp.addEventListener("change", atualizarGraficos);
   gTime.addEventListener("change", atualizarGraficos);
@@ -1026,7 +1030,7 @@
   });
   $("gTela").addEventListener("mouseleave", function () { $("gDica").hidden = true; graf.sobre = null; desenharBolinhas(); });
 
-  /* [IA] Claude – dica flutuante única para o histograma, a matriz e as barras (mesmo estilo da dica das bolinhas) */
+  /* [IA] Claude – dica flutuante única para os boxplots e as barras (mesmo estilo da dica das bolinhas) */
   var dicaG = document.createElement("div");
   dicaG.className = "p2-dica g-dica-flutuante"; dicaG.hidden = true; dicaG.setAttribute("role", "tooltip");
   document.body.appendChild(dicaG);
@@ -1077,98 +1081,108 @@
   });
   $("gBarras").addEventListener("focusout", esconderDicaG);
 
-  /* [IA] Claude – E1: histograma do peso das trocas (linha no zero, negativos e positivos em cores diferentes, mediana) */
-  function desenharHistograma() {
-    var chave = gTemp.value, h = graf.dados.histograma[chave];
-    if (!h || paineis[1].hidden) return;
-    var periodo = chave === "todas" ? "de 2020-21 a 2025-26" : "em " + rotuloTemporada(+chave);
-    $("gHistLer").innerHTML = "Quantas trocas " + periodo + " caem em cada faixa de peso. Vermelho: o time piorou depois da troca; " +
-      "azul: melhorou. Tracejado: mediana (" + fmtSinal(h.mediana, 2) + ").";
-    var tela = $("gHist"), area = $("gHistArea"), dpr = window.devicePixelRatio || 1;
-    var larg = area.clientWidth, alt = Math.max(260, Math.min(380, Math.round(larg * 0.32)));
+  /* [IA] Claude – H3 e H1: boxplot do peso de cada troca por grupo (caixa = Q1 a Q3, traço = mediana,
+     hastes = 1,5 × IIQ limitadas ao dado; trocas além das hastes não são desenhadas). Dados prontos em graficos.json. */
+  var CAIXAS = { h3: { tela: "gH3", area: "gH3Area", sel: null, layout: null },
+                 h1: { tela: "gH1", area: "gH1Area", sel: null, layout: null } };
+
+  function desenharTodasCaixas() { desenharCaixas("h3"); desenharCaixas("h1"); }
+
+  function desenharCaixas(qual) {
+    var cfg = CAIXAS[qual], gs = graf.dados && graf.dados[qual] && graf.dados[qual][gTemp.value];
+    if (!gs || paineis[1].hidden) return;
+    var tela = $(cfg.tela), area = $(cfg.area), dpr = window.devicePixelRatio || 1;
+    var larg = area.clientWidth, alt = Math.max(300, Math.min(400, Math.round(larg * 0.36)));
     tela.width = larg * dpr; tela.height = alt * dpr; tela.style.height = alt + "px";
     var ctx = tela.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, larg, alt);
-    var mx = { e: 52, d: 12, t: 12, b: 42 }, b = h.bordas, c = h.contagens;
-    var cmax = Math.max.apply(null, c), x0 = b[0], x1 = b[b.length - 1];
-    var X = function (v) { return mx.e + (v - x0) / (x1 - x0) * (larg - mx.e - mx.d); };
-    var Y = function (v) { return mx.t + (1 - v / cmax) * (alt - mx.t - mx.b); };
-    graf.hist = { h: h, mx: mx, larg: larg, x0: x0, x1: x1, sel: graf.hist && graf.hist.sel };
-    for (var i = 0; i < c.length; i++) {
-      if (graf.hist.sel === i) { ctx.fillStyle = "rgba(239,230,216,.10)"; ctx.fillRect(X(b[i]), mx.t, X(b[i + 1]) - X(b[i]), Y(0) - mx.t); }
-      ctx.fillStyle = b[i] < 0 ? "rgb(255,84,112)" : "rgb(53,200,240)";
-      ctx.fillRect(X(b[i]) + 0.5, Y(c[i]), X(b[i + 1]) - X(b[i]) - 1, Y(0) - Y(c[i]));
+    var mx = { e: 56, d: 12, t: 26, b: 52 };
+    var y0 = Math.min.apply(null, gs.map(function (g) { return g.bigode_min; }));
+    var y1 = Math.max.apply(null, gs.map(function (g) { return g.bigode_max; }));
+    var passo = (y1 - y0) > 100 ? 25 : (y1 - y0) > 50 ? 20 : 10;
+    // folga em cima para o texto "% além de ±30"
+    y0 = Math.floor(y0 / passo) * passo; y1 = Math.ceil((y1 + (y1 - y0) * 0.08) / passo) * passo;
+    var col = (larg - mx.e - mx.d) / gs.length;
+    var Y = function (v) { return mx.t + (y1 - v) / (y1 - y0) * (alt - mx.t - mx.b); };
+    cfg.layout = { mx: mx, col: col, n: gs.length, gs: gs };
+    // grade e eixo y
+    ctx.font = "12px 'DM Sans', sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    for (var v = y0; v <= y1 + 1e-9; v += passo) {
+      ctx.strokeStyle = "rgba(181,168,149,.12)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(mx.e, Y(v)); ctx.lineTo(larg - mx.d, Y(v)); ctx.stroke();
+      ctx.fillStyle = LUAR_FRACO; ctx.fillText(fmtSinal(v, 0), mx.e - 8, Y(v));
     }
-    ctx.strokeStyle = LUAR; ctx.lineWidth = 1.2;
-    ctx.beginPath(); ctx.moveTo(X(0), mx.t); ctx.lineTo(X(0), Y(0)); ctx.stroke();
-    ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(X(h.mediana), mx.t); ctx.lineTo(X(h.mediana), Y(0)); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = LUAR_FRACO; ctx.font = "12px 'DM Sans', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "top";
-    for (var v = -60; v <= 60; v += 20) ctx.fillText(fmtSinal(v, 0), X(v), alt - mx.b + 6);
-    ctx.fillText("peso da troca: mudança no saldo do time a cada 12 min (pts)", (mx.e + larg) / 2, alt - 18);
-    ctx.textAlign = "right"; ctx.textBaseline = "middle";
-    var passo = cmax > 1500 ? 500 : cmax > 600 ? 200 : cmax > 150 ? 50 : 10;
-    for (var k = 0; k <= cmax; k += passo) ctx.fillText(fmtInt(k), mx.e - 8, Y(k));
+    ctx.save(); ctx.translate(14, (mx.t + alt - mx.b) / 2); ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = "center"; ctx.fillText("peso da troca (pts a cada 12 min)", 0, 0); ctx.restore();
+    // linha do zero embaixo das caixas
+    ctx.strokeStyle = LUAR; ctx.lineWidth = 1; ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(mx.e, Y(0)); ctx.lineTo(larg - mx.d, Y(0)); ctx.stroke(); ctx.setLineDash([]);
+    gs.forEach(function (g, i) {
+      var cx = mx.e + col * (i + 0.5), w = Math.min(120, col * 0.42);
+      if (cfg.sel === i) { ctx.fillStyle = "rgba(239,230,216,.06)"; ctx.fillRect(mx.e + col * i + 2, mx.t - 20, col - 4, alt - mx.t - mx.b + 20); }
+      // hastes
+      ctx.strokeStyle = LUAR_FRACO; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(cx, Y(g.bigode_max)); ctx.lineTo(cx, Y(g.q3)); ctx.moveTo(cx, Y(g.q1)); ctx.lineTo(cx, Y(g.bigode_min));
+      ctx.moveTo(cx - w * 0.25, Y(g.bigode_max)); ctx.lineTo(cx + w * 0.25, Y(g.bigode_max));
+      ctx.moveTo(cx - w * 0.25, Y(g.bigode_min)); ctx.lineTo(cx + w * 0.25, Y(g.bigode_min));
+      ctx.stroke();
+      // caixa (tom de pedra) e mediana destacada
+      ctx.fillStyle = cfg.sel === i ? "rgba(181,168,149,.45)" : "rgba(181,168,149,.30)";
+      ctx.fillRect(cx - w / 2, Y(g.q3), w, Y(g.q1) - Y(g.q3));
+      ctx.strokeStyle = cfg.sel === i ? LUAR : LUAR_FRACO;
+      ctx.strokeRect(cx - w / 2 + 0.5, Y(g.q3) + 0.5, w - 1, Y(g.q1) - Y(g.q3) - 1);
+      ctx.strokeStyle = TOCHA; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(cx - w / 2, Y(g.mediana)); ctx.lineTo(cx + w / 2, Y(g.mediana)); ctx.stroke();
+      ctx.font = "600 12px 'DM Sans', sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      var tm = fmtSinal(g.mediana, 2), lm = ctx.measureText(tm).width;
+      ctx.fillStyle = "#120F0C"; ctx.fillRect(cx + w / 2 + 3, Y(g.mediana) - 8, lm + 6, 16);
+      ctx.fillStyle = TOCHA; ctx.fillText(tm, cx + w / 2 + 6, Y(g.mediana));
+      // % além de ±30 acima da haste
+      ctx.fillStyle = LUAR_FRACO; ctx.font = "12px 'DM Sans', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+      ctx.fillText(fmt(g.pct_extremos, 1) + "% além de ±30", cx, Y(g.bigode_max) - 5);
+      // grupo e n embaixo
+      ctx.textBaseline = "top"; ctx.fillStyle = LUAR; ctx.font = "600 13px 'DM Sans', sans-serif";
+      ctx.fillText(g.grupo, cx, alt - mx.b + 10);
+      ctx.fillStyle = LUAR_FRACO; ctx.font = "12px 'DM Sans', sans-serif";
+      ctx.fillText("n = " + fmtInt(g.n), cx, alt - mx.b + 28);
+    });
   }
 
-  $("gHist").addEventListener("mousemove", function (ev) {
-    var g = graf.hist; if (!g) return;
-    var r = this.getBoundingClientRect(), x = ev.clientX - r.left;
-    var v = g.x0 + (x - g.mx.e) / (g.larg - g.mx.e - g.mx.d) * (g.x1 - g.x0);
-    var i = Math.floor((v - g.h.bordas[0]) / (g.h.bordas[1] - g.h.bordas[0]));
-    if (i < 0 || i >= g.h.contagens.length) { esconderDicaG(); if (g.sel !== null) { g.sel = null; desenharHistograma(); } return; }
-    if (g.sel !== i) { g.sel = i; desenharHistograma(); }
-    var a = g.h.bordas[i], z = g.h.bordas[i + 1], n = g.h.contagens[i];
-    mostrarDicaG("<strong>" + fmtSinal(a, 0) + " a " + fmtSinal(z, 0) + " pts/12 min</strong><dl><dt>trocas</dt><dd>" + fmtInt(n) +
-      "</dd><dt>do total</dt><dd>" + fmt(100 * n / g.h.n, 1) + "%</dd></dl><p class=\"g-dica-texto\">" +
-      (z <= 0 ? "Trocas em que o time piorou depois" : a >= 0 ? "Trocas em que o time melhorou depois" : "Trocas perto de zero") + ".</p>", ev);
+  function dicaCaixa(g, ev) {
+    mostrarDicaG("<strong>" + esc(g.grupo) + "</strong><dl><dt>trocas</dt><dd>" + fmtInt(g.n) + "</dd><dt>mediana</dt><dd>" +
+      fmtSinal(g.mediana, 2) + " pts/12 min</dd><dt>50% centrais</dt><dd>" + fmtSinal(g.q1, 1) + " a " + fmtSinal(g.q3, 1) +
+      "</dd><dt>além de ±30</dt><dd>" + fmt(g.pct_extremos, 1) + "%</dd><dt>negativas</dt><dd>" + fmt(g.pct_negativos, 1) +
+      "%</dd></dl>", ev);
+  }
+  function selecionarCaixa(qual, i, ev) {
+    var cfg = CAIXAS[qual];
+    if (cfg.sel !== i) { cfg.sel = i; desenharCaixas(qual); }
+    if (i === null) esconderDicaG(); else dicaCaixa(cfg.layout.gs[i], ev);
+  }
+  Object.keys(CAIXAS).forEach(function (qual) {
+    var cfg = CAIXAS[qual], tela = $(cfg.tela);
+    tela.addEventListener("mousemove", function (ev) {
+      var l = cfg.layout; if (!l) return;
+      var r = tela.getBoundingClientRect(), i = Math.floor((ev.clientX - r.left - l.mx.e) / l.col);
+      selecionarCaixa(qual, i >= 0 && i < l.n ? i : null, ev);
+    });
+    tela.addEventListener("mouseleave", function () { selecionarCaixa(qual, null); });
+    // teclado: o foco mostra o grupo atual (o primeiro, de início); as setas trocam de grupo
+    function pontoDoGrupo(i) {
+      var r = tela.getBoundingClientRect(), l = cfg.layout;
+      return { clientX: r.left + l.mx.e + l.col * (i + 0.5) + 30, clientY: r.top + r.height * 0.3 };
+    }
+    tela.addEventListener("focus", function () { if (cfg.layout) selecionarCaixa(qual, cfg.sel || 0, pontoDoGrupo(cfg.sel || 0)); });
+    tela.addEventListener("blur", function () { selecionarCaixa(qual, null); });
+    tela.addEventListener("keydown", function (ev) {
+      var l = cfg.layout; if (!l || (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft")) return;
+      ev.preventDefault();
+      var i = Math.max(0, Math.min(l.n - 1, (cfg.sel || 0) + (ev.key === "ArrowRight" ? 1 : -1)));
+      selecionarCaixa(qual, i, pontoDoGrupo(i));
+    });
   });
-  $("gHist").addEventListener("mouseleave", function () { esconderDicaG(); if (graf.hist) { graf.hist.sel = null; desenharHistograma(); } });
 
-  /* [IA] Claude – E4: matriz de correlação de Spearman (valor em cada célula, escala divergente −1 a +1) */
-  function corCorr(r) {
-    var a = Math.min(Math.abs(r), 1), c = r < 0 ? NEG : POS;
-    return "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (0.08 + 0.72 * a).toFixed(3) + ")";
-  }
-  function montarCorrelacao() {
-    var chave = gTemp.value, m = graf.dados.correlacao[chave];
-    if (!m) return;
-    var periodo = chave === "todas" ? "de 2020-21 a 2025-26" : "em " + rotuloTemporada(+chave);
-    $("gCorrLer").innerHTML = "Estatísticas por 36 min dos jogadores com ≥ " + graf.dados.min_entradas + " entradas " + periodo +
-      " (n = " + fmtInt(m.n) + "). +1: sobem juntos; −1: um sobe e o outro desce; 0: sem relação.";
-    var v = m.variaveis;
-    // só a metade de baixo (a matriz é simétrica) e sem a diagonal
-    $("gCorr").innerHTML = "<thead><tr><th></th>" + v.slice(0, -1).map(function (x) { return "<th scope=\"col\">" + esc(x) + "</th>"; }).join("") +
-      "</tr></thead><tbody>" + m.matriz.slice(1).map(function (linha, k) {
-        var i = k + 1;
-        return "<tr><th scope=\"row\">" + esc(v[i]) + "</th>" + linha.slice(0, -1).map(function (r, j) {
-          if (j >= i) return '<td class="g-corr__vazio"></td>';
-          return '<td style="background:' + corCorr(r) + '" tabindex="0" data-a="' + esc(v[i]) + '" data-b="' + esc(v[j]) +
-            '" data-r="' + r + '">' + fmtSinal(r, 2) + "</td>";
-        }).join("") + "</tr>";
-      }).join("") + "</tbody>";
-  }
-
-  function forcaCorr(r) {
-    var a = Math.abs(r);
-    return a < 0.1 ? "praticamente nenhuma" : a < 0.3 ? "fraca" : a < 0.5 ? "moderada" : "forte";
-  }
-  function dicaCorr(td, ev) {
-    var r = +td.getAttribute("data-r");
-    mostrarDicaG("<strong>" + esc(td.getAttribute("data-a")) + " × " + esc(td.getAttribute("data-b")) + "</strong><dl><dt>Spearman</dt><dd>" +
-      fmtSinal(r, 2) + "</dd><dt>intensidade</dt><dd>" + forcaCorr(r) + "</dd></dl><p class=\"g-dica-texto\">" +
-      (Math.abs(r) < 0.1 ? "Quase não andam juntos." : r > 0 ? "Quando um é maior, o outro tende a ser maior." :
-        "Quando um é maior, o outro tende a ser menor.") + "</p>", ev);
-  }
-  $("gCorr").addEventListener("mousemove", function (ev) {
-    var td = ev.target.closest("td[data-r]"); if (td) dicaCorr(td, ev); else esconderDicaG();
-  });
-  $("gCorr").addEventListener("mouseleave", esconderDicaG);
-  $("gCorr").addEventListener("focusin", function (ev) {
-    var td = ev.target.closest("td[data-r]"); if (!td) return;
-    var r = td.getBoundingClientRect(); dicaCorr(td, { clientX: r.right, clientY: r.top });
-  });
-  $("gCorr").addEventListener("focusout", esconderDicaG);
-
-  window.addEventListener("resize", function () { if (graf.dados) { desenharBolinhas(); desenharHistograma(); } });
+  window.addEventListener("resize", function () { if (graf.dados) { desenharBolinhas(); desenharTodasCaixas(); } });
 
   /* ------------------------------------------------------------ início */
   if (location.hash === "#algoritmos") abrirAba(2, false);

@@ -449,13 +449,21 @@ def test_parte2_graficos(cliente):
     assert impactos == sorted(impactos)  # ordenado do menor para o maior
 
 
-# [IA] Claude – histograma, correlação e figuras de comparação na página da Parte 2
+# [IA] Claude – boxplots H3/H1 (peso de cada troca por grupo) e figuras de comparação na página da Parte 2
 def test_parte2_graficos_exploratorios_e_figuras(cliente):
     d = cliente.get("/api/parte2/graficos").get_json()
-    h = d["histograma"]["todas"]
-    assert sum(h["contagens"]) == h["n"] and len(h["bordas"]) == len(h["contagens"]) + 1
-    c = d["correlacao"]["todas"]
-    assert c["variaveis"][0] == "impacto" and all(abs(c["matriz"][i][i] - 1) < 1e-9 for i in range(len(c["variaveis"])))
+    assert "histograma" not in d and "correlacao" not in d
+    for qual, rotulos in (("h3", ["1–2 min", "2–4 min", "4–8 min", "8+ min"]),
+                          ("h1", ["até 5 pts", "6 a 15 pts", "mais de 15 pts"])):
+        assert set(d[qual]) >= {"todas", "2020", "2025"}
+        for chave, gs in d[qual].items():
+            assert [g["grupo"] for g in gs] == rotulos
+            for g in gs:
+                assert g["bigode_min"] <= g["q1"] <= g["mediana"] <= g["q3"] <= g["bigode_max"]
+                assert 0 <= g["pct_extremos"] <= 100 and 0 <= g["pct_negativos"] <= 100
+        # as contagens por grupo das temporadas somam o total de "todas"
+        assert sum(g["n"] for g in d[qual]["todas"]) == sum(g["n"] for c, gs in d[qual].items() if c != "todas" for g in gs)
+    assert sum(g["n"] for g in d["h3"]["todas"]) == sum(g["n"] for g in d["h1"]["todas"])
     r = cliente.get("/api/parte2/figura/tempo_por_tamanho.png")
     assert r.status_code == 200 and r.mimetype == "image/png"
     assert cliente.get("/api/parte2/figura/nao_existe.png").status_code == 404
