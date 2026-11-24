@@ -400,3 +400,7 @@
 .g-barra[data-time]:hover .g-barra__valor, .g-barra[data-time]:focus .g-barra__valor { filter: brightness(1.25); }
 .g-barra[data-time]:focus-visible, .g-corr td:focus-visible { outline: 2px solid var(--cesar); outline-offset: 2px; }
 .g-corr td[data-r]:hover { box-shadow: inset 0 0 0 2px var(--luar); }
+
+/* [IA] Claude – palavras coloridas da legenda */
+.g-leg-neg { color: var(--neg); font-weight: 600; }
+.g-leg-pos { color: var(--pos); font-weight: 600; }

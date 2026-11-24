@@ -294,7 +294,7 @@
     var ks = (sai ? d.saidas[i] : d.chegadas[i]).slice().sort(function (a, b) { return d.arcos[b][2] - d.arcos[a][2]; });
     var todos = estado.verTodos[lado], mostra = todos ? ks : ks.slice(0, LIMITE_LISTA);
     var titulo = sai ? "Entraram no lugar dele" : "Ele entrou no lugar de";
-    var sub = sai ? "arcos que saem dele (ele → Y)" : "arcos que chegam nele (X → ele)";
+    var sub = sai ? "setas cheias no grafo" : "setas tracejadas no grafo";
     var traco = '<svg class="p2-traco' + (sai ? "" : " p2-traco--chega") + '" viewBox="0 0 36 10" aria-hidden="true">' +
       '<line x1="1" y1="5" x2="27" y2="5"/><path d="M27 1l8 4-8 4z"/></svg>';
     var corpo;
@@ -302,12 +302,13 @@
       corpo = '<p class="p2-lista__vazio">' + (sai ? "Ninguém entrou no lugar dele" : "Ele não entrou no lugar de ninguém") +
         " nas trocas 1 por 1 medidas.</p>";
     } else {
-      corpo = '<div class="p2-lista__cab" aria-hidden="true"><span>jogador e vezes</span><span>peso, pts/12 min</span></div><ul>' +
+      corpo = '<div class="p2-lista__cab" aria-hidden="true"><span>troca</span><span>efeito no saldo</span></div><ul>' +
         mostra.map(function (k) {
           var a = d.arcos[k], j = sai ? a[1] : a[0], nj = d.nos[j];
           var texto = sai ? "<b>" + esc(nj.nome) + "</b> entrou no lugar dele <span>" + vezes(a[3]) + "</span>"
             : "entrou no lugar de <b>" + esc(nj.nome) + "</b> <span>" + vezes(a[3]) + "</span>";
-          var dica = "Peso " + fmtSinal(a[2], 2) + " pts de saldo a cada 12 min (depois da troca − antes). Abrir a ficha de " + nj.nome + ".";
+          var dica = "Depois dessa troca, o saldo do time a cada 12 min ficou " + fmt(Math.abs(a[2]), 2) + " pontos " +
+            (a[2] >= 0 ? "melhor" : "pior") + ". Clique para abrir a ficha de " + nj.nome + ".";
           return '<li><button type="button" class="p2-viz" data-no="' + j + '" data-arco="' + k + '" title="' + esc(dica) + '">' +
             htmlFoto(nj, "p2-foto--p", true) + '<span class="p2-viz__txt">' + texto + "</span>" +
             '<span class="p2-viz__peso ' + classeSinal(a[2]) + '">' + fmtSinal(a[2], 2) + "</span></button></li>";

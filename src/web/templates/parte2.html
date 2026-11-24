@@ -69,22 +69,23 @@
           <p class="p2-carregando" id="carregando">carregando…</p>
         </div>
         <!-- [IA] Claude – legenda que muda com a seleção: com um jogador escolhido, explica as duas direções dos arcos -->
+        <!-- [IA] Claude – legenda em frases curtas: o que se vê e o que significa -->
         <figcaption class="p2-legenda" id="legenda">
           <span class="p2-legenda__item">
             <span class="p2-escala" aria-hidden="true"></span>
-            <span><span class="p2-escala__ponta">−20 piora</span> peso da troca (pts de saldo a cada 12 min, depois − antes) <span class="p2-escala__ponta">melhora +20</span></span>
+            <span>Cor da seta: <span class="g-leg-neg">vermelho</span>, o time piorou depois da troca; <span class="g-leg-pos">azul</span>, melhorou</span>
           </span>
-          <span class="p2-legenda__item" data-legenda="geral">X <span aria-hidden="true">→</span><span class="sr-only">para</span> Y: Y entrou no lugar de X</span>
+          <span class="p2-legenda__item" data-legenda="geral">Seta de X para Y: Y entrou no lugar de X</span>
           <span class="p2-legenda__item" data-legenda="sel" hidden>
             <svg class="p2-traco" viewBox="0 0 36 10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5"/><path d="M27 1l8 4-8 4z"/></svg>
-            <span>sai dele: <b>Y entrou no lugar dele</b></span>
+            <span>Cheia: entraram no lugar dele</span>
           </span>
           <span class="p2-legenda__item" data-legenda="sel" hidden>
             <svg class="p2-traco p2-traco--chega" viewBox="0 0 36 10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5"/><path d="M27 1l8 4-8 4z"/></svg>
-            <span>chega nele: <b>ele entrou no lugar de X</b></span>
+            <span>Tracejada: ele entrou no lugar do outro</span>
           </span>
-          <span class="p2-legenda__item"><span class="p2-aneis" aria-hidden="true"><span class="p2-anel"></span><span class="p2-anel p2-anel--neg"></span></span>anel do nó: sinal do impacto médio; tamanho: minutos em quadra</span>
-          <span class="p2-legenda__item p2-legenda__fonte">Fotos: NBA.com (carregadas do site da NBA)</span>
+          <span class="p2-legenda__item"><span class="p2-aneis" aria-hidden="true"><span class="p2-anel"></span><span class="p2-anel p2-anel--neg"></span></span>Anel azul: o time melhora quando ele entra; vermelho: piora. Maior = mais minutos</span>
+          <span class="p2-legenda__item p2-legenda__fonte">Fotos: NBA.com</span>
         </figcaption>
       </figure>
 
