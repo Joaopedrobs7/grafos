@@ -1025,6 +1025,20 @@
   });
   $("gTela").addEventListener("mouseleave", function () { $("gDica").hidden = true; graf.sobre = null; desenharBolinhas(); });
 
+  /* [IA] Claude – dica flutuante única para o histograma, a matriz e as barras (mesmo estilo da dica das bolinhas) */
+  var dicaG = document.createElement("div");
+  dicaG.className = "p2-dica g-dica-flutuante"; dicaG.hidden = true; dicaG.setAttribute("role", "tooltip");
+  document.body.appendChild(dicaG);
+  function mostrarDicaG(html, ev) {
+    dicaG.innerHTML = html; dicaG.hidden = false;
+    var x = ev.clientX + 14, y = ev.clientY + 14;
+    if (x + dicaG.offsetWidth > window.innerWidth - 8) x = ev.clientX - dicaG.offsetWidth - 14;
+    if (y + dicaG.offsetHeight > window.innerHeight - 8) y = ev.clientY - dicaG.offsetHeight - 14;
+    dicaG.style.left = x + "px"; dicaG.style.top = y + "px";
+  }
+  function esconderDicaG() { dicaG.hidden = true; }
+  window.addEventListener("scroll", esconderDicaG, { passive: true });
+
   function montarBarras() {
     var chave = gTemp.value === "todas" ? "todas" : gTemp.value, lin = graf.dados.times[chave] || [];
     var n = lin.length, maxAbs = Math.max.apply(null, lin.map(function (t) { return Math.abs(t[1]); }).concat([0.1]));
@@ -1038,12 +1052,29 @@
       var classe = i < 5 ? " is-maior" : i >= n - 5 ? " is-menor" : "";
       var larg = Math.abs(t[1]) / maxAbs * 50, esq = t[1] >= 0 ? 50 : 50 - larg;
       var sel = gTime.value === t[0] ? ' style="outline:2px solid ' + CESAR + ';outline-offset:2px"' : "";
-      var dica = esc(t[0]) + ": " + fmtSinal(t[1], 2) + " pontos de saldo a cada 12 minutos depois da troca (média de " + fmtInt(t[2]) + " substituições)";
-      return '<li class="g-barra' + classe + '"' + sel + ' title="' + dica + '"><span class="g-barra__time">' + esc(t[0]) +
+      return '<li class="g-barra' + classe + '"' + sel + ' data-time="' + esc(t[0]) + '" data-v="' + t[1] + '" data-n="' + t[2] +
+        '" data-pos="' + (i + 1) + '" tabindex="0"><span class="g-barra__time">' + esc(t[0]) +
         '</span><span class="g-barra__trilho"><span class="g-barra__zero"></span><span class="g-barra__valor" style="left:' +
         esq + "%;width:" + larg + '%"></span></span><span class="g-barra__num">' + fmtSinal(t[1], 2) + "</span></li>";
     }).join("");
   }
+
+  function dicaBarra(li, ev) {
+    var v = +li.getAttribute("data-v");
+    mostrarDicaG("<strong>" + esc(li.getAttribute("data-time")) + "</strong><dl><dt>impacto médio</dt><dd>" + fmtSinal(v, 2) +
+      " pts/12 min</dd><dt>trocas</dt><dd>" + fmtInt(+li.getAttribute("data-n")) + "</dd><dt>posição</dt><dd>" +
+      li.getAttribute("data-pos") + "º de 30</dd></dl><p class=\"g-dica-texto\">Depois das trocas, o saldo do time a cada 12 min ficou, em média, " +
+      fmt(Math.abs(v), 2) + " pontos " + (v >= 0 ? "melhor" : "pior") + ".</p>", ev);
+  }
+  $("gBarras").addEventListener("mousemove", function (ev) {
+    var li = ev.target.closest("li[data-time]"); if (li) dicaBarra(li, ev); else esconderDicaG();
+  });
+  $("gBarras").addEventListener("mouseleave", esconderDicaG);
+  $("gBarras").addEventListener("focusin", function (ev) {
+    var li = ev.target.closest("li[data-time]"); if (!li) return;
+    var r = li.getBoundingClientRect(); dicaBarra(li, { clientX: r.left + r.width * 0.6, clientY: r.top });
+  });
+  $("gBarras").addEventListener("focusout", esconderDicaG);
 
   /* [IA] Claude – E1: histograma do peso das trocas (linha no zero, negativos e positivos em cores diferentes, mediana) */
   function desenharHistograma() {
@@ -1060,7 +1091,9 @@
     var cmax = Math.max.apply(null, c), x0 = b[0], x1 = b[b.length - 1];
     var X = function (v) { return mx.e + (v - x0) / (x1 - x0) * (larg - mx.e - mx.d); };
     var Y = function (v) { return mx.t + (1 - v / cmax) * (alt - mx.t - mx.b); };
+    graf.hist = { h: h, mx: mx, larg: larg, x0: x0, x1: x1, sel: graf.hist && graf.hist.sel };
     for (var i = 0; i < c.length; i++) {
+      if (graf.hist.sel === i) { ctx.fillStyle = "rgba(239,230,216,.10)"; ctx.fillRect(X(b[i]), mx.t, X(b[i + 1]) - X(b[i]), Y(0) - mx.t); }
       ctx.fillStyle = b[i] < 0 ? "rgb(255,84,112)" : "rgb(53,200,240)";
       ctx.fillRect(X(b[i]) + 0.5, Y(c[i]), X(b[i + 1]) - X(b[i]) - 1, Y(0) - Y(c[i]));
     }
@@ -1074,6 +1107,20 @@
     var passo = cmax > 1500 ? 500 : cmax > 600 ? 200 : cmax > 150 ? 50 : 10;
     for (var k = 0; k <= cmax; k += passo) ctx.fillText(fmtInt(k), mx.e - 8, Y(k));
   }
+
+  $("gHist").addEventListener("mousemove", function (ev) {
+    var g = graf.hist; if (!g) return;
+    var r = this.getBoundingClientRect(), x = ev.clientX - r.left;
+    var v = g.x0 + (x - g.mx.e) / (g.larg - g.mx.e - g.mx.d) * (g.x1 - g.x0);
+    var i = Math.floor((v - g.h.bordas[0]) / (g.h.bordas[1] - g.h.bordas[0]));
+    if (i < 0 || i >= g.h.contagens.length) { esconderDicaG(); if (g.sel !== null) { g.sel = null; desenharHistograma(); } return; }
+    if (g.sel !== i) { g.sel = i; desenharHistograma(); }
+    var a = g.h.bordas[i], z = g.h.bordas[i + 1], n = g.h.contagens[i];
+    mostrarDicaG("<strong>" + fmtSinal(a, 0) + " a " + fmtSinal(z, 0) + " pts/12 min</strong><dl><dt>trocas</dt><dd>" + fmtInt(n) +
+      "</dd><dt>do total</dt><dd>" + fmt(100 * n / g.h.n, 1) + "%</dd></dl><p class=\"g-dica-texto\">" +
+      (z <= 0 ? "Trocas em que o time piorou depois" : a >= 0 ? "Trocas em que o time melhorou depois" : "Trocas perto de zero") + ".</p>", ev);
+  });
+  $("gHist").addEventListener("mouseleave", function () { esconderDicaG(); if (graf.hist) { graf.hist.sel = null; desenharHistograma(); } });
 
   /* [IA] Claude – E4: matriz de correlação de Spearman (valor em cada célula, escala divergente −1 a +1) */
   function corCorr(r) {
@@ -1093,11 +1140,32 @@
         var i = k + 1;
         return "<tr><th scope=\"row\">" + esc(v[i]) + "</th>" + linha.slice(0, -1).map(function (r, j) {
           if (j >= i) return '<td class="g-corr__vazio"></td>';
-          return '<td style="background:' + corCorr(r) + '" title="' + esc(v[i]) + " × " + esc(v[j]) + ": " + fmt(r, 2) + '">' +
-            fmtSinal(r, 2) + "</td>";
+          return '<td style="background:' + corCorr(r) + '" tabindex="0" data-a="' + esc(v[i]) + '" data-b="' + esc(v[j]) +
+            '" data-r="' + r + '">' + fmtSinal(r, 2) + "</td>";
         }).join("") + "</tr>";
       }).join("") + "</tbody>";
   }
+
+  function forcaCorr(r) {
+    var a = Math.abs(r);
+    return a < 0.1 ? "praticamente nenhuma" : a < 0.3 ? "fraca" : a < 0.5 ? "moderada" : "forte";
+  }
+  function dicaCorr(td, ev) {
+    var r = +td.getAttribute("data-r");
+    mostrarDicaG("<strong>" + esc(td.getAttribute("data-a")) + " × " + esc(td.getAttribute("data-b")) + "</strong><dl><dt>Spearman</dt><dd>" +
+      fmtSinal(r, 2) + "</dd><dt>intensidade</dt><dd>" + forcaCorr(r) + "</dd></dl><p class=\"g-dica-texto\">" +
+      (Math.abs(r) < 0.1 ? "Quase não andam juntos." : r > 0 ? "Quando um é maior, o outro tende a ser maior." :
+        "Quando um é maior, o outro tende a ser menor.") + "</p>", ev);
+  }
+  $("gCorr").addEventListener("mousemove", function (ev) {
+    var td = ev.target.closest("td[data-r]"); if (td) dicaCorr(td, ev); else esconderDicaG();
+  });
+  $("gCorr").addEventListener("mouseleave", esconderDicaG);
+  $("gCorr").addEventListener("focusin", function (ev) {
+    var td = ev.target.closest("td[data-r]"); if (!td) return;
+    var r = td.getBoundingClientRect(); dicaCorr(td, { clientX: r.right, clientY: r.top });
+  });
+  $("gCorr").addEventListener("focusout", esconderDicaG);
 
   window.addEventListener("resize", function () { if (graf.dados) { desenharBolinhas(); desenharHistograma(); } });
 
