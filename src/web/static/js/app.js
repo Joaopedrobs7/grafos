@@ -28,7 +28,7 @@
   };
   var TITULOS = {
     m01: "Terreno", m02: "Uma chave", m03: "Três chaves", m04: "Esteiras", m05: "Bônus",
-    m06: "Fonte", m07: "Impossível", m08: "Grande", g01: "Fábrica", g02: "Armadilha"
+    m06: "Fonte", m07: "Impossível", m08: "Grande", g01: "Catacumba", g02: "Miragem"
   };
   var STATUS_TXT = {
     OK: "Baú alcançado",
