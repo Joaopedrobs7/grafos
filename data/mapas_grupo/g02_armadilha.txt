@@ -1,7 +1,0 @@
-; Mapa do grupo 2 - "Armadilha": esteiras de mao unica levam a salas sem volta.
-#############
-#S..a.A....G#
-#.###v#v#####
-#.#...#.....#
-#+#...#..+..#
-#############
