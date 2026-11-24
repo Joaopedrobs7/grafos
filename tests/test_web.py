@@ -449,21 +449,25 @@ def test_parte2_graficos(cliente):
     assert impactos == sorted(impactos)  # ordenado do menor para o maior
 
 
-# [IA] Claude – boxplots H3/H1 (peso de cada troca por grupo) e figuras de comparação na página da Parte 2
+# [IA] Claude – faixa H3 (percentis por minuto em quadra), barras 100% H1 (categorias do peso por placar) e figuras
 def test_parte2_graficos_exploratorios_e_figuras(cliente):
     d = cliente.get("/api/parte2/graficos").get_json()
     assert "histograma" not in d and "correlacao" not in d
-    for qual, rotulos in (("h3", ["1–2 min", "2–4 min", "4–8 min", "8+ min"]),
-                          ("h1", ["até 5 pts", "6 a 15 pts", "mais de 15 pts"])):
-        assert set(d[qual]) >= {"todas", "2020", "2025"}
-        for chave, gs in d[qual].items():
-            assert [g["grupo"] for g in gs] == rotulos
-            for g in gs:
-                assert g["bigode_min"] <= g["q1"] <= g["mediana"] <= g["q3"] <= g["bigode_max"]
-                assert 0 <= g["pct_extremos"] <= 100 and 0 <= g["pct_negativos"] <= 100
-        # as contagens por grupo das temporadas somam o total de "todas"
+    assert set(d["h3"]) >= {"todas", "2020", "2025"} and set(d["h1"]) >= {"todas", "2020", "2025"}
+    for chave, fs in d["h3"].items():
+        assert [f["minutos"] for f in fs][:3] == ["1", "2", "3"] and fs[-1]["minutos"].endswith("+")
+        for f in fs:
+            assert f["p10"] <= f["p25"] <= f["mediana"] <= f["p75"] <= f["p90"]
+            assert f["n"] > 0 and 0 <= f["pct_extremos"] <= 100 and 0 <= f["pct_negativos"] <= 100
+    assert len(d["categorias_h1"]) == 5
+    for chave, gs in d["h1"].items():
+        assert [g["grupo"] for g in gs] == ["até 5 pts", "6 a 15 pts", "mais de 15 pts"]
+        for g in gs:
+            assert abs(sum(g["pcts"]) - 100) < 0.05 and sum(g["contagens"]) == g["n"]
+    # as contagens das temporadas somam o total de "todas", e H3 e H1 cobrem as mesmas trocas
+    for qual in ("h3", "h1"):
         assert sum(g["n"] for g in d[qual]["todas"]) == sum(g["n"] for c, gs in d[qual].items() if c != "todas" for g in gs)
-    assert sum(g["n"] for g in d["h3"]["todas"]) == sum(g["n"] for g in d["h1"]["todas"])
+    assert sum(f["n"] for f in d["h3"]["todas"]) == sum(g["n"] for g in d["h1"]["todas"])
     r = cliente.get("/api/parte2/figura/tempo_por_tamanho.png")
     assert r.status_code == 200 and r.mimetype == "image/png"
     assert cliente.get("/api/parte2/figura/nao_existe.png").status_code == 404

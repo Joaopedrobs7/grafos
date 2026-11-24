@@ -146,18 +146,19 @@
       <p class="p2-contagem" id="gContagem" aria-live="polite"></p>
     </div>
 
-    <!-- [IA] Claude – H3 e H1: boxplots do peso de cada troca por grupo (canvas, respondem ao filtro de temporada) -->
+    <!-- [IA] Claude – H3 (faixa por minuto em quadra) e H1 (barras 100% por placar); canvas, respondem ao filtro de temporada -->
     <section class="p2-bloco" aria-labelledby="h3Titulo">
       <p class="g-tipo">Exploratório</p>
       <h2 class="p2-subtitulo" id="h3Titulo">Tempo do substituto em quadra</h2>
       <p class="p2-nota g-como-ler">Peso das trocas conforme o tempo que o substituto ficou em quadra.</p>
       <figure class="p2-quadro">
         <div class="p2-quadro__area" id="gH3Area">
-          <canvas id="gH3" class="g-caixas" tabindex="0" role="img" aria-label="Boxplot do peso das trocas por tempo do substituto em quadra"></canvas>
+          <canvas id="gH3" class="g-expl" tabindex="0" role="img" aria-label="Mediana e faixa do peso das trocas por minuto do substituto em quadra"></canvas>
         </div>
-        <figcaption class="p2-legenda g-caixas-leg">
-          <span class="p2-legenda__item"><span class="g-caixa-ico" aria-hidden="true"></span>50% centrais; traço = mediana</span>
-          <span class="p2-legenda__item">hastes até 1,5 × a altura da caixa; trocas além delas não aparecem</span>
+        <figcaption class="p2-legenda">
+          <span class="p2-legenda__item"><span class="g-ico-linha" aria-hidden="true"></span>linha = mediana</span>
+          <span class="p2-legenda__item"><span class="g-ico-faixa" aria-hidden="true"></span>faixa = 80% das trocas (do 10º ao 90º percentil)</span>
+          <span class="p2-legenda__item"><span class="g-ico-faixa g-ico-faixa--forte" aria-hidden="true"></span>parte escura = 50% das trocas</span>
         </figcaption>
       </figure>
     </section>
@@ -165,14 +166,17 @@
     <section class="p2-bloco" aria-labelledby="h1Titulo">
       <p class="g-tipo">Exploratório</p>
       <h2 class="p2-subtitulo" id="h1Titulo">Placar no momento da troca</h2>
-      <p class="p2-nota g-como-ler">Peso das trocas conforme a diferença no placar no momento da troca.</p>
+      <p class="p2-nota g-como-ler">Como o peso das trocas se distribui conforme a diferença no placar no momento da troca.</p>
       <figure class="p2-quadro">
         <div class="p2-quadro__area" id="gH1Area">
-          <canvas id="gH1" class="g-caixas" tabindex="0" role="img" aria-label="Boxplot do peso das trocas por diferença no placar no momento da troca"></canvas>
+          <canvas id="gH1" class="g-expl" tabindex="0" role="img" aria-label="Barras 100% do peso das trocas por diferença no placar no momento da troca"></canvas>
         </div>
-        <figcaption class="p2-legenda g-caixas-leg">
-          <span class="p2-legenda__item"><span class="g-caixa-ico" aria-hidden="true"></span>50% centrais; traço = mediana</span>
-          <span class="p2-legenda__item">hastes até 1,5 × a altura da caixa; trocas além delas não aparecem</span>
+        <figcaption class="p2-legenda">
+          <span class="p2-legenda__item"><span class="g-ico-cat g-ico-cat--0" aria-hidden="true"></span>piorou muito (&lt; −30)</span>
+          <span class="p2-legenda__item"><span class="g-ico-cat g-ico-cat--1" aria-hidden="true"></span>piorou (−30 a −5)</span>
+          <span class="p2-legenda__item"><span class="g-ico-cat g-ico-cat--2" aria-hidden="true"></span>perto de zero (−5 a +5)</span>
+          <span class="p2-legenda__item"><span class="g-ico-cat g-ico-cat--3" aria-hidden="true"></span>melhorou (+5 a +30)</span>
+          <span class="p2-legenda__item"><span class="g-ico-cat g-ico-cat--4" aria-hidden="true"></span>melhorou muito (&gt; +30)</span>
         </figcaption>
       </figure>
     </section>

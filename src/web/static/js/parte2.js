@@ -83,7 +83,7 @@
     // [IA] Claude – o painel acabou de aparecer: mede de novo com a largura real e redesenha (fotos já carregadas ficam no cache)
     requestAnimationFrame(function () {
       if (i === 0) { medir(); desenhar(); }
-      else if (i === 1 && graf.dados) { desenharBolinhas(); desenharTodasCaixas(); }
+      else if (i === 1 && graf.dados) { desenharBolinhas(); desenharExploratorios(); }
     });
   }
   abas.forEach(function (a, i) {
@@ -880,7 +880,7 @@
   var gTemp = $("gTemporada"), gTime = $("gTime");
 
   function carregarGraficos() {
-    if (graf.dados) { desenharBolinhas(); desenharTodasCaixas(); return; }
+    if (graf.dados) { desenharBolinhas(); desenharExploratorios(); return; }
     if (graf.dados === false) return;
     graf.dados = false;
     json("api/parte2/graficos").then(function (d) {
@@ -927,7 +927,7 @@
       "(pts a cada 12 min). Ex.: <b>" + esc(ex[0]) + "</b>, " + fmtSinal(ex[4], 2) + "." : "";
     desenharBolinhas();
     montarBarras();
-    desenharTodasCaixas();
+    desenharExploratorios();
   }
   gTemp.addEventListener("change", atualizarGraficos);
   gTime.addEventListener("change", atualizarGraficos);
@@ -1030,7 +1030,7 @@
   });
   $("gTela").addEventListener("mouseleave", function () { $("gDica").hidden = true; graf.sobre = null; desenharBolinhas(); });
 
-  /* [IA] Claude – dica flutuante única para os boxplots e as barras (mesmo estilo da dica das bolinhas) */
+  /* [IA] Claude – dica flutuante única para H3, H1 e as barras (mesmo estilo da dica das bolinhas) */
   var dicaG = document.createElement("div");
   dicaG.className = "p2-dica g-dica-flutuante"; dicaG.hidden = true; dicaG.setAttribute("role", "tooltip");
   document.body.appendChild(dicaG);
@@ -1081,108 +1081,175 @@
   });
   $("gBarras").addEventListener("focusout", esconderDicaG);
 
-  /* [IA] Claude – H3 e H1: boxplot do peso de cada troca por grupo (caixa = Q1 a Q3, traço = mediana,
-     hastes = 1,5 × IIQ limitadas ao dado; trocas além das hastes não são desenhadas). Dados prontos em graficos.json. */
-  var CAIXAS = { h3: { tela: "gH3", area: "gH3Area", sel: null, layout: null },
-                 h1: { tela: "gH1", area: "gH1Area", sel: null, layout: null } };
+  /* [IA] Claude – H3: faixa do peso por minuto do substituto em quadra (linha = mediana; faixa clara = 10º ao 90º
+     percentil; faixa escura = 25º ao 75º). H1: barras 100% por placar no momento da troca, 5 categorias do peso.
+     Dados prontos em graficos.json; passar o mouse ou usar as setas mostra a dica. */
+  var EXPL = { h3: { tela: "gH3", area: "gH3Area", sel: null, layout: null },
+               h1: { tela: "gH1", area: "gH1Area", sel: null, layout: null } };
+  // cores das 5 categorias do H1 (da que piorou muito à que melhorou muito)
+  var CORES_H1 = [rgba(NEG, 0.95), rgba(NEG, 0.42), rgba(NEUTRO, 0.30), rgba(POS, 0.42), rgba(POS, 0.95)];
+  function rgba(c, a) { return "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + a + ")"; }
 
-  function desenharTodasCaixas() { desenharCaixas("h3"); desenharCaixas("h1"); }
+  function desenharExploratorios() { desenharFaixa(); desenharPilhas(); }
 
-  function desenharCaixas(qual) {
-    var cfg = CAIXAS[qual], gs = graf.dados && graf.dados[qual] && graf.dados[qual][gTemp.value];
-    if (!gs || paineis[1].hidden) return;
-    var tela = $(cfg.tela), area = $(cfg.area), dpr = window.devicePixelRatio || 1;
-    var larg = area.clientWidth, alt = Math.max(300, Math.min(400, Math.round(larg * 0.36)));
+  function telaPronta(cfg, alt) {
+    var tela = $(cfg.tela), larg = $(cfg.area).clientWidth, dpr = window.devicePixelRatio || 1;
     tela.width = larg * dpr; tela.height = alt * dpr; tela.style.height = alt + "px";
     var ctx = tela.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, larg, alt);
-    var mx = { e: 56, d: 12, t: 26, b: 52 };
-    var y0 = Math.min.apply(null, gs.map(function (g) { return g.bigode_min; }));
-    var y1 = Math.max.apply(null, gs.map(function (g) { return g.bigode_max; }));
+    return { ctx: ctx, larg: larg };
+  }
+
+  function desenharFaixa() {
+    var cfg = EXPL.h3, fs = graf.dados && graf.dados.h3 && graf.dados.h3[gTemp.value];
+    if (!fs || paineis[1].hidden) return;
+    var larg0 = $(cfg.area).clientWidth, alt = Math.max(300, Math.min(400, Math.round(larg0 * 0.36)));
+    var t = telaPronta(cfg, alt), ctx = t.ctx, larg = t.larg;
+    var col = (larg - 68) / fs.length, comN = col >= 64;  // n embaixo de cada minuto só quando cabe
+    var mx = { e: 56, d: 12, t: 18, b: comN ? 66 : 48 };
+    var y0 = Math.min.apply(null, fs.map(function (f) { return f.p10; }));
+    var y1 = Math.max.apply(null, fs.map(function (f) { return f.p90; }));
     var passo = (y1 - y0) > 100 ? 25 : (y1 - y0) > 50 ? 20 : 10;
-    // folga em cima para o texto "% além de ±30"
-    y0 = Math.floor(y0 / passo) * passo; y1 = Math.ceil((y1 + (y1 - y0) * 0.08) / passo) * passo;
-    var col = (larg - mx.e - mx.d) / gs.length;
+    y0 = Math.floor(y0 / 10) * 10; y1 = Math.ceil(y1 / 10) * 10;
     var Y = function (v) { return mx.t + (y1 - v) / (y1 - y0) * (alt - mx.t - mx.b); };
-    cfg.layout = { mx: mx, col: col, n: gs.length, gs: gs };
+    var X = function (i) { return mx.e + col * (i + 0.5); };
+    cfg.layout = { mx: mx, col: col, n: fs.length, itens: fs };
     // grade e eixo y
     ctx.font = "12px 'DM Sans', sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "middle";
-    for (var v = y0; v <= y1 + 1e-9; v += passo) {
+    for (var v = Math.ceil(y0 / passo) * passo; v <= y1 + 1e-9; v += passo) {
       ctx.strokeStyle = "rgba(181,168,149,.12)"; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(mx.e, Y(v)); ctx.lineTo(larg - mx.d, Y(v)); ctx.stroke();
       ctx.fillStyle = LUAR_FRACO; ctx.fillText(fmtSinal(v, 0), mx.e - 8, Y(v));
     }
     ctx.save(); ctx.translate(14, (mx.t + alt - mx.b) / 2); ctx.rotate(-Math.PI / 2);
     ctx.textAlign = "center"; ctx.fillText("peso da troca (pts a cada 12 min)", 0, 0); ctx.restore();
-    // linha do zero embaixo das caixas
+    if (cfg.sel !== null) { ctx.fillStyle = "rgba(239,230,216,.06)"; ctx.fillRect(mx.e + col * cfg.sel + 2, mx.t, col - 4, alt - mx.t - mx.b); }
+    // faixas (polígono pelo limite de cima e de volta pelo de baixo)
+    function faixa(cima, baixo, cor) {
+      ctx.fillStyle = cor; ctx.beginPath();
+      fs.forEach(function (f, i) { if (i) ctx.lineTo(X(i), Y(f[cima])); else ctx.moveTo(X(i), Y(f[cima])); });
+      for (var i = fs.length - 1; i >= 0; i--) ctx.lineTo(X(i), Y(fs[i][baixo]));
+      ctx.closePath(); ctx.fill();
+    }
+    faixa("p90", "p10", rgba(NEUTRO, 0.16));
+    faixa("p75", "p25", rgba(NEUTRO, 0.26));
+    // zero
     ctx.strokeStyle = LUAR; ctx.lineWidth = 1; ctx.setLineDash([5, 4]);
     ctx.beginPath(); ctx.moveTo(mx.e, Y(0)); ctx.lineTo(larg - mx.d, Y(0)); ctx.stroke(); ctx.setLineDash([]);
-    gs.forEach(function (g, i) {
-      var cx = mx.e + col * (i + 0.5), w = Math.min(120, col * 0.42);
-      if (cfg.sel === i) { ctx.fillStyle = "rgba(239,230,216,.06)"; ctx.fillRect(mx.e + col * i + 2, mx.t - 20, col - 4, alt - mx.t - mx.b + 20); }
-      // hastes
-      ctx.strokeStyle = LUAR_FRACO; ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(cx, Y(g.bigode_max)); ctx.lineTo(cx, Y(g.q3)); ctx.moveTo(cx, Y(g.q1)); ctx.lineTo(cx, Y(g.bigode_min));
-      ctx.moveTo(cx - w * 0.25, Y(g.bigode_max)); ctx.lineTo(cx + w * 0.25, Y(g.bigode_max));
-      ctx.moveTo(cx - w * 0.25, Y(g.bigode_min)); ctx.lineTo(cx + w * 0.25, Y(g.bigode_min));
-      ctx.stroke();
-      // caixa (tom de pedra) e mediana destacada
-      ctx.fillStyle = cfg.sel === i ? "rgba(181,168,149,.45)" : "rgba(181,168,149,.30)";
-      ctx.fillRect(cx - w / 2, Y(g.q3), w, Y(g.q1) - Y(g.q3));
-      ctx.strokeStyle = cfg.sel === i ? LUAR : LUAR_FRACO;
-      ctx.strokeRect(cx - w / 2 + 0.5, Y(g.q3) + 0.5, w - 1, Y(g.q1) - Y(g.q3) - 1);
-      ctx.strokeStyle = TOCHA; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(cx - w / 2, Y(g.mediana)); ctx.lineTo(cx + w / 2, Y(g.mediana)); ctx.stroke();
-      ctx.font = "600 12px 'DM Sans', sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
-      var tm = fmtSinal(g.mediana, 2), lm = ctx.measureText(tm).width;
-      ctx.fillStyle = "#120F0C"; ctx.fillRect(cx + w / 2 + 3, Y(g.mediana) - 8, lm + 6, 16);
-      ctx.fillStyle = TOCHA; ctx.fillText(tm, cx + w / 2 + 6, Y(g.mediana));
-      // % além de ±30 acima da haste
-      ctx.fillStyle = LUAR_FRACO; ctx.font = "12px 'DM Sans', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
-      ctx.fillText(fmt(g.pct_extremos, 1) + "% além de ±30", cx, Y(g.bigode_max) - 5);
-      // grupo e n embaixo
-      ctx.textBaseline = "top"; ctx.fillStyle = LUAR; ctx.font = "600 13px 'DM Sans', sans-serif";
-      ctx.fillText(g.grupo, cx, alt - mx.b + 10);
-      ctx.fillStyle = LUAR_FRACO; ctx.font = "12px 'DM Sans', sans-serif";
-      ctx.fillText("n = " + fmtInt(g.n), cx, alt - mx.b + 28);
+    // mediana: linha com pontos
+    ctx.strokeStyle = TOCHA; ctx.lineWidth = 2.5; ctx.beginPath();
+    fs.forEach(function (f, i) { if (i) ctx.lineTo(X(i), Y(f.mediana)); else ctx.moveTo(X(i), Y(f.mediana)); });
+    ctx.stroke();
+    fs.forEach(function (f, i) {
+      ctx.fillStyle = TOCHA; ctx.beginPath(); ctx.arc(X(i), Y(f.mediana), cfg.sel === i ? 6 : 3.5, 0, Math.PI * 2); ctx.fill();
+      if (cfg.sel === i) { ctx.strokeStyle = "#120F0C"; ctx.lineWidth = 2; ctx.stroke(); }
+      // minuto e n embaixo
+      ctx.textAlign = "center"; ctx.textBaseline = "top";
+      ctx.fillStyle = cfg.sel === i ? LUAR : LUAR_FRACO; ctx.font = "600 13px 'DM Sans', sans-serif";
+      ctx.fillText(f.minutos, X(i), alt - mx.b + 8);
+      if (comN) { ctx.font = "11px 'DM Sans', sans-serif"; ctx.fillStyle = LUAR_FRACO; ctx.fillText("n = " + fmtInt(f.n), X(i), alt - mx.b + 26); }
     });
+    ctx.fillStyle = LUAR_FRACO; ctx.font = "12px 'DM Sans', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+    ctx.fillText("minutos do substituto em quadra", mx.e + (larg - mx.e - mx.d) / 2, alt - 2);
   }
 
-  function dicaCaixa(g, ev) {
-    mostrarDicaG("<strong>" + esc(g.grupo) + "</strong><dl><dt>trocas</dt><dd>" + fmtInt(g.n) + "</dd><dt>mediana</dt><dd>" +
-      fmtSinal(g.mediana, 2) + " pts/12 min</dd><dt>50% centrais</dt><dd>" + fmtSinal(g.q1, 1) + " a " + fmtSinal(g.q3, 1) +
-      "</dd><dt>além de ±30</dt><dd>" + fmt(g.pct_extremos, 1) + "%</dd><dt>negativas</dt><dd>" + fmt(g.pct_negativos, 1) +
-      "%</dd></dl>", ev);
-  }
-  function selecionarCaixa(qual, i, ev) {
-    var cfg = CAIXAS[qual];
-    if (cfg.sel !== i) { cfg.sel = i; desenharCaixas(qual); }
-    if (i === null) esconderDicaG(); else dicaCaixa(cfg.layout.gs[i], ev);
-  }
-  Object.keys(CAIXAS).forEach(function (qual) {
-    var cfg = CAIXAS[qual], tela = $(cfg.tela);
-    tela.addEventListener("mousemove", function (ev) {
-      var l = cfg.layout; if (!l) return;
-      var r = tela.getBoundingClientRect(), i = Math.floor((ev.clientX - r.left - l.mx.e) / l.col);
-      selecionarCaixa(qual, i >= 0 && i < l.n ? i : null, ev);
+  function desenharPilhas() {
+    var cfg = EXPL.h1, gs = graf.dados && graf.dados.h1 && graf.dados.h1[gTemp.value];
+    if (!gs || paineis[1].hidden) return;
+    var linha = 58, mx = { e: 118, d: 12, t: 8, b: 30 }, alt = mx.t + linha * gs.length + mx.b;
+    var t = telaPronta(cfg, alt), ctx = t.ctx, larg = t.larg, w = larg - mx.e - mx.d, h = 36;
+    var X = function (p) { return mx.e + p / 100 * w; };
+    var segs = [];
+    // eixo x em %
+    ctx.font = "12px 'DM Sans', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+    [0, 25, 50, 75, 100].forEach(function (p) {
+      ctx.strokeStyle = "rgba(181,168,149,.12)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(X(p), mx.t); ctx.lineTo(X(p), alt - mx.b + 4); ctx.stroke();
+      ctx.fillStyle = LUAR_FRACO; ctx.textAlign = p === 100 ? "right" : "center";
+      ctx.fillText(p + "%", X(p), alt - mx.b + 8);
     });
-    tela.addEventListener("mouseleave", function () { selecionarCaixa(qual, null); });
-    // teclado: o foco mostra o grupo atual (o primeiro, de início); as setas trocam de grupo
-    function pontoDoGrupo(i) {
-      var r = tela.getBoundingClientRect(), l = cfg.layout;
-      return { clientX: r.left + l.mx.e + l.col * (i + 0.5) + 30, clientY: r.top + r.height * 0.3 };
-    }
-    tela.addEventListener("focus", function () { if (cfg.layout) selecionarCaixa(qual, cfg.sel || 0, pontoDoGrupo(cfg.sel || 0)); });
-    tela.addEventListener("blur", function () { selecionarCaixa(qual, null); });
+    gs.forEach(function (g, i) {
+      var yc = mx.t + linha * (i + 0.5), yt = yc - h / 2, acum = 0;
+      segs.push([]);
+      ctx.textAlign = "right"; ctx.textBaseline = "bottom"; ctx.fillStyle = LUAR; ctx.font = "600 13px 'DM Sans', sans-serif";
+      ctx.fillText(g.grupo, mx.e - 10, yc);
+      ctx.textBaseline = "top"; ctx.fillStyle = LUAR_FRACO; ctx.font = "11px 'DM Sans', sans-serif";
+      ctx.fillText("n = " + fmtInt(g.n), mx.e - 10, yc + 2);
+      g.pcts.forEach(function (p, c) {
+        var xa = X(acum), xb = X(acum + p); acum += p;
+        segs[i].push([xa, xb]);
+        ctx.fillStyle = CORES_H1[c]; ctx.fillRect(xa + 1, yt, Math.max(0, xb - xa - 2), h);
+        var sel = cfg.sel && cfg.sel[0] === i && cfg.sel[1] === c;
+        if (sel) { ctx.strokeStyle = LUAR; ctx.lineWidth = 2; ctx.strokeRect(xa + 1, yt - 1, Math.max(0, xb - xa - 2), h + 2); }
+        if (xb - xa >= 38) {
+          ctx.fillStyle = c === 0 || c === 4 ? "#120F0C" : LUAR; ctx.font = "600 12px 'DM Sans', sans-serif";
+          ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText(fmt(p, 0) + "%", (xa + xb) / 2, yc);
+        }
+      });
+    });
+    cfg.layout = { mx: mx, linha: linha, h: h, n: gs.length, itens: gs, segs: segs };
+  }
+
+  function dicaFaixa(f, ev) {
+    var titulo = f.minutos === "10+" ? "10 min ou mais em quadra" : f.minutos + " min em quadra";
+    mostrarDicaG("<strong>" + esc(titulo) + "</strong><dl><dt>trocas</dt><dd>" + fmtInt(f.n) + "</dd><dt>mediana</dt><dd>" +
+      fmtSinal(f.mediana, 2) + " pts/12 min</dd><dt>80% das trocas</dt><dd>entre " + fmtSinal(f.p10, 1) + " e " +
+      fmtSinal(f.p90, 1) + "</dd><dt>além de ±30</dt><dd>" + fmt(f.pct_extremos, 1) + "%</dd><dt>negativas</dt><dd>" +
+      fmt(f.pct_negativos, 1) + "%</dd></dl>", ev);
+  }
+  function dicaPilha(g, c, ev) {
+    mostrarDicaG("<strong>" + esc(g.grupo) + " no placar</strong><dl><dt>peso</dt><dd>" + esc(graf.dados.categorias_h1[c]) +
+      "</dd><dt>parte do grupo</dt><dd>" + fmt(g.pcts[c], 1) + "%</dd><dt>trocas</dt><dd>" + fmtInt(g.contagens[c]) + " de " +
+      fmtInt(g.n) + "</dd></dl>", ev);
+  }
+  function selecionarExpl(qual, sel, ev) {
+    var cfg = EXPL[qual], mudou = JSON.stringify(cfg.sel) !== JSON.stringify(sel);
+    cfg.sel = sel;
+    if (mudou) { if (qual === "h3") desenharFaixa(); else desenharPilhas(); }
+    if (sel === null) esconderDicaG();
+    else if (qual === "h3") dicaFaixa(cfg.layout.itens[sel], ev);
+    else dicaPilha(cfg.layout.itens[sel[0]], sel[1], ev);
+  }
+  // o que está sob o mouse: índice do minuto (H3) ou [grupo, categoria] (H1)
+  function alvoExpl(qual, x, y) {
+    var l = EXPL[qual].layout; if (!l) return null;
+    if (qual === "h3") { var i = Math.floor((x - l.mx.e) / l.col); return i >= 0 && i < l.n ? i : null; }
+    var g = Math.floor((y - l.mx.t) / l.linha);
+    if (g < 0 || g >= l.n || Math.abs(y - (l.mx.t + l.linha * (g + 0.5))) > l.h / 2 + 2) return null;
+    for (var c = 0; c < 5; c++) if (x >= l.segs[g][c][0] && x < l.segs[g][c][1]) return [g, c];
+    return null;
+  }
+  // ponto de referência da dica quando a seleção vem do teclado
+  function pontoExpl(qual, sel) {
+    var r = $(EXPL[qual].tela).getBoundingClientRect(), l = EXPL[qual].layout;
+    if (qual === "h3") return { clientX: r.left + l.mx.e + l.col * (sel + 0.5) + 16, clientY: r.top + r.height * 0.3 };
+    var s = l.segs[sel[0]][sel[1]];
+    return { clientX: r.left + (s[0] + s[1]) / 2, clientY: r.top + l.mx.t + l.linha * (sel[0] + 0.5) + l.h / 2 };
+  }
+  Object.keys(EXPL).forEach(function (qual) {
+    var cfg = EXPL[qual], tela = $(cfg.tela);
+    tela.addEventListener("mousemove", function (ev) {
+      var r = tela.getBoundingClientRect();
+      selecionarExpl(qual, alvoExpl(qual, ev.clientX - r.left, ev.clientY - r.top), ev);
+    });
+    tela.addEventListener("mouseleave", function () { selecionarExpl(qual, null); });
+    // teclado: o foco mostra o primeiro item; as setas andam (no H1, ↑ ↓ trocam de barra)
+    function inicial() { return cfg.sel !== null ? cfg.sel : qual === "h3" ? 0 : [0, 2]; }
+    tela.addEventListener("focus", function () { if (cfg.layout) { var s = inicial(); selecionarExpl(qual, s, pontoExpl(qual, s)); } });
+    tela.addEventListener("blur", function () { selecionarExpl(qual, null); });
     tela.addEventListener("keydown", function (ev) {
-      var l = cfg.layout; if (!l || (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft")) return;
+      var l = cfg.layout, k = ev.key; if (!l) return;
+      var dx = k === "ArrowRight" ? 1 : k === "ArrowLeft" ? -1 : 0, dy = k === "ArrowDown" ? 1 : k === "ArrowUp" ? -1 : 0;
+      if (!dx && !(dy && qual === "h1")) return;
       ev.preventDefault();
-      var i = Math.max(0, Math.min(l.n - 1, (cfg.sel || 0) + (ev.key === "ArrowRight" ? 1 : -1)));
-      selecionarCaixa(qual, i, pontoDoGrupo(i));
+      var s = inicial(), novo;
+      if (qual === "h3") novo = Math.max(0, Math.min(l.n - 1, s + dx));
+      else novo = [Math.max(0, Math.min(l.n - 1, s[0] + dy)), Math.max(0, Math.min(4, s[1] + dx))];
+      selecionarExpl(qual, novo, pontoExpl(qual, novo));
     });
   });
 
-  window.addEventListener("resize", function () { if (graf.dados) { desenharBolinhas(); desenharTodasCaixas(); } });
+  window.addEventListener("resize", function () { if (graf.dados) { desenharBolinhas(); desenharExploratorios(); } });
 
   /* ------------------------------------------------------------ início */
   if (location.hash === "#algoritmos") abrirAba(2, false);

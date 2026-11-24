@@ -241,14 +241,19 @@
 .g-barra__eixo { display: flex; justify-content: space-between; }
 .p2-tabela th small { display: block; font-weight: 400; font-size: 11px; color: var(--luar-fraco); }
 
-/* [IA] Claude – rótulo do tipo de gráfico, boxplots H3/H1 e figuras dos algoritmos */
+/* [IA] Claude – rótulo do tipo de gráfico, legendas da faixa H3 e das barras 100% H1, figuras dos algoritmos */
 .g-tipo { font: 600 12px/1 var(--f-pixel); color: var(--tocha); margin-bottom: 6px; }
 .p2-painel > .p2-bloco + .p2-bloco { margin-top: 36px; }
-.g-caixas:focus-visible { outline: 2px solid var(--cesar); outline-offset: 2px; }
-.g-caixa-ico {
-  width: 14px; height: 12px; flex: none; background: rgba(181, 168, 149, .32);
-  box-shadow: inset 0 0 0 1px var(--luar-fraco), inset 0 -5px 0 -3px var(--tocha);
-}
+.g-expl:focus-visible { outline: 2px solid var(--cesar); outline-offset: 2px; }
+.g-ico-linha { width: 18px; height: 3px; flex: none; background: var(--tocha); }
+.g-ico-faixa { width: 16px; height: 12px; flex: none; background: rgba(181, 168, 149, .16); }
+.g-ico-faixa--forte { background: rgba(181, 168, 149, .42); }
+.g-ico-cat { width: 14px; height: 12px; flex: none; }
+.g-ico-cat--0 { background: rgba(255, 84, 112, .95); }
+.g-ico-cat--1 { background: rgba(255, 84, 112, .42); }
+.g-ico-cat--2 { background: rgba(181, 168, 149, .30); }
+.g-ico-cat--3 { background: rgba(53, 200, 240, .42); }
+.g-ico-cat--4 { background: rgba(53, 200, 240, .95); }
 .g-figuras { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-top: 12px; }
 .g-figuras figure { background: #fff; padding: 8px; }
 .g-figuras img { width: 100%; height: auto; display: block; }

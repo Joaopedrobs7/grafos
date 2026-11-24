@@ -10,8 +10,8 @@ algoritmos (``out/parte2/bellman_ford.json``, ``dijkstra.json`` e ``parte2_repor
   arcos ``[i, j, peso, ocorrencias]`` (índices na lista de nós), o ciclo negativo que o Bellman-Ford do grupo
   devolveu, o caminho do recorte sem ciclo e, quando o time-temporada é um dos pares do Dijkstra, esse caminho;
 - ``benchmark.json``: tempos médios por algoritmo e tipo de grafo e a tabela de escalabilidade;
-- ``graficos.json``: dados dos gráficos interativos (impacto × minutos, times e os boxplots H3 e H1 do peso
-  de cada troca, lidos de ``trocas.csv``).
+- ``graficos.json``: dados dos gráficos interativos (impacto × minutos, times, a faixa H3 e as barras 100% H1
+  do peso de cada troca, lidos de ``trocas.csv``).
 
 Nenhum algoritmo de busca ou caminho roda aqui: os ciclos e caminhos vêm prontos dos JSON da frente de
 algoritmos; este módulo só procura o peso de cada arco listado e soma os custos acumulados para exibição.
@@ -222,15 +222,15 @@ def montar_graficos(arestas: list[dict], jogadores: list[dict], min_entradas: in
         por_time.setdefault("todas" if ano is None else str(ano), []).append([time, _num(soma / oc, 3), oc])
     for v in por_time.values():
         v.sort(key=lambda x: x[1])
-    # [IA] Claude – H3 (tempo do substituto em quadra) e H1 (placar no momento da troca): resumo do boxplot
-    # por grupo e por temporada, com as mesmas definições de src/parte2/graficos_avd.py
-    from .graficos_avd import grupos, resumo_grupo
-    caixas = {"h3": {}, "h1": {}}
+    # [IA] Claude – H3 (faixa por minuto do substituto em quadra) e H1 (barras 100% por placar no momento da
+    # troca), por temporada, com as mesmas definições de src/parte2/graficos_avd.py
+    from .graficos_avd import CATEGORIAS_H1, faixas_h3, pilhas_h1
+    expl = {"h3": {}, "h1": {}}
     if trocas is not None:
         for chave, t in [("todas", trocas)] + [(str(a), g) for a, g in trocas.groupby("temporada")]:
-            for qual in caixas:
-                caixas[qual][chave] = [dict(grupo=r, **resumo_grupo(w)) for r, w in grupos(t, qual)]
-    return {"min_entradas": min_entradas, "h3": caixas["h3"], "h1": caixas["h1"],
+            expl["h3"][chave] = faixas_h3(t)
+            expl["h1"][chave] = pilhas_h1(t)
+    return {"min_entradas": min_entradas, "h3": expl["h3"], "h1": expl["h1"], "categorias_h1": CATEGORIAS_H1,
             "colunas_jogadores": ["nome", "time", "temporada", "minutos", "impacto", "entradas"],
             "jogadores": pontos, "colunas_times": ["time", "impacto", "ocorrencias"], "times": por_time,
             "definicoes": {

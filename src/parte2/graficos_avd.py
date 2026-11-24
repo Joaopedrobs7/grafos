@@ -1,19 +1,18 @@
 # [IA] Claude – código de desenho (matplotlib) dos 4 gráficos de dados da Parte 2 escolhidos pelo grupo
 """Gráficos de dados (AVD) da Parte 2, no grafo de rotação. Tipos e destaques escolhidos pelo grupo:
 
-- H3 (exploratório): boxplot do peso de cada troca por tempo que o substituto ficou em quadra
-  (1–2, 2–4, 4–8 e 8+ min), com n e % de extremos (|peso| > 30) por grupo e linha no zero;
-- H1 (exploratório): boxplot do peso de cada troca pela diferença absoluta no placar no momento da troca
-  (até 5, 6 a 15 e mais de 15 pontos), com n e % de extremos por grupo e linha no zero;
+- H3 (exploratório): faixa do peso de cada troca por minuto que o substituto ficou em quadra (1, 2, …, 9 e
+  10+ min): linha da mediana, faixa do 10º ao 90º percentil, faixa interna do 25º ao 75º, n por minuto e zero;
+- H1 (exploratório): barras 100% empilhadas, uma por diferença absoluta no placar no momento da troca (até 5,
+  6 a 15 e mais de 15 pontos), divididas em 5 categorias do peso: < −30, −30 a −5, −5 a +5, +5 a +30, > +30;
 - impacto x minutos (explanatório): uma bolinha por jogador-temporada com >= 30 entradas, quadrante
   "impacto > 0 e minutos < mediana" destacado, cor por time e nome do jogador;
 - X6 (explanatório): times mais eficientes em trocas, média das 6 temporadas, 30 times ordenados, zero
   marcado, 5 melhores e 5 piores em cor forte e o resto em cinza.
 
 Definições: peso de uma troca (ocorrência) = 12 × (saldo depois / min depois − saldo antes / min antes),
-só trocas com os dois trechos de pelo menos 1 minuto (``trocas.csv``); nos boxplots a caixa vai do 1º ao
-3º quartil, a linha é a mediana e os bigodes vão até o dado mais distante dentro de 1,5 × IIQ (pontos além
-dos bigodes não são desenhados). Impacto de um jogador-temporada = média dos pesos dos arcos que chegam nele, ponderada pelas
+só trocas com os dois trechos de pelo menos 1 minuto (``trocas.csv``); minuto k do H3 = [k, k+1); categorias
+do H1: < −30, [−30, −5), [−5, +5], (+5, +30], > +30. Impacto de um jogador-temporada = média dos pesos dos arcos que chegam nele, ponderada pelas
 ocorrências; entradas = soma das ocorrências; impacto de um time = média dos pesos de todos os arcos do
 time, ponderada pelas ocorrências. Este módulo só calcula essas médias e desenha; não interpreta.
 
@@ -111,11 +110,17 @@ def estatisticas_36(raw: Path = RAW) -> pd.DataFrame | None:
     }).reset_index()
 
 
-# [IA] Claude – grupos dos boxplots H3 e H1 (peso de cada troca) e resumo de cada grupo
+# [IA] Claude – faixas do H3 (minuto a minuto) e categorias do H1 (barras 100% empilhadas) do peso de cada troca
 LIMITE_EXTREMO = 30.0
-GRUPOS_H3 = [("1–2 min", 1, 2), ("2–4 min", 2, 4), ("4–8 min", 4, 8), ("8+ min", 8, float("inf"))]
+# minutos inteiros do substituto em quadra: [k, k+1); o trecho fica dentro de um período (máx. 11 min nos dados,
+# só 10 trocas com 11), por isso a última faixa junta 10 min ou mais
+FAIXAS_H3 = [(f"{k}", k, k + 1) for k in range(1, 10)] + [("10+", 10, float("inf"))]
 GRUPOS_H1 = [("até 5 pts", 0, 5), ("6 a 15 pts", 6, 15), ("mais de 15 pts", 16, float("inf"))]
-CAIXA, BORDA = "#CFC8BD", "#57534E"
+# categorias do peso: < −30, [−30, −5), [−5, +5], (+5, +30], > +30
+CATEGORIAS_H1 = ["piorou muito (< −30)", "piorou (−30 a −5)", "perto de zero (−5 a +5)",
+                 "melhorou (+5 a +30)", "melhorou muito (> +30)"]
+FAIXA, FAIXA_INTERNA, MEDIANA = "#D6CFC4", "#B5AA9A", "#E8590C"
+CORES_H1 = [NEG, "#E6A596", "#D4D4D4", "#97C3DA", POS]
 
 
 def trocas(rot: Path = ROT) -> pd.DataFrame:
@@ -123,55 +128,97 @@ def trocas(rot: Path = ROT) -> pd.DataFrame:
     return pd.read_csv(rot / "trocas.csv")
 
 
-def grupos(t: pd.DataFrame, qual: str) -> list[tuple[str, pd.Series]]:
-    """[(rótulo, pesos)] na ordem dos grupos: H3 por minutos do substituto, H1 por diferença no placar."""
-    if qual == "h3":
-        return [(r, t.loc[(t["min_depois"] >= a) & (t["min_depois"] < b), "peso_ocorrencia"]) for r, a, b in GRUPOS_H3]
-    return [(r, t.loc[(t["placar"] >= a) & (t["placar"] <= b), "peso_ocorrencia"]) for r, a, b in GRUPOS_H1]
+def faixas_h3(t: pd.DataFrame) -> list[dict]:
+    """Por minuto do substituto em quadra: n, percentis 10/25/50/75/90, % além de ±30 e % negativas."""
+    res = []
+    for r, a, b in FAIXAS_H3:
+        w = t.loc[(t["min_depois"] >= a) & (t["min_depois"] < b), "peso_ocorrencia"]
+        if w.empty:
+            continue
+        p = {k: round(float(w.quantile(q)), 3) for k, q in
+             (("p10", 0.10), ("p25", 0.25), ("mediana", 0.5), ("p75", 0.75), ("p90", 0.90))}
+        res.append({"minutos": r, "n": int(len(w)), **p,
+                    "pct_extremos": round(float((w.abs() > LIMITE_EXTREMO).mean() * 100), 2),
+                    "pct_negativos": round(float((w < 0).mean() * 100), 2)})
+    return res
 
 
-def resumo_grupo(w: pd.Series) -> dict:
-    """n, quartis, bigodes (1,5 × IIQ, limitados ao dado), % de extremos e % de negativos."""
-    q1, med, q3 = (float(w.quantile(q)) for q in (0.25, 0.5, 0.75))
-    iiq = q3 - q1
-    dentro = w[(w >= q1 - 1.5 * iiq) & (w <= q3 + 1.5 * iiq)]
-    return {"n": int(len(w)), "q1": round(q1, 3), "mediana": round(med, 3), "q3": round(q3, 3),
-            "bigode_min": round(float(dentro.min()), 3), "bigode_max": round(float(dentro.max()), 3),
-            "pct_extremos": round(float((w.abs() > LIMITE_EXTREMO).mean() * 100), 2),
-            "pct_negativos": round(float((w < 0).mean() * 100), 2)}
+def categoria_peso(w: pd.Series) -> pd.Series:
+    """Índice da categoria do peso (0 a 4) na ordem de CATEGORIAS_H1."""
+    import numpy as np
+    return pd.Series(np.select([w < -30, w < -5, w <= 5, w <= 30], [0, 1, 2, 3], 4), index=w.index)
 
 
-def boxplot_grupos(t: pd.DataFrame, qual: str, destino: Path) -> dict:
-    plt = _plt()
-    gs = grupos(t, qual)
-    res = {r: resumo_grupo(w) for r, w in gs}
-    fig, ax = plt.subplots(figsize=(9, 5.4))
-    ax.axhline(0, color="black", lw=1, zorder=1)
-    ax.boxplot([w.to_numpy() for _, w in gs], whis=1.5, showfliers=False, widths=0.55, patch_artist=True,
-               boxprops={"facecolor": CAIXA, "edgecolor": BORDA, "lw": 1}, whiskerprops={"color": BORDA, "lw": 1},
-               capprops={"color": BORDA, "lw": 1}, medianprops={"color": "black", "lw": 2.4}, zorder=2)
-    topo = max(v["bigode_max"] for v in res.values())
-    base = min(v["bigode_min"] for v in res.values())
-    for i, (r, v) in enumerate(res.items(), start=1):
-        ax.text(i, v["bigode_max"] + (topo - base) * 0.03, f"{v['pct_extremos']:.1f}% extremos".replace(".", ","),
-                ha="center", va="bottom", fontsize=9, color=NEG, weight="bold")
-        ax.text(i + 0.3, v["mediana"], f"{v['mediana']:+.2f}".replace(".", ","), ha="left", va="center", fontsize=8.5,
-                bbox={"facecolor": "white", "edgecolor": "none", "pad": 1.5}, zorder=3)
-    ax.set_xticks(range(1, len(res) + 1), [f"{r}\nn = {_mil(v['n'])}" for r, v in res.items()])
-    ax.set_ylim(base - (topo - base) * 0.06, topo + (topo - base) * 0.12)
-    ax.set_ylabel("peso da troca: saldo por 12 min depois − antes (pontos)")
-    total = _mil(sum(v["n"] for v in res.values()))
-    if qual == "h3":
-        ax.set_xlabel("tempo que o substituto ficou em quadra")
-        titulo = "Tempo do substituto em quadra"
-    else:
-        ax.set_xlabel("diferença no placar no momento da troca (pontos, em módulo)")
-        titulo = "Placar no momento da troca"
-    ax.set_title(f"{titulo}: peso de cada troca, 2020-21 a 2025-26 ({total} trocas)\n"
-                 f"caixa = 1º a 3º quartil; traço = mediana; bigodes = 1,5 × IIQ (pontos além deles omitidos); "
-                 f"extremos = |peso| > {LIMITE_EXTREMO:.0f}", fontsize=10)
+def pilhas_h1(t: pd.DataFrame) -> list[dict]:
+    """Por grupo de placar: n, mediana, contagem e % de cada categoria do peso (as % somam 100)."""
+    res = []
+    for r, a, b in GRUPOS_H1:
+        w = t.loc[(t["placar"] >= a) & (t["placar"] <= b), "peso_ocorrencia"]
+        cont = categoria_peso(w).value_counts().reindex(range(5), fill_value=0)
+        res.append({"grupo": r, "n": int(len(w)), "mediana": round(float(w.median()), 3),
+                    "contagens": [int(c) for c in cont],
+                    "pcts": [round(float(c) / len(w) * 100, 2) for c in cont]})
+    return res
+
+
+def _fim(fig, ax, plt, destino: Path) -> None:
     fig.tight_layout(); fig.savefig(destino, dpi=160); plt.close(fig)
-    return {"trocas": int(sum(v["n"] for v in res.values())), "grupos": res}
+
+
+def faixa_h3(t: pd.DataFrame, destino: Path) -> dict:
+    plt = _plt()
+    fs = faixas_h3(t)
+    x = list(range(len(fs)))
+    fig, ax = plt.subplots(figsize=(10, 5.6))
+    ax.axhline(0, color="black", lw=1, zorder=1)
+    ax.fill_between(x, [f["p10"] for f in fs], [f["p90"] for f in fs], color=FAIXA, lw=0, zorder=2,
+                    label="80% das trocas (10º ao 90º percentil)")
+    ax.fill_between(x, [f["p25"] for f in fs], [f["p75"] for f in fs], color=FAIXA_INTERNA, lw=0, zorder=2,
+                    label="50% das trocas (25º ao 75º percentil)")
+    med = [f["mediana"] for f in fs]
+    ax.plot(x, med, color=MEDIANA, lw=2.4, marker="o", ms=5, zorder=3, label="mediana")
+    for i, v in enumerate(med):
+        rot = "0,0" if abs(v) < 0.05 else f"{v:+.1f}".replace(".", ",").replace("-", "−")
+        ax.annotate(rot, (i, v), xytext=(0, 7), textcoords="offset points", ha="center",
+                    fontsize=8, color=MEDIANA, weight="bold", zorder=4)
+    ax.set_xticks(x, [f"{f['minutos']}\nn = {_mil(f['n'])}" for f in fs], fontsize=8.5)
+    ax.set_xlim(-0.3, len(fs) - 0.7)
+    ax.set_xlabel("minutos que o substituto ficou em quadra (1 = de 1 a 2 min; 10+ = 10 min ou mais)")
+    ax.set_ylabel("peso da troca: saldo por 12 min depois − antes (pontos)")
+    total = _mil(sum(f["n"] for f in fs))
+    ax.set_title(f"Tempo do substituto em quadra: peso de cada troca, 2020-21 a 2025-26 ({total} trocas)", fontsize=10.5)
+    ax.legend(loc="upper left", fontsize=8.5, frameon=False)
+    _fim(fig, ax, plt, destino)
+    return {"trocas": int(sum(f["n"] for f in fs)), "faixas": fs}
+
+
+def pilhas_100(t: pd.DataFrame, destino: Path) -> dict:
+    plt = _plt()
+    gs = pilhas_h1(t)
+    fig, ax = plt.subplots(figsize=(10, 4.2))
+    ys = list(range(len(gs)))[::-1]
+    for y, g in zip(ys, gs):
+        esq = 0.0
+        for c, pct in enumerate(g["pcts"]):
+            ax.barh(y, pct, left=esq, color=CORES_H1[c], height=0.62, edgecolor="white", lw=1)
+            if pct >= 5:
+                ax.text(esq + pct / 2, y, f"{pct:.0f}%", ha="center", va="center", fontsize=9,
+                        color="white" if c in (0, 4) else "#222222", weight="bold")
+            esq += pct
+    ax.set_yticks(ys, [f"{g['grupo']}\nn = {_mil(g['n'])}" for g in gs])
+    ax.set_xlim(0, 100)
+    ax.set_xticks(range(0, 101, 20), [f"{v}%" for v in range(0, 101, 20)])
+    ax.spines["left"].set_visible(False); ax.tick_params(axis="y", length=0)
+    ax.set_xlabel("% das trocas do grupo")
+    ax.set_ylabel("diferença no placar no momento da troca")
+    total = _mil(sum(g["n"] for g in gs))
+    ax.set_title(f"Placar no momento da troca: peso de cada troca, 2020-21 a 2025-26 ({total} trocas)\n"
+                 "peso = saldo por 12 min depois − antes (pontos)", fontsize=10.5)
+    from matplotlib.patches import Patch
+    ax.legend([Patch(color=c) for c in CORES_H1], CATEGORIAS_H1, ncol=5, fontsize=7.6, frameon=False,
+              loc="upper center", bbox_to_anchor=(0.45, -0.2), handlelength=1.2, columnspacing=1.2)
+    _fim(fig, ax, plt, destino)
+    return {"trocas": int(sum(g["n"] for g in gs)), "categorias": CATEGORIAS_H1, "grupos": gs}
 
 
 def _cores_times(times) -> dict:
@@ -239,8 +286,8 @@ def main(argv: list[str] | None = None) -> None:
     arcos, jog = dados()
     tr = trocas()
     resumo = {
-        "h3_tempo_em_quadra": boxplot_grupos(tr, "h3", SAIDA / "h3_tempo_em_quadra.png"),
-        "h1_placar_momento": boxplot_grupos(tr, "h1", SAIDA / "h1_placar_momento.png"),
+        "h3_tempo_em_quadra": faixa_h3(tr, SAIDA / "h3_tempo_em_quadra.png"),
+        "h1_placar_momento": pilhas_100(tr, SAIDA / "h1_placar_momento.png"),
         "impacto_x_minutos": bolinhas(jog, args.temporada, SAIDA / f"impacto_x_minutos_{args.temporada}.png"),
         "x6_times_trocas": x6_times(arcos, SAIDA / "x6_times_trocas.png"),
     }

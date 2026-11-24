@@ -1,83 +1,187 @@
 {
   "h3_tempo_em_quadra": {
     "trocas": 143607,
-    "grupos": {
-      "1–2 min": {
+    "faixas": [
+      {
+        "minutos": "1",
         "n": 15233,
-        "q1": -21.433,
+        "p10": -39.338,
+        "p25": -21.433,
         "mediana": -1.701,
-        "q3": 17.722,
-        "bigode_min": -80.143,
-        "bigode_max": 76.162,
+        "p75": 17.722,
+        "p90": 36.143,
         "pct_extremos": 30.78,
         "pct_negativos": 51.97
       },
-      "2–4 min": {
-        "n": 43635,
-        "q1": -15.312,
-        "mediana": -0.604,
-        "q3": 14.09,
-        "bigode_min": -59.386,
-        "bigode_max": 58.155,
-        "pct_extremos": 17.63,
-        "pct_negativos": 50.9
+      {
+        "minutos": "2",
+        "n": 20506,
+        "p10": -30.81,
+        "p25": -16.401,
+        "mediana": -0.91,
+        "p75": 14.935,
+        "p90": 29.368,
+        "pct_extremos": 20.1,
+        "pct_negativos": 51.27
       },
-      "4–8 min": {
-        "n": 70872,
-        "q1": -12.067,
-        "mediana": 0.5,
-        "q3": 13.437,
-        "bigode_min": -50.304,
-        "bigode_max": 51.688,
-        "pct_extremos": 11.7,
-        "pct_negativos": 48.54
+      {
+        "minutos": "3",
+        "n": 23129,
+        "p10": -27.274,
+        "p25": -14.251,
+        "mediana": -0.362,
+        "p75": 13.529,
+        "p90": 26.596,
+        "pct_extremos": 15.44,
+        "pct_negativos": 50.58
       },
-      "8+ min": {
-        "n": 13867,
-        "q1": -9.273,
-        "mediana": 5.49,
-        "q3": 20.061,
-        "bigode_min": -53.074,
-        "bigode_max": 63.979,
-        "pct_extremos": 18.24,
-        "pct_negativos": 39.92
+      {
+        "minutos": "4",
+        "n": 22749,
+        "p10": -24.785,
+        "p25": -13.127,
+        "mediana": -0.037,
+        "p75": 13.063,
+        "p90": 25.394,
+        "pct_extremos": 12.59,
+        "pct_negativos": 50.02
+      },
+      {
+        "minutos": "5",
+        "n": 19843,
+        "p10": -23.342,
+        "p25": -11.907,
+        "mediana": 0.406,
+        "p75": 13.334,
+        "p90": 24.617,
+        "pct_extremos": 11.28,
+        "pct_negativos": 48.66
+      },
+      {
+        "minutos": "6",
+        "n": 16585,
+        "p10": -22.767,
+        "p25": -11.723,
+        "mediana": 0.815,
+        "p75": 13.649,
+        "p90": 25.351,
+        "pct_extremos": 11.41,
+        "pct_negativos": 47.83
+      },
+      {
+        "minutos": "7",
+        "n": 11695,
+        "p10": -22.48,
+        "p25": -11.01,
+        "mediana": 1.515,
+        "p75": 14.173,
+        "p90": 25.287,
+        "pct_extremos": 11.11,
+        "pct_negativos": 46.45
+      },
+      {
+        "minutos": "8",
+        "n": 7490,
+        "p10": -21.604,
+        "p25": -9.431,
+        "mediana": 3.459,
+        "p75": 16.942,
+        "p90": 28.977,
+        "pct_extremos": 13.78,
+        "pct_negativos": 42.35
+      },
+      {
+        "minutos": "9",
+        "n": 4486,
+        "p10": -22.97,
+        "p25": -9.796,
+        "mediana": 6.186,
+        "p75": 21.588,
+        "p90": 34.578,
+        "pct_extremos": 19.84,
+        "pct_negativos": 39.34
+      },
+      {
+        "minutos": "10+",
+        "n": 1891,
+        "p10": -24.023,
+        "p25": -5.987,
+        "mediana": 12.571,
+        "p75": 30.403,
+        "p90": 46.397,
+        "pct_extremos": 32.15,
+        "pct_negativos": 31.68
       }
-    }
+    ]
   },
   "h1_placar_momento": {
     "trocas": 143607,
-    "grupos": {
-      "até 5 pts": {
+    "categorias": [
+      "piorou muito (< −30)",
+      "piorou (−30 a −5)",
+      "perto de zero (−5 a +5)",
+      "melhorou (+5 a +30)",
+      "melhorou muito (> +30)"
+    ],
+    "grupos": [
+      {
+        "grupo": "até 5 pts",
         "n": 57703,
-        "q1": -12.269,
         "mediana": 0.101,
-        "q3": 12.985,
-        "bigode_min": -50.123,
-        "bigode_max": 50.85,
-        "pct_extremos": 12.47,
-        "pct_negativos": 49.1
+        "contagens": [
+          3446,
+          18935,
+          12234,
+          19341,
+          3747
+        ],
+        "pcts": [
+          5.97,
+          32.81,
+          21.2,
+          33.52,
+          6.49
+        ]
       },
-      "6 a 15 pts": {
+      {
+        "grupo": "6 a 15 pts",
         "n": 61525,
-        "q1": -13.998,
         "mediana": 0.78,
-        "q3": 15.568,
-        "bigode_min": -58.328,
-        "bigode_max": 59.875,
-        "pct_extremos": 17.35,
-        "pct_negativos": 48.22
+        "contagens": [
+          5015,
+          19313,
+          11052,
+          20485,
+          5660
+        ],
+        "pcts": [
+          8.15,
+          31.39,
+          17.96,
+          33.3,
+          9.2
+        ]
       },
-      "mais de 15 pts": {
+      {
+        "grupo": "mais de 15 pts",
         "n": 24379,
-        "q1": -16.12,
         "mediana": 0.0,
-        "q3": 16.919,
-        "bigode_min": -65.591,
-        "bigode_max": 66.413,
-        "pct_extremos": 21.88,
-        "pct_negativos": 49.5
+        "contagens": [
+          2584,
+          7565,
+          3970,
+          7509,
+          2751
+        ],
+        "pcts": [
+          10.6,
+          31.03,
+          16.28,
+          30.8,
+          11.28
+        ]
       }
-    }
+    ]
   },
   "impacto_x_minutos": {
     "temporada": 2025,
