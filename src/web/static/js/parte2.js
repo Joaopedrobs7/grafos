@@ -557,8 +557,18 @@
         " No recorte sem ciclo ele roda com os pesos reponderados (Johnson).</p>";
     } else {
       var d = estado.dados, inverso = estado.grafoPar === "recorte" && d.nos[p.a].minutos <= d.nos[p.b].minutos;
-      html += '<p class="p2-detalhe__texto"><b>Sem caminho</b> de ' + quem + ": " + esc(r.mensagem) + "." +
-        (inverso ? " Aqui o destino jogou mais minutos que a origem; troque os dois (⇄) ou use o grafo completo." : "") + "</p>";
+      // [IA] Claude – no recorte, diz com os nomes e os minutos por que não há caminho (o destino jogou mais)
+      if (inverso) {
+        var na = esc(nomeNo(p.a)), nb = esc(nomeNo(p.b));
+        html += '<p class="p2-detalhe__texto"><b>Sem caminho</b> de ' + quem + ".</p>" +
+          '<p class="p2-aviso-min"><b>' + nb + "</b> jogou mais minutos que <b>" + na + "</b> (" +
+          fmt(d.nos[p.b].minutos, 0) + " min contra " + fmt(d.nos[p.a].minutos, 0) + " min). " +
+          "No recorte sem ciclo as setas só vão de quem jogou mais para quem jogou menos, então a partir de " + na +
+          " nunca se chega a " + nb + ". Troque os dois (⇄) para ver o caminho de " + nb + " até " + na +
+          ", ou use o grafo completo.</p>";
+      } else {
+        html += '<p class="p2-detalhe__texto"><b>Sem caminho</b> de ' + quem + ": " + esc(r.mensagem) + ".</p>";
+      }
     }
     return html + "</div>";
   }
