@@ -1913,12 +1913,12 @@
     $("metricasSub").textContent = S.nome === NOME_PERSONALIZADO ? "Mapa personalizado" : codigo(S.nome) + " " + titulo(S.nome);
     if (!m || !m.g) {
       // sem solve.metricas: ao menos o tamanho do grafo de estados
-      box.appendChild(tabela(["Grafo", "Ordem", "Tamanho"], [["G_est (estados)", fmt(S.mapa.estados), fmt(S.mapa.arcos)]]));
+      box.appendChild(tabela(["Grafo", "Vértices", "Arestas"], [["G_est (estados)", fmt(S.mapa.estados), fmt(S.mapa.arcos)]]));
       return;
     }
     var g = m.g;
     var gp = g.G_pos || g.g_pos || {}, ge = g.G_est || g.g_est || {};
-    box.appendChild(tabela(["Grafo", "Ordem", "Tamanho", "Densidade"], [
+    box.appendChild(tabela(["Grafo", "Vértices", "Arestas", "Densidade"], [
       ["G_pos (casas)", fmt(gp.ordem), fmt(gp.tamanho), dens(gp.densidade)],
       ["G_est (estados)", fmt(ge.ordem), fmt(ge.tamanho), dens(ge.densidade)]
     ]));
@@ -1943,7 +1943,7 @@
 
     if (m.camadas.length) {
       box.appendChild(el("h4", "metricas__sub", "Camadas"));
-      box.appendChild(tabela(["Chaves", "Ordem", "Tamanho", "Densidade"], m.camadas.map(function (c) {
+      box.appendChild(tabela(["Chaves", "Vértices", "Arestas", "Densidade"], m.camadas.map(function (c) {
         return [c.chaves === "-" || !c.chaves ? "sem chave" : c.chaves, fmt(c.ordem), fmt(c.tamanho), dens(c.densidade)];
       })));
     }
