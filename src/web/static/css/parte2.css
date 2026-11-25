@@ -407,3 +407,73 @@
 /* [IA] Claude – palavras coloridas da legenda */
 .g-leg-neg { color: var(--neg); font-weight: 600; }
 .g-leg-pos { color: var(--pos); font-weight: 600; }
+
+/* [IA] Claude – caminho entre dois jogadores: origem, destino, grafo, algoritmo e a comparação dos quatro */
+.p2-par {
+  display: grid; gap: 12px; padding: 16px;
+  background: var(--noite-2); box-shadow: inset 0 0 0 2px var(--noite-3);
+}
+.p2-par__slots { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 8px; align-items: stretch; }
+.p2-par__slot {
+  display: grid; gap: 6px; align-content: start; min-width: 0;
+  padding: 8px 10px; background: var(--noite-3);
+  box-shadow: inset 0 0 0 2px var(--noite-4);
+}
+.p2-par__slot--a:not(.is-vazio) { box-shadow: inset 0 0 0 2px var(--cesar); }
+.p2-par__slot--b:not(.is-vazio) { box-shadow: inset 0 0 0 2px var(--luar); }
+.p2-par__rot { font: 600 12px/1 var(--f-pixel); color: var(--tocha); }
+.p2-par__quem { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13px; }
+.p2-par__quem b { font-weight: 600; overflow-wrap: anywhere; }
+.p2-par__vazio { font-size: 13px; color: var(--luar-fraco); }
+.p2-par__trocar {
+  align-self: center; width: 34px; height: 34px; font-size: 18px;
+  background: var(--noite-3); box-shadow: inset 0 0 0 2px var(--noite-4);
+}
+.p2-par__trocar:hover:not(:disabled) { box-shadow: inset 0 0 0 2px var(--cesar); }
+.p2-par__trocar:disabled { opacity: 0.4; cursor: default; }
+.p2-par__nota { font-size: 12px; line-height: 1.45; color: var(--luar-fraco); }
+.p2-par__res { display: grid; gap: 8px; }
+
+.p2-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 0; box-shadow: inset 0 0 0 2px var(--noite-4); }
+.p2-seg button { padding: 8px 6px; font: 600 13px/1.1 var(--f-pixel); color: var(--luar-fraco); }
+.p2-seg button[aria-pressed="true"] { background: var(--noite-4); color: var(--luar); box-shadow: inset 0 -3px 0 var(--cesar); }
+
+.p2-algs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.p2-alg {
+  display: grid; gap: 2px; justify-items: start; padding: 8px 10px; text-align: left;
+  background: var(--noite-3); box-shadow: inset 0 0 0 2px var(--noite-4);
+}
+.p2-alg:hover { box-shadow: inset 0 0 0 2px var(--luar-fraco); }
+.p2-alg[aria-pressed="true"] { background: var(--noite-4); box-shadow: inset 0 0 0 2px var(--cesar); }
+.p2-alg__nome { font: 600 14px/1.1 var(--f-pixel); }
+.p2-alg__sobre { font-size: 11.5px; line-height: 1.3; color: var(--luar-fraco); }
+
+.p2-passo.is-futuro { opacity: 0.25; }
+.p2-passo.is-atual .p2-passo__arco { color: var(--tocha); }
+
+.p2-comp { width: 100%; border-collapse: collapse; font-size: 13px; }
+.p2-comp caption { text-align: left; padding-bottom: 6px; font: 600 12px/1.2 var(--f-pixel); color: var(--tocha); }
+.p2-comp th, .p2-comp td { padding: 6px 4px; text-align: left; box-shadow: inset 0 -1px 0 var(--noite-3); white-space: nowrap; }
+.p2-comp { font-size: 12.5px; }
+.p2-comp thead th { font-weight: 600; color: var(--luar-fraco); font-size: 12px; }
+.p2-comp .num { text-align: right; font-variant-numeric: tabular-nums; }
+.p2-comp .num.neg { color: var(--neg); }
+.p2-comp .num.pos { color: var(--pos); }
+.p2-comp tbody th button { font-weight: 600; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--noite-4); }
+.p2-comp tr.is-atual { background: var(--noite-3); }
+.p2-comp tr.is-atual th button { color: var(--cesar); text-decoration-color: var(--cesar); }
+
+.p2-ficha__acoes { display: flex; flex-wrap: wrap; gap: 6px; }
+.p2-ficha__acoes .p2-chip { padding: 6px 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .p2-passo.is-futuro { opacity: 1; }
+}
+
+/* [IA] Claude – rota origem → ciclo → destino quando o Bellman-Ford acha ciclo negativo */
+.p2-rota { display: grid; gap: 8px; padding: 10px 12px; background: var(--noite-3); }
+.p2-rota li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; font-size: 13px; line-height: 1.45; }
+.p2-rota__n { font: 600 13px/1.45 var(--f-pixel); color: var(--tocha); }
+.p2-rota__rot { display: block; font-size: 12px; color: var(--luar-fraco); }
+.p2-rota b { font-weight: 600; }
+.p2-par__ir { justify-self: start; padding: 8px 14px; font-weight: 600; box-shadow: inset 0 0 0 2px var(--cesar); }

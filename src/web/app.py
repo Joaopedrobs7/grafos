@@ -17,11 +17,13 @@ Rotas:
   /api/carga           ?n=500 resolve o m08 n vezes (máx 2000) (gera CPU para testar o Auto Scaling)
   /api/parte2/indice               temporadas e times do grafo de rotação (out/parte2/web/indice.json)
   /api/parte2/rotacao/<time>/<ano> nós, arcos, ciclo negativo e caminhos de um time-temporada
+  /api/parte2/caminho/<time>/<ano> ?de=i&para=j&grafo=completo|recorte -> BFS, DFS, Dijkstra e Bellman-Ford de A até B
   /api/parte2/graficos             dados dos gráficos interativos (impacto x minutos e times)
   /api/parte2/benchmark            tempos médios e escalabilidade (resumo de out/parte2/parte2_report.json)
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
@@ -35,6 +37,7 @@ from flask import Flask, Response, abort, jsonify, redirect, request, send_from_
 
 from ..graphs.estados import grafo_estados
 from ..graphs.io import Mapa, MapaInvalido, ler_mapa, listar_mapas, parse_mapa
+from ..parte2.par import caminho_entre
 from ..solve import resolver
 from ..traco import ALGORITMOS_TRACO, traco_json
 from ..viz import dados_mapa
@@ -299,7 +302,7 @@ def api_carga():
 
 
 # [IA] Claude – API da página da Parte 2: só lê os JSON pré-calculados (src/parte2/web_dados.py), com cache.
-# O servidor não roda algoritmo nenhum para a Parte 2; o navegador só desenha.
+# Só /api/parte2/caminho roda algoritmo no pedido (os do grupo); o navegador só desenha.
 SIGLA_TIME = re.compile(r"^[A-Z]{2,4}$")
 
 
@@ -336,6 +339,34 @@ def api_parte2_rotacao(sigla: str, ano: int):
     if resp is None:
         return _erro(f"time-temporada {sigla} {ano} não existe", 404)
     return resp
+
+
+# [IA] Claude – caminho entre dois jogadores escolhidos no grafo: única rota da Parte 2 que roda algoritmo no
+# pedido (os 4 do grupo, em src/parte2/par.py, num time-temporada de ~20 nós; leva menos de 1 ms)
+@lru_cache(maxsize=64)
+def _parte2_dados(caminho: str, mtime: float) -> dict:
+    return json.loads(Path(caminho).read_text(encoding="utf-8"))
+
+
+@app.get("/api/parte2/caminho/<sigla>/<int:ano>")
+def api_parte2_caminho(sigla: str, ano: int):
+    sigla = sigla.upper()
+    if not SIGLA_TIME.match(sigla):
+        return _erro("sigla de time inválida", 400)
+    caminho = PARTE2_WEB / "rotacao" / f"{sigla}_{ano}.json"
+    try:
+        dados = _parte2_dados(str(caminho), caminho.stat().st_mtime)
+    except OSError:
+        return _erro(f"time-temporada {sigla} {ano} não existe", 404)
+    try:
+        de, para = int(request.args["de"]), int(request.args["para"])
+    except (KeyError, ValueError):
+        return _erro("informe de=<índice> e para=<índice> dos dois jogadores", 400)
+    try:
+        res = caminho_entre(dados, de, para, request.args.get("grafo", "completo"))
+    except ValueError as e:
+        return _erro(str(e), 400)
+    return jsonify(res)
 
 
 @app.get("/api/parte2/graficos")

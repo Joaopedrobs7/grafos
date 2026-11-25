@@ -57,14 +57,15 @@
     </div>
     <!-- [IA] Claude – explicação do que os números significam -->
     <p class="p2-nota g-como-ler">Cada seta <b>X → Y</b> é uma troca: Y entrou no lugar de X. O peso é quanto o saldo do time
-      mudou a cada 12 min depois da troca. Clique num jogador para ver a ficha.</p>
+      mudou a cada 12 min depois da troca. Clique em dois jogadores (origem e depois destino) e escolha o algoritmo
+      para ver o caminho entre eles.</p>
 
     <div class="p2-palco">
       <figure class="p2-quadro">
         <div class="p2-quadro__area" id="area">
           <canvas id="tela" role="img" tabindex="0" aria-label="Grafo de rotação do time-temporada escolhido"
                   aria-describedby="telaTeclado"></canvas>
-          <p class="sr-only" id="telaTeclado">Com o grafo em foco, as setas escolhem o jogador seguinte ou o anterior e Esc fecha a ficha.</p>
+          <p class="sr-only" id="telaTeclado">Com o grafo em foco, as setas abrem a ficha do jogador seguinte ou do anterior; na ficha, os botões “Usar como origem” e “Usar como destino” montam o caminho. Esc fecha a ficha.</p>
           <div class="p2-dica" id="dica" hidden></div>
           <p class="p2-carregando" id="carregando">carregando…</p>
         </div>
@@ -89,10 +90,10 @@
         </figcaption>
       </figure>
 
-      <aside class="p2-lado" id="lado" aria-label="Ficha do jogador e destaques do grafo">
+      <aside class="p2-lado" id="lado" aria-label="Caminho entre dois jogadores, ficha do jogador e exemplos prontos">
         <div class="p2-detalhe" id="detalhe"></div>
         <p class="sr-only" id="aviso" aria-live="polite"></p>
-        <h2 class="p2-subtitulo p2-lado__titulo" id="destacarTitulo">Destacar</h2>
+        <h2 class="p2-subtitulo p2-lado__titulo" id="destacarTitulo">Exemplos prontos</h2>
         <div class="p2-modos" role="group" aria-labelledby="destacarTitulo">
           <button class="p2-modo" type="button" data-modo="ciclo" aria-pressed="false">
             <span class="p2-modo__nome">Ciclo negativo</span>

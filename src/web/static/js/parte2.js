@@ -1,7 +1,8 @@
 /* [IA] Claude – página da Parte 2: carrega os JSON pré-calculados (api/parte2/*) e desenha o grafo de rotação de um
    time-temporada num canvas 2D (nós em círculo por minutos, arcos curvos com seta e cor pelo sinal do peso),
    os destaques do ciclo negativo / caminho sem ciclo / par do Dijkstra, a tabela de jogadores e as tabelas do
-   benchmark. Nenhum algoritmo roda aqui. Script clássico, sem dependências. */
+   benchmark. O caminho entre dois jogadores (origem e destino clicados no grafo) é calculado no servidor pelos
+   algoritmos do grupo (api/parte2/caminho); aqui só se desenha. Script clássico, sem dependências. */
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
@@ -11,7 +12,16 @@
 
   var estado = {
     indice: null, dados: null, modo: null, selecionado: null, sobre: null,
-    ordem: { chave: "minutos", desc: true }, layout: null, bench: null
+    ordem: { chave: "minutos", desc: true }, layout: null, bench: null,
+    // [IA] Claude – caminho entre dois jogadores: a = origem, b = destino (índices), resultado da API e algoritmo exibido
+    par: { a: null, b: null }, alg: "BFS", grafoPar: "completo", rota: null, rotaErro: null, anim: Infinity
+  };
+  var NOME_ALG = { BFS: "BFS", DFS: "DFS", DIJKSTRA: "Dijkstra", BELLMAN_FORD: "Bellman-Ford" };
+  var SOBRE_ALG = {
+    BFS: "menor número de trocas (ignora o peso)",
+    DFS: "primeiro caminho que a busca em profundidade encontra",
+    DIJKSTRA: "menor custo; recusa peso negativo",
+    BELLMAN_FORD: "menor custo; detecta ciclo negativo"
   };
 
   /* ------------------------------------------------------------ formatação (pt-BR) */
@@ -166,6 +176,7 @@
     estado.selecionado = null;
     estado.sobre = null;
     estado.realce = null;
+    limparPar(true);
     $("contagem").innerHTML = "<b>" + d.nos.length + "</b> jogadores, <b>" + fmtInt(d.arcos.length) +
       "</b> trocas diferentes (arcos), <b>" + fmtInt(d.arcos_negativos) + "</b> delas com peso negativo";
     var btnDij = document.querySelector('[data-modo="dijkstra"]');
@@ -231,7 +242,7 @@
     b.addEventListener("click", function () {
       var m = b.getAttribute("data-modo");
       estado.modo = estado.modo === m ? null : m;
-      if (estado.modo) { estado.selecionado = null; estado.realce = null; marcarLinha(); }
+      if (estado.modo) { estado.selecionado = null; estado.realce = null; limparPar(true); marcarLinha(); }
       renderizarLado();
       desenhar();
     });
@@ -239,7 +250,13 @@
 
   function destaqueAtual() {
     var d = estado.dados;
-    if (!d || !estado.modo) return null;
+    if (!d) return null;
+    var r = resultadoAtual();
+    if (r && r.passos.length) {
+      return { fonte: estado.par.a, destino: estado.par.b, caminho: r.caminho, ciclo: r.ciclo, passos: r.passos,
+               passosAcesso: (r.passos_acesso || []).concat(r.passos_saida || []) };
+    }
+    if (!estado.modo) return null;
     if (estado.modo === "ciclo") return d.bellman_ford && d.bellman_ford.ciclo ? d.bellman_ford : null;
     if (estado.modo === "sem_ciclo") return d.sem_ciclo || null;
     if (estado.modo === "dijkstra") return d.dijkstra || null;
@@ -255,20 +272,9 @@
       b.setAttribute("aria-pressed", b.getAttribute("data-modo") === estado.modo ? "true" : "false");
     });
     var d = estado.dados, sel = estado.selecionado;
-    $("detalhe").innerHTML = !d ? "" : sel !== null ? htmlFicha(sel) : estado.modo ? "" : htmlConvite();
+    $("detalhe").innerHTML = !d ? "" : sel !== null ? htmlFicha(sel) : estado.modo ? "" : htmlPar();
     $("detalheModo").innerHTML = d ? htmlModo() : "";
     $("lado").classList.toggle("tem-ficha", sel !== null);
-  }
-
-  function htmlConvite() {
-    var d = estado.dados, sugest = d.nos.slice(0, 3).map(function (n, i) {
-      return '<button type="button" class="p2-chip" data-no="' + i + '">' + htmlFoto(n, "p2-foto--p", true) +
-        "<span>" + esc(n.nome) + "</span></button>";
-    }).join("");
-    return '<div class="p2-convite"><p class="p2-convite__titulo">Ficha do jogador</p>' +
-      '<p class="p2-convite__texto">Clique num jogador para ver o impacto e as trocas dele.</p>' +
-      '<p class="p2-convite__rotulo">Mais minutos em quadra:</p><div class="p2-chips">' + sugest + "</div>" +
-      '</div>';
   }
 
   function htmlFicha(i) {
@@ -290,6 +296,8 @@
       '<p class="p2-ficha__frase">' + frase + "</p></div>" +
       '<dl class="p2-ficha__nums"><div><dt>Minutos em quadra</dt><dd>' + fmt(n.minutos, 0) + "</dd></div>" +
       "<div><dt>Entradas</dt><dd>" + fmtInt(n.entradas) + "</dd></div></dl>" +
+      '<div class="p2-ficha__acoes"><button type="button" class="p2-chip" data-usar="a">Usar como origem</button>' +
+      '<button type="button" class="p2-chip" data-usar="b">Usar como destino</button></div>' +
       htmlLista(i, "sai") + htmlLista(i, "chega") + "</article>";
   }
 
@@ -365,6 +373,211 @@
     return '<p class="p2-total"><span>' + rotulo + "</span><span>" + fmtSinal(v, 2) + " pts por 12 min</span></p>";
   }
 
+  /* ------------------------------------------------------------ caminho entre dois jogadores */
+  /* [IA] Claude – 1º clique = origem, 2º = destino; o servidor roda os 4 algoritmos do grupo (api/parte2/caminho)
+     e a página mostra o do algoritmo escolhido, com animação passo a passo e a comparação dos quatro. */
+  var pedidoPar = 0, timerAnim = 0;
+  var ROTULO_STATUS = { OK: "caminho", SEM_CAMINHO: "sem caminho", RECUSA: "recusa", CICLO_NEGATIVO: "ciclo negativo" };
+
+  function resultadoAtual() {
+    var r = estado.rota;
+    if (!r) return null;
+    return r.resultados.filter(function (x) { return x.algoritmo === estado.alg; })[0] || null;
+  }
+  function reduzMovimento() {
+    return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+  function pararAnim() {
+    if (timerAnim) clearInterval(timerAnim);
+    timerAnim = 0;
+    estado.anim = Infinity;
+  }
+  function marcarPassosAnim() {
+    Array.prototype.forEach.call(document.querySelectorAll("#detalhe .p2-passo"), function (li, k) {
+      li.classList.toggle("is-futuro", k >= estado.anim);
+      li.classList.toggle("is-atual", k === estado.anim - 1);
+    });
+  }
+  function iniciarAnim() {
+    pararAnim();
+    var r = resultadoAtual();
+    if (!r || !r.passos.length || reduzMovimento()) { desenhar(); return; }
+    estado.anim = 0;
+    desenhar();
+    timerAnim = setInterval(function () {
+      estado.anim++;
+      if (estado.anim >= r.passos.length) pararAnim();
+      desenhar();
+      marcarPassosAnim();
+    }, 700);
+  }
+  function limparPar(silencioso) {
+    pedidoPar++;
+    estado.par = { a: null, b: null };
+    estado.rota = null;
+    estado.rotaErro = null;
+    estado.carregandoRota = false;
+    pararAnim();
+    if (!silencioso) { renderizarLado(); desenhar(); $("aviso").textContent = "Origem e destino limpos."; }
+  }
+  function buscarRota() {
+    var d = estado.dados, p = estado.par;
+    if (!d || p.a === null || p.b === null) { renderizarLado(); desenhar(); return; }
+    var n = ++pedidoPar;
+    estado.rota = null;
+    estado.rotaErro = null;
+    estado.carregandoRota = true;
+    pararAnim();
+    renderizarLado();
+    desenhar();
+    json("api/parte2/caminho/" + encodeURIComponent(d.time) + "/" + d.temporada + "?de=" + p.a + "&para=" + p.b +
+      "&grafo=" + estado.grafoPar).then(function (r) {
+      if (n !== pedidoPar) return;
+      estado.carregandoRota = false;
+      estado.rota = r;
+      renderizarLado();
+      iniciarAnim();
+      marcarPassosAnim();
+      anunciarRota();
+    }).catch(function (e) {
+      if (n !== pedidoPar) return;
+      estado.carregandoRota = false;
+      estado.rotaErro = e.message;
+      renderizarLado();
+      desenhar();
+    });
+  }
+  function escolherNoPar(i) {
+    var p = estado.par;
+    estado.modo = null;
+    if (estado.selecionado !== null) { estado.selecionado = null; marcarLinha(); }
+    if (p.a !== null && p.b === null && i === p.a) { limparPar(); return; }
+    if (p.a === null || p.b !== null) {
+      pedidoPar++;
+      estado.par = { a: i, b: null };
+      estado.rota = null;
+      estado.rotaErro = null;
+      estado.carregandoRota = false;
+      pararAnim();
+      renderizarLado();
+      desenhar();
+      $("aviso").textContent = "Origem: " + nomeNo(i) + ". Agora escolha o destino.";
+      return;
+    }
+    p.b = i;
+    buscarRota();
+  }
+  function usarComo(lado, i) {
+    var p = estado.par;
+    p[lado] = i;
+    var outro = lado === "a" ? "b" : "a";
+    if (p[outro] === i) p[outro] = null;
+    estado.selecionado = null;
+    estado.modo = null;
+    marcarLinha();
+    buscarRota();
+  }
+  function anunciarRota() {
+    var r = resultadoAtual(), p = estado.par;
+    if (!r) return;
+    var txt = NOME_ALG[r.algoritmo] + " de " + nomeNo(p.a) + " até " + nomeNo(p.b) + ": ";
+    if (r.status === "OK") txt += r.trocas + (r.trocas === 1 ? " troca" : " trocas") + ", custo " + fmtSinal(r.custo, 2) + " pontos.";
+    else txt += ROTULO_STATUS[r.status] + ". " + (r.mensagem || "");
+    $("aviso").textContent = txt;
+  }
+
+  function htmlSlot(i, rotulo, vazio, classe) {
+    var d = estado.dados;
+    return '<div class="p2-par__slot ' + classe + (i === null ? " is-vazio" : "") + '"><span class="p2-par__rot">' + rotulo +
+      "</span>" + (i === null ? '<span class="p2-par__vazio">' + vazio + "</span>"
+        : '<span class="p2-par__quem">' + htmlFoto(d.nos[i], "p2-foto--p", true) + "<b>" + esc(d.nos[i].nome) + "</b></span>") +
+      "</div>";
+  }
+  function htmlPar() {
+    var p = estado.par, ambos = p.a !== null && p.b !== null;
+    var guia = p.a === null
+      ? "Clique no jogador de <b>origem</b> e depois no de <b>destino</b>. Cada seta X → Y é “Y entrou no lugar de X”, " +
+        "então o caminho é uma cadeia de substituições."
+      : p.b === null ? "Agora clique no jogador de <b>destino</b>." : "";
+    var html = '<section class="p2-par" aria-labelledby="parTitulo">' +
+      '<p class="p2-convite__titulo" id="parTitulo">Caminho entre dois jogadores</p>' +
+      (guia ? '<p class="p2-convite__texto">' + guia + "</p>" : "") +
+      '<div class="p2-par__slots">' + htmlSlot(p.a, "Origem", "clique no grafo", "p2-par__slot--a") +
+      '<button type="button" class="p2-par__trocar" data-trocar' + (ambos ? "" : " disabled") +
+      ' aria-label="Trocar origem e destino" title="Trocar origem e destino">⇄</button>' +
+      htmlSlot(p.b, "Destino", p.a === null ? "–" : "clique no grafo", "p2-par__slot--b") + "</div>" +
+      '<div class="p2-seg" role="group" aria-label="Grafo usado">' +
+      ["completo", "recorte"].map(function (g) {
+        return '<button type="button" data-grafo="' + g + '" aria-pressed="' + (estado.grafoPar === g) + '">' +
+          (g === "completo" ? "Grafo completo" : "Recorte sem ciclo") + "</button>";
+      }).join("") + "</div>" +
+      '<p class="p2-par__nota">' + (estado.grafoPar === "completo"
+        ? "Todas as trocas do time-temporada (tem ciclo negativo)."
+        : "Só trocas de quem jogou mais minutos para quem jogou menos: sem ciclo, o menor custo existe.") + "</p>" +
+      '<div class="p2-algs" role="group" aria-label="Algoritmo">' +
+      Object.keys(NOME_ALG).map(function (a) {
+        return '<button type="button" class="p2-alg" data-alg="' + a + '" aria-pressed="' + (estado.alg === a) + '">' +
+          '<span class="p2-alg__nome">' + NOME_ALG[a] + '</span><span class="p2-alg__sobre">' + SOBRE_ALG[a] + "</span></button>";
+      }).join("") + "</div>" +
+      htmlResultado() + htmlComparar() +
+      (p.a !== null ? '<button type="button" class="p2-lista__mais" data-limpar-par>limpar origem e destino</button>' : "") +
+      "</section>";
+    return html;
+  }
+  function htmlResultado() {
+    var p = estado.par;
+    if (estado.carregandoRota) return '<p class="p2-detalhe__texto">calculando…</p>';
+    if (estado.rotaErro) return '<p class="p2-detalhe__texto">Não foi possível calcular: ' + esc(estado.rotaErro) + "</p>";
+    var r = resultadoAtual();
+    if (!r) return "";
+    var quem = "<b>" + esc(nomeNo(p.a)) + "</b> até <b>" + esc(nomeNo(p.b)) + "</b>";
+    var html = '<div class="p2-par__res">';
+    if (r.status === "OK") {
+      html += '<p class="p2-detalhe__texto">' + NOME_ALG[r.algoritmo] + " de " + quem + ": " + r.trocas +
+        (r.trocas === 1 ? " troca." : " trocas.") + "</p>" + listaPassos(r.passos) + total("Custo do caminho", r.custo);
+    } else if (r.status === "CICLO_NEGATIVO") {
+      // [IA] Claude – rota inteira ligada aos jogadores escolhidos: origem → ciclo → destino
+      var nomes = function (seq) { return (seq || []).map(function (i) { return "<b>" + esc(nomeNo(i)) + "</b>"; }).join(" → "); };
+      var noCiclo = r.ciclo.indexOf(p.b) >= 0;
+      html += '<p class="p2-detalhe__texto">No grafo completo <b>não existe menor custo</b> de ' + quem + ". " +
+        "No meio do caminho há um <b>ciclo negativo</b>: cada volta nele deixa o custo " + fmt(Math.abs(r.custo_ciclo), 2) +
+        " pontos mais baixo, então sempre dá para baixar mais. O Bellman-Ford detecta isso e mostra o ciclo em vez de um caminho.</p>" +
+        '<ol class="p2-rota">' +
+        '<li><span class="p2-rota__n">1</span><span><span class="p2-rota__rot">Da origem até o ciclo (tracejado)</span>' +
+        (r.acesso && r.acesso.length > 1 ? nomes(r.acesso) : "<b>" + esc(nomeNo(p.a)) + "</b> já está no ciclo") + "</span></li>" +
+        '<li><span class="p2-rota__n">2</span><span><span class="p2-rota__rot">O ciclo (numerado), repetível sem fim</span>' +
+        nomes(r.ciclo) + "</span></li>" +
+        '<li><span class="p2-rota__n">3</span><span><span class="p2-rota__rot">Do ciclo até o destino (tracejado)</span>' +
+        (!r.ciclo_leva_ao_destino ? "o destino não é alcançável a partir do ciclo"
+          : noCiclo ? "<b>" + esc(nomeNo(p.b)) + "</b> está no próprio ciclo" : nomes(r.saida)) + "</span></li></ol>" +
+        listaPassos(r.passos) + total("Custo de uma volta", r.custo_ciclo) +
+        '<button type="button" class="p2-chip p2-par__ir" data-grafo="recorte">Ver o menor custo no recorte sem ciclo →</button>';
+    } else if (r.status === "RECUSA") {
+      html += '<p class="p2-detalhe__texto"><b>Dijkstra recusou</b>: ' + esc(r.mensagem) +
+        " No recorte sem ciclo ele roda com os pesos reponderados (Johnson).</p>";
+    } else {
+      var d = estado.dados, inverso = estado.grafoPar === "recorte" && d.nos[p.a].minutos <= d.nos[p.b].minutos;
+      html += '<p class="p2-detalhe__texto"><b>Sem caminho</b> de ' + quem + ": " + esc(r.mensagem) + "." +
+        (inverso ? " Aqui o destino jogou mais minutos que a origem; troque os dois (⇄) ou use o grafo completo." : "") + "</p>";
+    }
+    return html + "</div>";
+  }
+  function htmlComparar() {
+    var r = estado.rota;
+    if (!r || estado.carregandoRota) return "";
+    return '<div class="p2-rolagem"><table class="p2-comp"><caption>Os 4 algoritmos neste par (' +
+      (r.grafo === "completo" ? "grafo completo" : "recorte sem ciclo") + ")</caption>" +
+      '<thead><tr><th scope="col">Algoritmo</th><th scope="col" class="num">Trocas</th><th scope="col" class="num">Custo</th>' +
+      '<th scope="col">Resultado</th><th scope="col" class="num" title="tempo de execução em milissegundos">ms</th></tr></thead><tbody>' +
+      r.resultados.map(function (x) {
+        var custo = x.status === "OK" ? fmtSinal(x.custo, 2) : x.status === "CICLO_NEGATIVO" ? "−∞" : "–";
+        return '<tr class="' + (x.algoritmo === estado.alg ? "is-atual" : "") + '"><th scope="row"><button type="button" data-alg="' +
+          x.algoritmo + '">' + NOME_ALG[x.algoritmo] + "</button></th>" +
+          '<td class="num">' + (x.trocas === null ? "–" : x.trocas) + '</td><td class="num ' + (x.status === "OK" ? classeSinal(x.custo) : "") +
+          '">' + custo + "</td><td>" + ROTULO_STATUS[x.status] + '</td><td class="num">' + fmt(x.tempo_ms, 2) + "</td></tr>";
+      }).join("") + "</tbody></table></div>";
+  }
+
   function selecionar(i, opc) {
     opc = opc || {};
     estado.selecionado = i;
@@ -393,6 +606,35 @@
   lado.addEventListener("click", function (ev) {
     var fechar = ev.target.closest("#limparSel");
     if (fechar) { selecionar(null, { avisarFechar: true }); tela.focus({ preventScroll: true }); return; }
+    // [IA] Claude – controles do caminho entre dois jogadores
+    var bAlg = ev.target.closest("[data-alg]");
+    if (bAlg) {
+      estado.alg = bAlg.getAttribute("data-alg");
+      renderizarLado();
+      iniciarAnim();
+      marcarPassosAnim();
+      anunciarRota();
+      var foco = lado.querySelector('.p2-alg[data-alg="' + estado.alg + '"]');
+      if (foco) foco.focus({ preventScroll: true });
+      return;
+    }
+    var bGrafo = ev.target.closest("[data-grafo]");
+    if (bGrafo) {
+      var g = bGrafo.getAttribute("data-grafo");
+      if (g !== estado.grafoPar) { estado.grafoPar = g; buscarRota(); }
+      var fg = lado.querySelector('[data-grafo="' + g + '"]');
+      if (fg) fg.focus({ preventScroll: true });
+      return;
+    }
+    if (ev.target.closest("[data-trocar]")) {
+      var p = estado.par;
+      estado.par = { a: p.b, b: p.a };
+      buscarRota();
+      return;
+    }
+    if (ev.target.closest("[data-limpar-par]")) { limparPar(); tela.focus({ preventScroll: true }); return; }
+    var usar = ev.target.closest("[data-usar]");
+    if (usar && estado.selecionado !== null) { usarComo(usar.getAttribute("data-usar"), estado.selecionado); return; }
     var mais = ev.target.closest("[data-mais]");
     if (mais) {
       var l = mais.getAttribute("data-mais");
@@ -579,14 +821,27 @@
     if (!d || !L || paineis[0].hidden) return;
     ctx.clearRect(0, 0, L.w, L.h);
     var h = destaqueAtual();
+    var par = estado.par, temPar = par.a !== null, parAtivo = temPar && par.b !== null;
     var fixo = !h && estado.selecionado !== null; // ficha aberta
-    var foco = h ? null : (estado.selecionado !== null ? estado.selecionado : estado.sobre);
+    var foco = h || (temPar && !fixo) ? null : (estado.selecionado !== null ? estado.selecionado : estado.sobre);
     var temFoco = foco !== null && foco !== undefined;
     var emCaminho = {}, arcosCaminho = [];
     if (h) {
-      var seq = h.ciclo || h.caminho;
-      seq.forEach(function (i) { emCaminho[i] = true; });
-      h.passos.forEach(function (p) { arcosCaminho.push(p); });
+      // [IA] Claude – no caminho entre dois jogadores, a animação revela um arco por vez (estado.anim)
+      var passosVis = h.destino !== undefined ? h.passos.slice(0, estado.anim) : h.passos;
+      if (h.destino !== undefined && !h.ciclo) {
+        emCaminho[h.fonte] = true;
+        passosVis.forEach(function (p) { emCaminho[p.para] = true; });
+        emCaminho[h.destino] = true;
+      } else {
+        (h.ciclo || h.caminho).forEach(function (i) { emCaminho[i] = true; });
+      }
+      if (h.destino !== undefined) { emCaminho[h.fonte] = true; emCaminho[h.destino] = true; }
+      (h.passosAcesso || []).forEach(function (p) { emCaminho[p.de] = true; emCaminho[p.para] = true; });
+      passosVis.forEach(function (p) { arcosCaminho.push(p); });
+    } else if (parAtivo) {
+      emCaminho[par.a] = true;
+      emCaminho[par.b] = true;
     }
     var fonteH = h ? (h.fonte !== undefined ? h.fonte : h.origem) : null;
     // vizinhos do jogador em foco: saiDe[j] = arco foco -> j (j entrou no lugar dele); chegaDe[j] = arco j -> foco
@@ -596,14 +851,16 @@
       d.chegadas[foco].forEach(function (k) { chegaDe[d.arcos[k][0]] = k; });
     }
     var vizinho = function (i) { return temFoco && (i === foco || saiDe[i] !== undefined || chegaDe[i] !== undefined); };
-    var acesoNo = function (i) { return h ? !!emCaminho[i] : !temFoco || vizinho(i); };
+    var destaca = !!h || parAtivo;
+    var acesoNo = function (i) { return destaca ? !!emCaminho[i] : !temFoco || vizinho(i); };
     var grande = L.estreito ? 9 : 13;
     L.raio = L.pos.map(function (p, i) {
       if (fixo && i === foco) return L.estreito ? 21 : 30;
-      if ((fixo && vizinho(i)) || (h && emCaminho[i])) return Math.max(p.r, grande);
+      if (temPar && (i === par.a || i === par.b)) return Math.max(p.r, grande + 3);
+      if ((fixo && vizinho(i)) || (destaca && emCaminho[i])) return Math.max(p.r, grande);
       return p.r;
     });
-    var apagado = !!h || temFoco;
+    var apagado = destaca || temFoco;
     // legenda: com um jogador em foco (clicado ou sob o mouse) explica as duas direções dos arcos
     Array.prototype.forEach.call(document.querySelectorAll("[data-legenda]"), function (el) {
       el.hidden = (el.getAttribute("data-legenda") === "sel") !== temFoco;
@@ -615,7 +872,7 @@
     ordem.forEach(function (k) {
       var a = d.arcos[k], t = Math.min(Math.abs(a[2]) / LIMITE_COR, 1);
       if (temFoco && (a[0] === foco || a[1] === foco)) return; // desenhados depois, por cima
-      var alfa = apagado ? (fixo || h ? 0.035 : 0.06) : 0.09 + 0.33 * t;
+      var alfa = apagado ? (fixo || destaca ? 0.035 : 0.06) : 0.09 + 0.33 * t;
       tracarArco(a[0], a[1], corPeso(a[2], alfa), apagado ? 1 : 0.7 + 1.1 * t, apagado ? 0 : 3.5 + 2 * t);
     });
 
@@ -634,6 +891,14 @@
       });
     }
 
+    // [IA] Claude – trecho da origem até o ciclo negativo (tracejado, sem número)
+    if (h && h.passosAcesso) {
+      h.passosAcesso.forEach(function (p) {
+        tracarArco(p.de, p.para, "rgba(18,15,12,0.9)", 6, 0);
+        tracarArco(p.de, p.para, "rgba(239,230,216,0.85)", 2.2, 10, true);
+      });
+    }
+
     // arcos do destaque, numerados
     var rotulosPasso = [];
     arcosCaminho.forEach(function (p, k) {
@@ -648,7 +913,9 @@
     if (temFoco) ordemNos.sort(function (a, b) { return (a === foco) - (b === foco) || (vizinho(a) - vizinho(b)); });
     ordemNos.forEach(function (i) {
       var no = d.nos[i], anel = corImpacto(no), larg = 2;
-      if (h && i === fonteH) { anel = CESAR; larg = 3.5; }
+      if (temPar && i === par.a) { anel = CESAR; larg = 4.5; }
+      else if (temPar && i === par.b) { anel = LUAR; larg = 4.5; }
+      else if (h && i === fonteH) { anel = CESAR; larg = 3.5; }
       else if (h && emCaminho[i]) { anel = TOCHA; larg = 3; }
       else if (i === foco) { anel = CESAR; larg = fixo ? 3.5 : 3; }
       else if (fixo && i === estado.sobre) { anel = LUAR; larg = 2.5; }
@@ -700,7 +967,7 @@
         return !!escolha;
       });
       if (!escolha) {
-        if (!aceso || (h && !emCaminho[i])) return;
+        if (!aceso || (destaca && !emCaminho[i])) return;
         var dist0 = r + 7, t0 = textos[textos.length - 1];
         escolha = { t: t0, x: p.x + cos * dist0, y: p.y + sin * dist0 + (alinh === "center" ? sin * 6 : 0) };
         escolha.c = caixa(t0, escolha.x, escolha.y, alinh);
@@ -743,6 +1010,12 @@
 
   /* [IA] Claude – dica compacta ao passar o mouse: foto, nome e impacto médio */
   var dicaDe = null;
+  // [IA] Claude – o que o próximo clique faz (o 1º escolhe a origem, o 2º o destino)
+  function acaoClique(i) {
+    var p = estado.par;
+    if (p.a !== null && p.b === null) return i === p.a ? "clique para desmarcar a origem" : "clique para escolher como destino";
+    return "clique para escolher como origem";
+  }
   function mostrarDica(i, ev) {
     if (i === null) { dica.hidden = true; dicaDe = null; return; }
     var d = estado.dados, n = d.nos[i];
@@ -753,7 +1026,7 @@
         '</strong><span class="p2-dica__imp">impacto médio <b class="' + (imp === null ? "" : classeSinal(imp)) + '">' +
         (imp === null ? "–" : fmtSinal(imp, 2)) + "</b> pts/12 min</span></div></div>" +
         '<p class="p2-dica__pe">' + fmt(n.minutos, 0) + " min em quadra · " + fmtInt(n.entradas) + (n.entradas === 1 ? " entrada" : " entradas") + "</p>" +
-        (estado.selecionado === i ? "" : '<p class="p2-dica__acao">clique para abrir a ficha</p>');
+        '<p class="p2-dica__acao">' + acaoClique(i) + "</p>";
     }
     dica.hidden = false;
     var r = area.getBoundingClientRect();
@@ -777,8 +1050,12 @@
   tela.addEventListener("click", function (ev) {
     var i = noEm(ev);
     dicaDe = null;
-    if (i === null) { if (estado.selecionado !== null) selecionar(null); return; }
-    selecionar(estado.selecionado === i ? null : i);
+    if (i === null) {
+      if (estado.selecionado !== null) selecionar(null);
+      else if (estado.par.a !== null) limparPar();
+      return;
+    }
+    escolherNoPar(i);
     mostrarDica(i, ev);
   });
   // teclado: setas percorrem os jogadores na ordem do círculo; Esc fecha a ficha
