@@ -149,6 +149,8 @@ def bfs_x_dfs(dados: dict, destino: Path) -> None:
         ax.set_title(f"fonte {e['fonte']}\n({len(e['BFS']['ordem'])} nós alcançados)", fontsize=9)
         ax.set_xlabel("camada (BFS) / profundidade (DFS)")
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        # [IA] Claude – número de nós é contagem: eixo y só com inteiros (antes mostrava 2,5, 7,5, 12,5…)
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
         _eixos(ax, "y")
     axs[0].set_ylabel("número de nós")
     handles, labels = axs[0].get_legend_handles_labels()
