@@ -196,7 +196,6 @@
 .ev-pilha-l li { display: flex; justify-content: space-between; gap: 10px; padding: 4px 9px; border-bottom: 1px solid var(--ev-linha-2); }
 .ev-pilha-l li:last-child { border-bottom: 0; }
 .ev-pilha-l li.ev-topo { background: var(--ev-faixa); box-shadow: inset 3px 0 0 var(--ev-cesar); }
-.ev-df { font: 500 12px/1 var(--ev-texto); color: var(--ev-tinta-2); }
 .ev-classes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 4px; font-size: 13px; }
 .ev-classes li { display: flex; align-items: center; gap: 8px; }
 .ev-classes b { margin-left: auto; font: 600 13px/1 var(--ev-texto); }

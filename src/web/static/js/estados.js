@@ -1146,13 +1146,13 @@
     var T = this.T, st = this.st, tab = this.tab, self = this;
     var pilha = (st.pilha || []).slice().reverse(); // topo primeiro (como no slide: F / C / B)
     var MAXP = 9, pl = '';
-    pilha.slice(0, MAXP).forEach(function (v, i) { pl += '<li' + (i === 0 ? ' class="ev-topo"' : '') + '>' + self._nome(v) + '<span class="ev-df">' + st.d[v] + '/</span></li>'; });
+    pilha.slice(0, MAXP).forEach(function (v, i) { pl += '<li' + (i === 0 ? ' class="ev-topo"' : '') + '>' + self._nome(v) + '</li>'; }); // [IA] Claude – sem o tempo de descoberta (d/) ao lado: não é requisito
     if (pilha.length > MAXP) pl += '<li class="ev-mais">+' + (pilha.length - MAXP).toLocaleString('pt-BR') + ' abaixo</li>';
     if (!pilha.length) pl = '<li class="ev-vazio">vazia</li>';
     var cont = { arvore: 0, retorno: 0, avanco: 0, cruzamento: 0 }, nO = this._nOlhaAte(st.k);
     for (var i = 0; i < nO; i++) cont[T.res.arcos[i][2]]++;
     var h = '<section class="ev-bloco ev-dfs-topo"><div class="ev-pilha"><h4 class="ev-h4">Pilha de chamadas</h4><ol class="ev-pilha-l" aria-label="Pilha, topo primeiro">' + pl + '</ol>' +
-      '<p class="ev-nota">topo = vértice atual; tempo = ' + (st.tempo === null || st.tempo === undefined ? '–' : num(st.tempo)) + '</p></div>' +
+      '<p class="ev-nota">topo = vértice atual</p></div>' +
       '<ul class="ev-classes">' + ['arvore', 'retorno', 'avanco', 'cruzamento'].map(function (c) {
         return '<li><i class="ev-traco' + (c === 'arvore' ? '' : ' ev-traco--trac') + '" style="--c:' + COR[c] + '"></i>' + LAB.traco.NOME_CLASSE[c] + '<b>' + cont[c].toLocaleString('pt-BR') + '</b></li>';
       }).join('') + '<li class="ev-ciclo-li">' + (cont.retorno ? 'Tem ciclo: sim (há arco de retorno)' : 'Tem ciclo: nenhum arco de retorno até aqui') + '</li></ul>' +
