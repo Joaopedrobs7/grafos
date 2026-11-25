@@ -302,7 +302,7 @@ As credenciais ficam em `.dvc/config.local`, fora do git.
 <!-- [IA] Claude – linha tests/ inclui test_algorithms.py -->
 ```
 data/mapas/          mapas fornecidos m01–m08
-data/mapas_grupo/    g01_fabrica (3 chaves + esteira + bônus) e g02_armadilha (59,6% de armadilhas)
+data/mapas_grupo/    g01_catacumba (3 chaves + esteiras + 2 bônus) e g02_miragem (35,3% de armadilhas)
 src/graphs/io.py     leitura e validação dos mapas
 src/graphs/graph.py  lista de adjacência dirigida
 src/graphs/estados.py  G_pos e G_est (exploração BFS a partir do início, nó virtual ALVO)
@@ -344,8 +344,8 @@ out/avd/             descrição do grafo e tabelas de apoio (out/avd/tabelas/)
 | m06 | 24 | 46 | 10 | ciclo negativo −1 | com `--fonte-consumivel`: custo 10 |
 | m07 | 16 | 38 | — | — | sem solução |
 | m08 | 2919 | 6364 | 392 | 482 (396 passos) | |
-| g01 | 186 | 346 | 42 | 37 (Bellman-Ford) | passa por bônus e esteira |
-| g02 | 94 | 212 | 10 | 10 | 56 de 94 estados são armadilha |
+| g01 | 645 | 1354 | 60 | 52 (Bellman-Ford, 62 passos) | coleta os 2 bônus e passa pelas esteiras |
+| g02 | 136 | 268 | 42 | 44 (Dijkstra, 44 passos) | 48 de 136 estados são armadilha |
 
 ## Status
 

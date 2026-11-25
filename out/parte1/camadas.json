@@ -225,84 +225,104 @@
       }
     ]
   },
-  "g01_fabrica": {
+  "g01_catacumba": {
     "camadas": [
       {
         "chaves": "-",
-        "ordem": 25,
-        "tamanho": 47,
-        "densidade": 0.07833333333333334
+        "ordem": 53,
+        "tamanho": 112,
+        "densidade": 0.040638606676342524
       },
       {
         "chaves": "a",
-        "ordem": 74,
-        "tamanho": 144,
-        "densidade": 0.026656793780081452
+        "ordem": 204,
+        "tamanho": 436,
+        "densidade": 0.01052834927074278
       },
       {
         "chaves": "ab",
-        "ordem": 71,
-        "tamanho": 123,
-        "densidade": 0.024748490945674044
+        "ordem": 300,
+        "tamanho": 624,
+        "densidade": 0.006956521739130435
       },
       {
         "chaves": "abc",
-        "ordem": 16,
-        "tamanho": 26,
-        "densidade": 0.10833333333333334
+        "ordem": 88,
+        "tamanho": 164,
+        "densidade": 0.021421107628004178
       }
     ],
-    "arcos_entre_camadas": 6,
+    "arcos_entre_camadas": 18,
     "casas_que_mudam_camada": [
       {
         "casa": [
           1,
-          4
+          3
         ],
         "simbolo": "a",
-        "arcos": 2
+        "arcos": 6
       },
       {
         "casa": [
           1,
-          13
+          15
         ],
         "simbolo": "b",
-        "arcos": 2
+        "arcos": 8
       },
       {
         "casa": [
-          3,
-          13
+          9,
+          7
         ],
         "simbolo": "c",
-        "arcos": 2
+        "arcos": 4
       }
     ]
   },
-  "g02_armadilha": {
+  "g02_miragem": {
     "camadas": [
       {
         "chaves": "-",
-        "ordem": 11,
-        "tamanho": 19,
-        "densidade": 0.17272727272727273
+        "ordem": 31,
+        "tamanho": 58,
+        "densidade": 0.06236559139784946
       },
       {
         "chaves": "a",
-        "ordem": 83,
-        "tamanho": 191,
-        "densidade": 0.028063473405818395
+        "ordem": 38,
+        "tamanho": 72,
+        "densidade": 0.051209103840682786
+      },
+      {
+        "chaves": "b",
+        "ordem": 27,
+        "tamanho": 52,
+        "densidade": 0.07407407407407407
+      },
+      {
+        "chaves": "ab",
+        "ordem": 40,
+        "tamanho": 83,
+        "densidade": 0.0532051282051282
       }
     ],
-    "arcos_entre_camadas": 2,
+    "arcos_entre_camadas": 3,
     "casas_que_mudam_camada": [
       {
         "casa": [
           1,
-          4
+          1
         ],
         "simbolo": "a",
+        "arcos": 1
+      },
+      {
+        "casa": [
+          1,
+          14
+        ],
+        "simbolo": "b",
         "arcos": 2
       }
     ]
