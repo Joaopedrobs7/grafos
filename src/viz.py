@@ -275,12 +275,23 @@ def figura_camadas_m02(mapa: Mapa, destino: Path) -> None:
         x, y = pos(e)
         cor = CORES_CAMADA[camadas.index(e[2]) % len(CORES_CAMADA)]
         ax.plot(x, y, "o", color=cor, markersize=7, markeredgecolor="black", markeredgewidth=0.4)
+    # [IA] Claude – nome legível de cada camada ("sem chaves", "chave a", "chaves ab") no lugar de "camada -"
+    def nome_camada(k: str) -> str:
+        return "sem chaves" if not k else (f"chave {k}" if len(k) == 1 else f"chaves {k}")
+
+    linhas_usadas = {}
+    for e in ge.estados():
+        linhas_usadas.setdefault(e[2], set()).add(e[0])
     for k, d in deslocamento.items():
-        ax.text(-0.8, d + mapa.linhas / 2, f"camada\n{k or '-'}", ha="right", va="center", fontsize=9)
+        ax.text(-0.8, d + mapa.linhas / 2, nome_camada(k), ha="right", va="center", fontsize=9, fontweight="bold",
+                color=CORES_CAMADA[camadas.index(k) % len(CORES_CAMADA)])
+    # [IA] Claude – o eixo y mostra a linha real do mapa em cada camada (antes mostrava a linha deslocada, ex.: 7 em vez de 1)
+    ticks = sorted((r + deslocamento[k], r) for k, rs in linhas_usadas.items() for r in rs)
+    ax.set_yticks([t for t, _ in ticks], [str(r) for _, r in ticks])
     ax.invert_yaxis()
     ax.set_xlabel("coluna")
-    ax.set_ylabel("linha (deslocada por camada)")
-    handles = [Line2D([0], [0], marker="o", lw=0, color=CORES_CAMADA[i], label=f"estados com chaves {k or '-'}")
+    ax.set_ylabel("linha do mapa (uma faixa por camada)")
+    handles = [Line2D([0], [0], marker="o", lw=0, color=CORES_CAMADA[i], label=f"estados {nome_camada(k)}")
                for i, k in enumerate(camadas)]
     handles += [Line2D([0], [0], color="#999999", label="arco na mesma camada"),
                 Line2D([0], [0], color="#d62728", lw=2, label="arco que muda de camada")]
@@ -337,8 +348,13 @@ def figura_heatmap(mapa: Mapa, destino: Path) -> None:
         m[r, c] = k
     fig, ax = plt.subplots(figsize=(14, 6.5))
     ax.set_facecolor("#3a3a3a")
-    im = ax.imshow(m, cmap="viridis", interpolation="nearest")
-    fig.colorbar(im, ax=ax, label="multiplicidade (nº de estados na casa)", shrink=0.8)
+    # [IA] Claude – multiplicidade é contagem: barra de cores em degraus inteiros (1, 2, …, máx), sem 1,5 / 2,5
+    from matplotlib.colors import BoundaryNorm
+    maximo = max(mult.values())
+    cmap = plt.get_cmap("viridis", maximo)
+    norm = BoundaryNorm([v + 0.5 for v in range(maximo + 1)], cmap.N)
+    im = ax.imshow(m, cmap=cmap, norm=norm, interpolation="nearest")
+    fig.colorbar(im, ax=ax, label="multiplicidade (nº de estados na casa)", shrink=0.8, ticks=range(1, maximo + 1))
     ax.set_xlabel("coluna")
     ax.set_ylabel("linha")
     ax.set_title(f"{mapa.nome}: multiplicidade das casas (máx = {max(mult.values())}; paredes em cinza)")
