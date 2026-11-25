@@ -208,15 +208,19 @@
           </div>
         </div>
 
+        <!-- [IA] Claude – mapa de estados e tabela em abas: cada um usa a coluna inteira (antes dividiam a altura) -->
         <div class="estados" id="estados">
-          <section class="estados__bloco estados__bloco--mapa" aria-labelledby="tMapaEstados">
+          <div class="estados__abas" role="tablist" aria-label="Painel do algoritmo">
+            <button class="estados__aba" type="button" role="tab" id="abaTabela" aria-controls="blocoTabela" aria-selected="true">Tabela</button>
+            <button class="estados__aba" type="button" role="tab" id="abaMapa" aria-controls="blocoMapa" aria-selected="false" tabindex="-1">Mapa de estados</button>
+          </div>
+          <section class="estados__bloco estados__bloco--mapa" id="blocoMapa" role="tabpanel" aria-labelledby="abaMapa" hidden>
             <h3 class="sr-only" id="tMapaEstados">Mapa de estados</h3>
             <div class="estados__mapa" id="estadosMapa">
               <p class="estados__vazio">O mapa de estados aparece aqui quando o mapa carregar.</p>
             </div>
           </section>
-          <div class="estados__divisor" id="estadosDivisor" role="separator" aria-orientation="horizontal" aria-controls="estadosMapa" aria-label="Dividir mapa e tabela" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50" tabindex="0"><span aria-hidden="true"></span></div>
-          <section class="estados__bloco estados__bloco--tabela" aria-labelledby="tTabela">
+          <section class="estados__bloco estados__bloco--tabela" id="blocoTabela" role="tabpanel" aria-labelledby="abaTabela">
             <h3 class="sr-only" id="tTabela">Tabela do algoritmo</h3>
             <div class="estados__tabela" id="estadosTabela">
               <p class="estados__vazio">A tabela do algoritmo aparece aqui, no formato das aulas.</p>

@@ -719,24 +719,28 @@ h2 { font-size: 48px; line-height: 1; }
 .resultado[data-status="RECUSA"]::before, .resultado[data-status="SEM_SOLUCAO"]::before,
 .resultado[data-status="CICLO_NEGATIVO"]::before { background: var(--erro); }
 
-/* mapa de estados + tabela no mesmo chão escuro da página (um degrau acima), com um divisor ajustável entre os dois.
-   O papel quadriculado fica só no manual. */
+/* mapa de estados + tabela no mesmo chão escuro da página (um degrau acima).
+   [IA] Claude – em abas (Tabela | Mapa de estados): o painel escolhido ocupa a altura toda da coluna. */
 .estados {
-  --mapa-pct: 42%;
   flex: 1 1 auto; min-height: 0; min-width: 0;
   display: grid;
-  grid-template-rows: minmax(0, var(--mapa-pct)) 9px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   color: var(--luar);
   background: #1F1B17;
 }
+.estados__abas { display: flex; gap: 4px; padding: 6px 8px 0; box-shadow: inset 0 -1px 0 #3A3028; }
+.estados__aba {
+  padding: 8px 14px 9px; font: 500 14px/1 var(--f-texto); color: var(--luar-fraco);
+  box-shadow: inset 0 -2px 0 transparent; cursor: pointer;
+}
+.estados__aba:hover { color: var(--luar); }
+.estados__aba[aria-selected="true"] { color: var(--luar); box-shadow: inset 0 -2px 0 var(--cesar); }
+.estados__aba:focus-visible { outline: 2px solid var(--cesar); outline-offset: -2px; }
 .estados__bloco { position: relative; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.estados__bloco[hidden] { display: none; }
 .estados__mapa, .estados__tabela { position: relative; flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 .estados__vazio { padding: 16px; font-size: 14px; color: var(--luar-fraco); }
 .estados__mapa > .ev-card, .estados__tabela > .ev-card { flex: 1 1 auto; min-height: 0; }
-.estados__divisor { position: relative; display: grid; place-items: center; cursor: row-resize; touch-action: none; }
-.estados__divisor::before { content: ""; position: absolute; left: 0; right: 0; top: 4px; height: 1px; background: transparent; }
-.estados__divisor:hover::before, .estados__divisor.is-arrastando::before, .estados__divisor:focus-visible::before { background: var(--tocha-escura); }
-.estados__divisor:focus-visible { outline: 2px solid var(--cesar); outline-offset: -2px; }
 /* a tabela grande ocupa o corpo inteiro e só ela rola por dentro */
 .estados__tabela > .ev-card { overflow: hidden; }
 .estados__tabela .ev-corpo { height: 0; }
@@ -1060,8 +1064,7 @@ h2 { font-size: 48px; line-height: 1; }
   .tela3d { flex: none; aspect-ratio: 16 / 10; max-height: 56vh; max-height: 56svh; }
   .info { gap: 14px; }
   .estados { grid-template-rows: auto auto; }
-  .estados__divisor { display: none; }
-  .estados__mapa { height: clamp(300px, 56vw, 480px); flex: none; }
+  .estados__mapa { height: clamp(320px, 70vw, 560px); flex: none; }
   .estados__tabela > .ev-card { overflow: visible; }
   .estados__tabela .ev-corpo { flex: none; height: auto; max-height: clamp(300px, 60vh, 560px); }
   .estados__tabela .ev-corpo > .ev-bloco:only-child > .ev-rola--xy { max-height: clamp(260px, 52vh, 500px); }

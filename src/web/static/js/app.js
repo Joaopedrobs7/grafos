@@ -1590,7 +1590,7 @@
     });
     ligarPop($("btnVis"), $("painelVis"));
     ligarVelocidade();
-    ligarDivisor();
+    ligarAbas();
     ligarDialogoMapa();
     ligarGaveta();
     $("chkTrap").addEventListener("change", function (e) { S.armadilhas = e.target.checked; chamar(playerR, "setTrapsVisible", S.armadilhas); });
@@ -1651,7 +1651,7 @@
   }
 
   /* ================================================================ [IA] Claude – rodada 2: janela, velocidade,
-     mapa de estados + tabela (LAB.EstadosView), métricas, divisor e mapa surpresa */
+     mapa de estados + tabela (LAB.EstadosView), métricas, abas Tabela/Mapa e mapa surpresa */
 
   /* ---------------------------------------------------------------- popovers (seletor de mapa, Visualização) */
   var pops = [];
@@ -1834,47 +1834,30 @@
     estadosChamar("load", m);
   }
 
-  /** Divisor entre mapa e tabela (arrastar ou setas para cima/baixo). */
-  function ligarDivisor() {
-    // [IA] Claude – fix rodada 2: o mapa começa com 38% e a tabela com o resto (a coluna já tem a altura da tela)
-    var box = $("estados"), div = $("estadosDivisor"), pct = 38;
-    try { pct = limitar(+(localStorage.getItem("lab.divisor") || 38), 20, 80); } catch (e) { /* sem storage */ }
-    function aplicar(v, salvar) {
-      pct = Math.round(limitar(v, 20, 80));
-      box.style.setProperty("--mapa-pct", pct + "%");
-      div.setAttribute("aria-valuenow", String(pct));
-      if (salvar) { try { localStorage.setItem("lab.divisor", String(pct)); } catch (e) { /* sem storage */ } }
-    }
-    aplicar(pct);
-    var arrastando = false;
-    div.addEventListener("pointerdown", function (e) {
-      arrastando = true;
-      div.setPointerCapture(e.pointerId);
-      div.classList.add("is-arrastando");
-      e.preventDefault();
-    });
-    div.addEventListener("pointermove", function (e) {
-      if (!arrastando) return;
-      var r = box.getBoundingClientRect();
-      aplicar((e.clientY - r.top) / Math.max(1, r.height) * 100);
-    });
-    function soltar() {
-      if (!arrastando) return;
-      arrastando = false;
-      div.classList.remove("is-arrastando");
-      aplicar(pct, true);
+  /** [IA] Claude – abas Tabela / Mapa de estados (substituem o divisor: cada painel usa a coluna inteira).
+   *  Clique ou setas esquerda/direita; a última aba escolhida fica guardada no navegador. */
+  function ligarAbas() {
+    var abas = [$("abaTabela"), $("abaMapa")];
+    if (!abas[0] || !abas[1]) return;
+    function mostrar(i, foca) {
+      abas.forEach(function (b, j) {
+        var sel = j === i;
+        b.setAttribute("aria-selected", String(sel));
+        b.tabIndex = sel ? 0 : -1;
+        $(b.getAttribute("aria-controls")).hidden = !sel;
+      });
+      if (foca) abas[i].focus();
+      try { localStorage.setItem("lab.painel", i ? "mapa" : "tabela"); } catch (e) { /* sem storage */ }
       estadosChamar("resize");
     }
-    div.addEventListener("pointerup", soltar);
-    div.addEventListener("pointercancel", soltar);
-    div.addEventListener("keydown", function (e) {
-      var d = e.key === "ArrowUp" ? -5 : e.key === "ArrowDown" ? 5 : 0;
-      if (e.key === "Home") { aplicar(20, true); e.preventDefault(); return; }
-      if (e.key === "End") { aplicar(80, true); e.preventDefault(); return; }
-      if (!d) return;
-      e.preventDefault();
-      aplicar(pct + d, true);
-      estadosChamar("resize");
+    var ini = 0;
+    try { ini = localStorage.getItem("lab.painel") === "mapa" ? 1 : 0; } catch (e) { /* sem storage */ }
+    mostrar(ini, false);
+    abas.forEach(function (b, i) {
+      b.addEventListener("click", function () { mostrar(i, false); });
+      b.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); mostrar(1 - i, true); }
+      });
     });
   }
 

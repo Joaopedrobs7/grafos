@@ -149,21 +149,20 @@
     t.innerHTML = '';
     var ct = this.cardTab = el('div', 'ev-card ev-tab');
     // [IA] Claude – rodada 4: sem abas (a tabela segue o algoritmo da barra de cima); a DFS das armadilhas é um link na
-    // linha de baixo, que também guarda o replay (só quando a sincronia está desligada) e o ícone de sincronia.
+    // linha de baixo. A tabela não tem play próprio: anda junto com o player do aluno.
     ct.innerHTML =
       '<p class="sr-only" data-t="abas" aria-live="polite"></p>' +
       '<div class="ev-corpo" data-t="corpo"></div>' +
+      // [IA] Claude – barra para arrastar as passadas (Bellman-Ford) ou iterações (Dijkstra), uma por uma
+      '<label class="ev-passadas" data-t="passbar" hidden><span class="ev-passadas__rot" data-t="passrot">Passada</span>' +
+        '<input type="range" class="ev-passadas__range" data-t="passr" min="0" max="0" step="1" value="0">' +
+        '<span class="ev-passadas__num" data-t="passn"></span></label>' +
       '<div class="ev-pe" data-t="ctl"><p class="ev-frase" data-t="frase" aria-live="polite"></p>' +
         '<button type="button" class="ev-link ev-pe-bt" data-x="detalhes" data-t="btdet" aria-expanded="false">Caminho</button>' +
         '<button type="button" class="ev-link ev-pe-bt" data-x="dfs" data-t="btdfs" aria-pressed="false">DFS</button>' +
-        '<div class="ev-botoes" data-t="botoes" role="group" aria-label="Replay da tabela" hidden>' +
-          '<button type="button" class="ev-ico" data-c="voltar" aria-label="Evento anterior" title="Evento anterior">' + ICO.voltar + '</button>' +
-          '<button type="button" class="ev-ico" data-c="play" aria-label="Reproduzir" title="Reproduzir">' + ICO.play + '</button>' +
-          '<button type="button" class="ev-ico" data-c="avancar" aria-label="Próximo evento" title="Próximo evento">' + ICO.avancar + '</button>' +
-          '<button type="button" class="ev-ico" data-c="fim" aria-label="Ir para o fim" title="Ir para o fim">' + ICO.fim + '</button>' +
-          '<span class="ev-cont" data-t="cont"></span>' +
-        '</div>' +
-        '<button type="button" class="ev-ico ev-sinc" data-c="sinc" data-t="sinc" aria-pressed="true" aria-label="Seguir o aluno" title="Seguir o aluno: a tabela acompanha o passo do player">' + ICO.elo + '</button>' +
+        // [IA] Claude – sem replay próprio: a tabela segue o player do aluno. Só aparece este botão quando a barra de
+        // passadas levou a tabela para outro ponto; ele (ou qualquer passo do player) volta ao passo do aluno.
+        '<button type="button" class="ev-voltar" data-c="sinc" data-t="volta" hidden>Voltar ao passo do aluno</button>' +
       '</div>' +
       '<div class="ev-detalhes" data-t="pe" hidden></div>';
     t.appendChild(ct);
@@ -177,7 +176,12 @@
       var x = e.target.closest('[data-x]');
       if (x) { self._acaoExtra(x.getAttribute('data-x'), x); }
     });
-    this._escuta(ct, 'keydown', function (e) { self._teclado(e); });
+    this._escuta(this.t.passr, 'input', function () {
+      var tab = self.tab; if (!self.T || !tab || !tab.fimColuna) return;
+      var j = Math.max(0, Math.min(tab.colunas, +self.t.passr.value | 0));
+      self._largaSinc(); self._pausa();
+      self._vaiPara(tab.fimColuna[j] || 0); // fim da passada j: a coluna j inteira na tabela
+    });
     this._escuta(this.t.corpo, 'scroll', function () { if (self._virtual) self._virtual(); }, { passive: true, capture: true });
 
     // redimensionamento
@@ -217,7 +221,9 @@
     this.percurso = percurso || null;
     this.idx = Math.max(0, Math.min((percurso ? percurso.length : 1) - 1, idx | 0));
     this._calculaAluno();
-    if (this.sincronizar && !this.tocando) this._sincroniza();
+    // [IA] Claude – qualquer passo do player traz a tabela de volta ao aluno (a barra de passadas só olha à parte)
+    if (!this.sincronizar) { this.sincronizar = true; this.t.volta.hidden = true; }
+    if (!this.tocando) this._sincroniza();
     else this._pede();
     if (this.seguir) this._centraAluno(false, false);
     this._renderTabela();
@@ -338,15 +344,13 @@
         this.anim = { t0: t0, de: de, dur: Math.min(260, 900 / (EVENTOS_POR_S * this.vel)) };
       } else this.anim = null;
     } else this.anim = null;
-    this.t.cont.textContent = k.toLocaleString('pt-BR') + ' de ' + T.eventos.length.toLocaleString('pt-BR');
-    this.t.cont.title = 'Evento ' + this.t.cont.textContent + ' do traço';
     this.t.frase.textContent = T.eventos.length ? LAB.traco.fraseEvento(T, this.st.evento) : 'Este traço não tem eventos.';
     this._renderTabela();
     this._pede();
   };
   P._controle = function (c) {
     var T = this.T;
-    if (c === 'sinc') { this._defineSinc(!this.sincronizar); return; }
+    if (c === 'sinc') { this._defineSinc(true); return; }
     if (!T) return;
     if (c === 'play') { if (this.tocando) this._pausa(); else { this._largaSinc(); if (this.k >= T.eventos.length) this._vaiPara(0); this._toca(); } return; }
     this._largaSinc(); this._pausa();
@@ -384,8 +388,7 @@
   // sincronia com o aluno: ligada, a tabela segue o passo do player e os controles próprios somem
   P._defineSinc = function (sim) {
     this.sincronizar = !!sim;
-    this.t.sinc.setAttribute('aria-pressed', String(this.sincronizar));
-    this.t.botoes.hidden = this.sincronizar;
+    this.t.volta.hidden = this.sincronizar;
     if (this.sincronizar) { this._pausa(); this._sincroniza(); }
   };
   // sincronizar: o replay vai até o evento em que o algoritmo fixou o estado onde o aluno está
@@ -399,14 +402,6 @@
       if (ultimo && T.final.status === 'OK') k = Math.max(k, T.marco[T.alvo] >= 0 ? T.marco[T.alvo] : T.eventos.length);
     } else k = T.eventos.length;
     this._vaiPara(k, forca);
-  };
-  P._teclado = function (e) {
-    if (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== 'range' && e.target.type !== 'checkbox') return;
-    if (e.key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); this._controle('play'); }
-    else if (e.key === 'ArrowRight' && e.target.type !== 'range') { e.preventDefault(); this._controle('avancar'); }
-    else if (e.key === 'ArrowLeft' && e.target.type !== 'range') { e.preventDefault(); this._controle('voltar'); }
-    else if (e.key === 'End') { e.preventDefault(); this._controle('fim'); }
-    else if (e.key === 'Home') { e.preventDefault(); this._controle('inicio'); }
   };
 
   // ------------------------------------------------------------------ aluno
@@ -1068,8 +1063,24 @@
     else if (T.res.recusa) html = this._tabRecusa();
     else html = this._tabColunas();
     corpo.innerHTML = html;
+    this._barraPassadas();
+    this._rodape(); // [IA] Claude – antes do _depois: a altura da tabela já conta com o resultado aberto embaixo
     if (this._depois) { var f = this._depois; this._depois = null; f.call(this); }
-    this._rodape();
+  };
+
+  // [IA] Claude – barra de passadas/iterações embaixo da tabela (só Dijkstra e Bellman-Ford com tabela de colunas)
+  P._barraPassadas = function () {
+    var T = this.T, tab = this.tab, a = T.algoritmo, bar = this.t.passbar;
+    var usa = (a === 'DIJKSTRA' || a === 'BELLMAN_FORD') && !T.res.recusa && tab && tab.colunas > 0;
+    bar.hidden = !usa;
+    if (!usa) return;
+    var j = this.st.coluna || 0, r = this.t.passr, nome = a === 'DIJKSTRA' ? 'Iteração' : 'Passada';
+    var vazia = j > 0 && tab.blocoDaColuna(j).vazio;
+    r.max = String(tab.colunas);
+    if (+r.value !== j) r.value = String(j);
+    this.t.passrot.textContent = nome;
+    this.t.passn.textContent = (j === 0 ? 'início' : j.toLocaleString('pt-BR')) + ' de ' + tab.colunas.toLocaleString('pt-BR') + (vazia ? ' · nada mudou' : '');
+    r.setAttribute('aria-valuetext', nome + ' ' + j + ' de ' + tab.colunas + (vazia ? ', nada mudou' : ''));
   };
 
   P._tabBFS = function () {
@@ -1206,17 +1217,16 @@
   P._tabColunas = function () {
     var T = this.T, st = this.st, tab = this.tab, dij = T.algoritmo === 'DIJKSTRA', self = this;
     // [IA] Claude – rodada 4: quantas colunas cabem inteiras (medido no último desenho; zera ao redimensionar)
-    var col = st.coluna || 0, nLin = tab.linhasAte(col, st.k), JC = Math.min(dij ? 6 : 4, this._jcMax || 99);
-    // colunas = blocos da tabela (Bellman-Ford: passadas seguidas sem mudança numa coluna só, cortada no passo atual)
-    var bAgora = tab.blocoDaColuna(col), b1 = tab.blocos.indexOf(bAgora), b0 = Math.max(0, b1 - JC + 1), cols = [];
-    for (var q = b0; q <= b1; q++) {
-      var bl = tab.blocos[q], fimV = Math.min(bl.fim, col);
-      // cabeçalho = só o número da iteração (o "passo" da tela é o do aluno, no HUD)
-      cols.push({ j: fimV, rot: bl.ini === 0 ? 'início' : bl.vazio && fimV > bl.ini ? bl.ini + '–' + fimV : String(bl.ini),
-        dica: bl.ini === 0 ? 'Antes da primeira ' + (dij ? 'iteração' : 'passada') : (dij ? 'Iteração ' : (bl.vazio && fimV > bl.ini ? 'Passadas ' : 'Passada ')) + (bl.vazio && fimV > bl.ini ? bl.ini + ' a ' + fimV : bl.ini) + (bl.vazio ? ': nada mudou' : ''),
-        vazio: bl.vazio });
+    var col = st.coluna || 0, nLin = tab.linhasAte(col, st.k), JC = Math.min(6, this._jcMax || 99);
+    // [IA] Claude – uma coluna por passada/iteração (antes as passadas sem mudança viravam uma coluna "5–213");
+    // mostra as JC últimas até a atual, e a barra embaixo da tabela leva a qualquer uma
+    var cols = [];
+    for (var j0 = Math.max(0, col - JC + 1); j0 <= col; j0++) {
+      var vz = j0 > 0 && tab.blocoDaColuna(j0).vazio;
+      cols.push({ j: j0, rot: j0 === 0 ? 'início' : String(j0),
+        dica: j0 === 0 ? 'Antes da primeira ' + (dij ? 'iteração' : 'passada') : (dij ? 'Iteração ' : 'Passada ') + j0 + (vz ? ': nada mudou' : ''),
+        vazio: vz });
     }
-    var c0 = b0;
     var foco = st.olhando ? st.olhando[1] : st.atual;
     var cab = '<th scope="col" class="ev-canto" title="' + (dij ? 'Linhas: vértices. Colunas: iterações.' : 'Linhas: vértices. Colunas: passadas.') + '">' + (dij ? 'v \\ it.' : 'v \\ pass.') + '</th>' + cols.map(function (c, i) {
       var cls = (i === cols.length - 1 ? 'ev-col-agora' : '') + (c.vazio ? ' ev-col-vazia' : '');
@@ -1224,7 +1234,7 @@
     }).join('');
     var regra = dij ? 'Cada coluna é uma iteração: o vértice aberto de menor d é fechado (*) e seus arcos são relaxados.'
       : 'Cada coluna é uma passada completa por todos os arcos. O código do grupo faz sempre as |V|−1 = ' + (T.n - 1).toLocaleString('pt-BR') +
-        ' passadas; passadas seguidas em que nada mudou aparecem juntas numa coluna só, e o replay as pula de uma vez.';
+        ' passadas; nas passadas em que nada mudou a coluna aparece listrada. A barra embaixo da tabela leva a qualquer passada.';
     // [IA] Claude – rodada 4: sem legenda visível acima da tabela (a coluna destacada já diz onde estamos); a regra fica para leitores de tela
     var h = '<section class="ev-bloco"><h4 class="sr-only">' + (dij ? 'Tabela do Dijkstra' : 'Tabela do Bellman-Ford') + '</h4><p class="sr-only">' + esc(regra) + '</p>' +
       '<div class="ev-rola ev-rola--xy" data-virtual="1"><table class="ev-t ev-t--dp"><thead><tr>' + cab + '</tr></thead><tbody data-vbody></tbody></table></div></section>';
@@ -1236,7 +1246,7 @@
       var cls = (c.fechaAqui ? 'ev-fecha' : '') + (c.mudou ? ' ev-mudou' : '') + (cc.vazio ? ' ev-vazia' : '') + (j === col && v === foco ? ' ev-foco' : '');
       return '<td class="' + cls + '">' + risc + '(' + num(c.d) + ', ' + (c.p >= 0 ? self._nome(c.p) : '–') + ')</td>';
     };
-    var ROW = 26; // = altura da linha em estados.css (.ev-t--dp tbody tr)
+    var ROW = 30; // = altura da linha em estados.css (.ev-t--dp tbody tr)
     this._depois = function () {
       var box = self.t.corpo.querySelector('[data-virtual]'), tb = box.querySelector('[data-vbody]');
       // altura = cabeçalho + linhas inteiras (quando a coluna tem altura fixa): nem a primeira nem a última linha ficam cortadas
@@ -1323,7 +1333,7 @@
     else if (x === 'detalhes') {
       this.t.pe.hidden = !this.t.pe.hidden;
       b.setAttribute('aria-expanded', String(!this.t.pe.hidden));
-      this._rodape();
+      this._renderTabela(); // [IA] Claude – refaz a altura da tabela (linhas inteiras) com o bloco do resultado aberto/fechado
     }
     else if (x === 'foca') {
       var u = +b.getAttribute('data-u'), L = this.layout; if (!L) return;
