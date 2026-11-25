@@ -19,6 +19,15 @@ GRAFO_TAREFA = {"BFS": "grafo inteiro", "DFS": "grafo inteiro",
                 "Dijkstra": "recorte sem ciclo (Johnson)", "Bellman-Ford": "time-temporada e recorte"}
 
 
+# [IA] Claude – números no padrão brasileiro (vírgula decimal) nos rótulos dos gráficos
+def _br(texto: str) -> str:
+    return texto.replace(".", ",")
+
+
+def _ms(v: float) -> str:
+    return _br(f"{v:.3g} ms") if v < 1000 else f"{v:.0f} ms"
+
+
 def _ler(saida: Path, nome: str):
     return json.loads((saida / nome).read_text(encoding="utf-8"))
 
@@ -48,7 +57,7 @@ def tempo_por_algoritmo(rel: dict, destino: Path) -> None:
         m = statistics.fmean(medias)
         ax.scatter(medias, [i] * len(medias), s=30, color=CORES[alg], alpha=0.4, edgecolors="none")
         ax.scatter([m], [i], s=120, color=CORES[alg], edgecolors="white", linewidths=1.5, zorder=3)
-        ax.annotate(f"{m:.3g} ms", (m, i), xytext=(0, 11), textcoords="offset points", ha="center", color=TINTA, fontsize=9)
+        ax.annotate(_ms(m), (m, i), xytext=(0, 11), textcoords="offset points", ha="center", color=TINTA, fontsize=9)
         rotulos.append(f"{alg}\n{len(tarefas)} tarefas, {GRAFO_TAREFA[alg]}")
     ax.set_xscale("log")
     ax.set_yticks(range(len(CORES)), rotulos)
@@ -60,8 +69,9 @@ def tempo_por_algoritmo(rel: dict, destino: Path) -> None:
                label=f"uma tarefa (média de {rel['repeticoes']} execuções)"),
         Line2D([0], [0], marker="o", lw=0, color=TINTA_2, markersize=10, label="média do algoritmo"),
     ], loc="upper right", fontsize=8, frameon=False)
-    ax.set_title(f"Grafo de rotação: tempo médio por algoritmo nas tarefas das partes 2–4 "
-                 f"({rel['repeticoes']} execuções cada)", fontsize=11)
+    # [IA] Claude – título em duas linhas: em uma linha só ele encostava na borda direita da imagem
+    ax.set_title(f"Grafo de rotação: tempo médio por algoritmo em cada tarefa do benchmark\n"
+                 f"({rel['repeticoes']} execuções por tarefa)", fontsize=11)
     _salvar(plt, fig, destino)
 
 
@@ -69,6 +79,7 @@ def tempo_por_tamanho(rel: dict, destino: Path) -> None:
     plt = _plt()
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(14, 5.2))
     estilos = {"recorte_sem_ciclo": ("-o", "recorte sem ciclo"), "completo": ("--s", "grafo completo")}
+    finais = []  # rótulos do último ponto de cada linha, posicionados depois para não se sobreporem
     for grafo, (marca, nome) in estilos.items():
         for alg in CORES:
             pts = sorted((e["E"], e["media_s"] * 1e3) for e in rel["escalabilidade"]
@@ -77,8 +88,7 @@ def tempo_por_tamanho(rel: dict, destino: Path) -> None:
                 continue
             x, y = zip(*pts)
             a1.plot(x, y, marca, color=CORES[alg], lw=2, markersize=6, label=f"{alg} ({nome})")
-            a1.annotate(f"{y[-1]:.3g} ms" if y[-1] < 1000 else f"{y[-1]:.0f} ms", (x[-1], y[-1]), xytext=(6, 0),
-                        textcoords="offset points", va="center", color=TINTA, fontsize=8)
+            finais.append((x[-1], y[-1]))
             lin = sorted((l["amostra"], l["crescimento_tempo"], l["crescimento_teorico"]) for l in rel["complexidade"]
                          if l["algoritmo"] == alg and l["grafo"] == grafo)
             fr, cresc, _ = zip(*lin)
@@ -87,6 +97,17 @@ def tempo_por_tamanho(rel: dict, destino: Path) -> None:
     for l in rel["complexidade"]:
         if l["grafo"] == "recorte_sem_ciclo":
             teor.setdefault(l["complexidade"], []).append((l["amostra"], l["crescimento_teorico"]))
+    # [IA] Claude – rótulos de linhas que terminam no mesmo |E| e com tempos próximos eram desenhados um em cima do
+    # outro (ex.: 3,61 ms e 2,66 ms); aqui eles são afastados na vertical (escala log) só o suficiente para caber
+    import math
+    distancia = 0.25  # em décadas do eixo y (log10), um pouco mais que a altura do texto
+    for x_fim in sorted({x for x, _ in finais}):
+        ultimo = -math.inf
+        for y_fim in sorted(y for x, y in finais if x == x_fim):
+            alvo = max(math.log10(y_fim), ultimo + distancia)
+            a1.annotate(_ms(y_fim), (x_fim, y_fim), xytext=(x_fim * 1.08, 10 ** alvo), textcoords="data",
+                        va="center", color=TINTA, fontsize=8)
+            ultimo = alvo
     for nome, pts in teor.items():
         fr, c = zip(*sorted(set(pts)))
         a2.plot([f"{f:.0%}" for f in fr], c, ":", color=CINZA, lw=1.5)
@@ -150,7 +171,7 @@ def caminhos_dijkstra(d: dict, destino: Path) -> None:
         vals = [p[chave] for p in pares]
         a1.barh([i + desloc for i in y], vals, height=0.26, color=cor, label=rotulo)
         for i, v in zip(y, vals):
-            a1.annotate(f"{v:.2f}", (v, i + desloc), xytext=(4 if v >= 0 else -4, 0), textcoords="offset points",
+            a1.annotate(_br(f"{v:.2f}"), (v, i + desloc), xytext=(4 if v >= 0 else -4, 0), textcoords="offset points",
                         ha="left" if v >= 0 else "right", va="center", color=TINTA, fontsize=7)
     a1.axvline(0, color=TINTA_2, lw=0.8)
     a1.margins(x=0.15)
