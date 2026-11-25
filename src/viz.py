@@ -307,10 +307,16 @@ def figura_arvore_bfs(mapa: Mapa, destino: Path) -> None:
     for v, (x, y) in pos.items():
         cor = "#fdbf6f" if v == ALVO else CORES_CAMADA[len(v[2]) % len(CORES_CAMADA)]
         ax.plot(x, y, "o", color=cor, markersize=6, markeredgecolor="black", markeredgewidth=0.4)
-        ax.text(x + 0.12, y, rotulo(v), fontsize=5, va="center")
+        # [IA] Claude – legibilidade: rótulo dos estados maior e perto do nó (antes fonte 5, quase ilegível)
+        ax.text(x + 0.04, y, rotulo(v), fontsize=7.5, va="center")
     ax.invert_yaxis()
+    # [IA] Claude – margem à direita para os rótulos do último ramo não encostarem na borda da figura
+    xs = [x for x, _ in pos.values()]
+    ax.set_xlim(min(xs) - 0.1, max(xs) + 0.35)
     ax.set_ylabel("nível BFS (passos desde o início)")
-    ax.set_xlabel("posição no nível")
+    # [IA] Claude – a posição horizontal só separa os ramos; os números do eixo x não têm significado
+    ax.set_xticks([])
+    ax.set_xlabel("ramos da árvore BFS")
     ax.set_title(f"Árvore BFS de estados do {mapa.nome} ({len(niveis)} níveis)")
     from matplotlib.lines import Line2D
     ax.legend(handles=[Line2D([0], [0], marker="o", lw=0, color=CORES_CAMADA[0], label="sem chave"),
