@@ -10,8 +10,11 @@ usada na disciplina de Cloud (EC2 + AMI + Auto Scaling Group + Application Load 
 Veja [`docs/cloud/ARQUITETURA_AWS.md`](docs/cloud/ARQUITETURA_AWS.md).
 
 <!-- [IA] Claude – resumo da Parte 2 -->
-A Parte 2 aplica os mesmos algoritmos a um grafo dirigido e ponderado da **NBA** (2000 a 2025): 776 nós
-(time + temporada), 22.378 arcos e 11.006 pesos negativos, com benchmark, escalabilidade e tabelas de apoio à AVD.
+A Parte 2 aplica os mesmos algoritmos ao **grafo de rotação da NBA** (temporada regular, 2020-21 a 2025-26):
+nó = jogador num time-temporada, arco X → Y = Y entrou em quadra no lugar de X, peso = saldo do time a cada 12 min
+depois da troca − antes. São 3.507 nós, 21.672 arcos e 10.616 pesos negativos em 180 times-temporada, com os casos
+obrigatórios, benchmark, escalabilidade e a página interativa `/parte2`. Uma segunda visão (grafo de partidas, time ×
+temporada, 2000-01 a 2025-26) fica em `out/parte2/partidas/`.
 
 ## Instalação
 
@@ -142,13 +145,14 @@ PORT=8765 python -m src.web.app       # outra porta
 
 <!-- [IA] Claude – menu de projetos e uma rota por parte -->
 `/` abre o menu de projetos (estilo tela de seleção de videogame: ↑/↓ ou W/S escolhem, Enter abre).
-A Parte 1 fica em `/parte1` (`/labirinto` redireciona para lá) e a Parte 2 em `/parte2`, por
-enquanto uma página provisória; os resultados da Parte 2 ficam em `out/parte2/`.
+A Parte 1 fica em `/parte1` (`/labirinto` redireciona para lá) e a Parte 2 em `/parte2` (abas Grafo, Gráficos e
+Algoritmos: grafo de rotação de cada time-temporada, ficha do jogador, caminho entre dois jogadores com o algoritmo
+escolhido, gráficos e benchmark); os resultados da Parte 2 ficam em `out/parte2/`.
 
 ```
-src/web/templates/menu.html         menu de projetos em "/" (Parte 1 liberada, Parte 2 trancada)
+src/web/templates/menu.html         menu de projetos em "/" (Parte 1 e Parte 2)
 src/web/templates/labirinto.html    Parte 1 em "/parte1": navbar, hero, player, manual, CTA e rodapé
-src/web/templates/parte2.html       Parte 2 em "/parte2" (provisória)
+src/web/templates/parte2.html       Parte 2 em "/parte2" (grafo de rotação, gráficos e algoritmos)
 src/web/templates/404.html          página 404 independente
 src/web/static/js/menu.js           cursor do menu, parede de pedra e pill do servidor (menu e Parte 2)
 src/web/static/css/menu.css         estilos do menu e da página da Parte 2
@@ -223,7 +227,7 @@ push na `main` e, no console, **Auto Scaling Group → Atualização da instânc
 | Branch | Papel |
 |---|---|
 | `main` | integração: Parte 1 + Parte 2, com o menu de projetos em `/`. É o que vai para produção. |
-| `entrega2` | desenvolvimento da Parte 2; entra na `main` por pull request |
+| `entrega2` | desenvolvimento da Parte 2 (já integrada na `main` pelo PR #3) |
 
 Versões entregues ficam em **tags** (não em branches): `entrega1` (Parte 1, 17/11/2026) e `ex05-rds`
 (Cloud, Exercício 05). Para ver uma delas: `git checkout entrega1`.
@@ -350,10 +354,12 @@ out/avd/             descrição do grafo e tabelas de apoio (out/avd/tabelas/)
 ## Status
 
 Feito: Parte 1 (código, saídas obrigatórias, figuras, HTML interativo, mapas do grupo, testes), deploy web e, na
-Parte 2, dataset, casos dos 4 algoritmos, benchmark, escalabilidade, gráficos de comparação e tabelas de apoio à AVD.
+Parte 2, dataset versionado com DVC, grafo de rotação, casos dos 4 algoritmos, benchmark, escalabilidade, gráficos
+de comparação, página `/parte2` (grafo, gráficos e algoritmos) e Neo4j local para visualização.
 
-Pendente: análise exploratória e explanatória (AVD), visualizações e notas analíticas, discussão crítica, PDF (manual +
-técnica, prova do m05, discussões, matriz de contribuição) e `docs/DECLARACAO_IA.pdf` assinada.
+Pendente (texto do grupo): pergunta de pesquisa, prova do m05, discussões e notas analíticas, discussão crítica,
+conclusões e matriz de contribuição no PDF (o esqueleto factual está em `docs/RELATORIO_ESQUELETO.docx`), e
+`docs/DECLARACAO_IA.pdf` assinada por todos.
 
 ## Uso de IA
 

@@ -54,12 +54,12 @@
       chaoAlt: '#625950',
       parede: '#4F4842',
       paredeTopo: '#7A7065',
-      lama: '#4C3A28',
-      agua: '#1C3A44',
-      aguaClara: '#6FB7C2',
+      lama: '#6E4622',
+      agua: '#126FAD',
+      aguaClara: '#7FCBF2',
       bonus: '#E9AE3C',
-      fonte: '#FFD24A',
-      esteira: '#3A342D',
+      fonte: '#9A74F0',
+      esteira: '#17181A',
       inicio: '#FF6002',
       saida: '#C9923A'
     }
@@ -82,14 +82,17 @@
     tones: ['#5B534B', '#655C52', '#4F4842', '#6B6157', '#575049', '#605A54']
   };
   const MOSS = { dark: '#34482A', base: '#4F6B35', hi: '#6E8A45' };
-  const MUD = { dark: '#30241A', base: '#4C3A28', mid: '#5C4732', hi: '#735A3E', sheen: '#55636A', wet: '#3A3A36' };
-  const WATER = { deep: '#10232A', base: '#1A3540', mid: '#234955', hi: '#356A75', foam: '#6FA8AE', glint: '#CDEBE6' };
+  const MUD = { dark: '#4A2C14', base: '#6E4622', mid: '#80552C', hi: '#A06C3A', sheen: '#9A8C7A', wet: '#56361A' };
+  const WATER = { deep: '#0B4C7A', base: '#126FAD', mid: '#2A8FD0', hi: '#55B4EA', foam: '#A4DEFF', glint: '#F0FAFF' };
+  // [IA] Claude – esteira de aeroporto: lona preta, trilhos de aço e setas amarelas
   const BELT = {
-    rail0: '#24201D', rail1: '#4B4642', rail2: '#7C756D', rivet: '#A39A8E',
-    belt: '#3A342D', slat: '#221D19', beltHi: '#4A4339', chev: '#F1DDB0', chevLo: '#B99E6C', rune: '#3E2F1E'
+    rail0: '#2A2C30', rail1: '#5C6068', rail2: '#9EA3AC', rivet: '#D2D6DC',
+    belt: '#17181A', slat: '#0B0B0C', beltHi: '#26272A', chev: '#FFD23A', chevLo: '#C99A16', rune: '#050505'
   };
   const GREEN = { dark: '#1A6B4E', mid: '#2A9C6C', base: '#3FCF8E', hi: '#9BF2C8' };
   const GOLD = { dark: '#7A4E14', lo: '#B5791F', base: '#E9AE3C', hi: '#FFE08A', white: '#FFF8DC' };
+  // água mágica violeta da fonte '*' (cor própria: não confunde com o ouro do bônus nem com a água azul)
+  const MANA = { dark: '#3B2470', lo: '#6A44C2', base: '#9A74F0', hi: '#C9B6FF', white: '#F3EEFF' };
   const WOOD = { dark: '#2E1F14', lo: '#4A3220', base: '#62432A', mid: '#6F4D30', hi: '#8A6440', grain: '#553923' };
   const IRON = { dark: '#1C1A19', lo: '#33302E', base: '#4A4643', hi: '#79736B', rivet: '#A8A096' };
 
@@ -475,7 +478,7 @@
     '................'
   ];
 
-  // Fonte '*': bacia de pedra redonda com água dourada mágica e bica no centro.
+  // Fonte '*': bacia de pedra redonda com água mágica violeta e bica no centro.
   const FOUNTAIN_MAP = [
     '................',
     '.....hhhhhh.....',
@@ -700,6 +703,87 @@
     }
   }
 
+  // [IA] Claude – ícones só da legenda "Casas e custos" (no 3D o objeto voxel fica por cima do piso,
+  // então estes desenhos completos não entram no tileTexture).
+  const ICON_PLUS = [
+    '................',
+    '.....kkkkkk.....',
+    '.....kwllmk.....',
+    '.....klmmdk.....',
+    '.....kmmmdk.....',
+    '.kkkkkmmmdkkkkk.',
+    '.kwlllmmmmmmmdk.',
+    '.klmmmmmmmmmmdk.',
+    '.kmmmmmmmmmmmdk.',
+    '.kddddmmmdddddk.',
+    '.kkkkkmmmdkkkkk.',
+    '.....kmmmdk.....',
+    '.....kmmmdk.....',
+    '.....kddddk.....',
+    '.....kkkkkk.....',
+    '................'
+  ];
+  const ICON_DOOR = [
+    '...ffffffffff...',
+    '..fkkkkkkkkkkf..',
+    '.fkhWwhWwhWwWkf.',
+    '.fkiIiiiiiiIikf.',
+    '.fkhWwhWwhWwWkf.',
+    '.fkhWwhSShWwWkf.',
+    '.fkhWwSkkSWwWkf.',
+    '.fkhWpPPPPpwWkf.',
+    '.fkhWpPkkPpwWkf.',
+    '.fkhWppkpppwWkf.',
+    '.fkhWwppppwwWkf.',
+    '.fkiIiiiiiiIikf.',
+    '.fkhWwhWwhWwWkf.',
+    '.fkhWwhWwhWwWkf.',
+    '.fkkkkkkkkkkkkf.',
+    '.ffffffffffffff.'
+  ];
+  const ICON_CHEST = [
+    '................',
+    '................',
+    '..kkkkkkkkkkkk..',
+    '.khhhhhhhhhhhhk.',
+    '.kWWWWWWWWWWWWk.',
+    '.kYYYYYYYYYYYYk.',
+    '.kkkkkkLLkkkkkk.',
+    '.kYWWWYLLYWWWYk.',
+    '.kYWWWYkkYWWWYk.',
+    '.kYwWWYYYYWWwYk.',
+    '.kYWWWWWWWWWWYk.',
+    '.kYYYYYYYYYYYYk.',
+    '.kwwwwwwwwwwwwk.',
+    '..kkkkkkkkkkkk..',
+    '...dddddddddd...',
+    '................'
+  ];
+
+  /** Ícone 16×16 da legenda: bônus (+ verde), porta (madeira com cadeado na cor da chave) e baú. */
+  function legendIcon(ch) {
+    ch = String(ch || '.');
+    const isDoor = KEY_LETTERS.indexOf(ch.toLowerCase()) >= 0 && ch !== ch.toLowerCase();
+    if (ch !== '+' && ch !== 'G' && !isDoor) return tileTexture(ch, 0);
+    return cached('icon:' + ch, () => canvas(TILE, TILE, (ctx) => {
+      if (ch === '+') {
+        paintSlab(ctx, 0, STONE);
+        draw(ctx, ICON_PLUS, { k: '#0E3B26', d: '#1E8A55', m: '#3FCF8E', l: '#8FF0BF', w: '#E6FFF2' });
+      } else if (ch === 'G') {
+        paintSlab(ctx, 2, STONE);
+        draw(ctx, ICON_CHEST, { k: '#1C1612', h: WOOD.hi, W: WOOD.base, w: WOOD.dark, Y: GOLD.base, L: GOLD.hi, d: STONE.pit });
+        px(ctx, 3, 4, GOLD.white);
+      } else {
+        paintSlab(ctx, -1, STONE);
+        const r = keyRamp(ch);
+        draw(ctx, ICON_DOOR, {
+          f: CAP.base, k: '#1C1612', h: WOOD.hi, W: WOOD.base, w: WOOD.dark,
+          i: IRON.base, I: IRON.hi, S: IRON.rivet, p: r.d, P: r.m
+        });
+      }
+    }));
+  }
+
   /** Textura de piso TILE×TILE para um símbolo da grade (ver SPEC §5.1). Cacheada. */
   function tileTexture(ch, variant) {
     variant = Math.abs(Math.round(variant || 0)) % 4;
@@ -715,8 +799,8 @@
         case '*':
           paintSlab(ctx, -1, STONE);
           draw(ctx, FOUNTAIN_MAP, {
-            h: CAP.hi, r: CAP.base, d: CAP.edge, q: GOLD.lo, w: GOLD.base,
-            c: GOLD.hi, y: GOLD.hi, G: GOLD.white
+            h: CAP.hi, r: CAP.base, d: CAP.edge, q: MANA.lo, w: MANA.base,
+            c: MANA.hi, y: MANA.hi, G: MANA.white
           });
           break;
         case 'S': paintStart(ctx); break;
@@ -1229,6 +1313,7 @@
     draw,
     canvas,
     tileTexture,
+    legendIcon,
     wallTexture,
     doorTexture,
     waterFrames,

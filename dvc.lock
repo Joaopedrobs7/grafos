@@ -94,8 +94,8 @@ stages:
       size: 7545
     - path: src/parte2/rotacao_graficos.py
       hash: md5
-      md5: f790bba2faf1fb10a92540d1b8e995d9
-      size: 9986
+      md5: b783c8178c3feaca5038ec8c4ec16317
+      size: 11202
     outs:
     - path: out/parte2/bellman_ford.json
       hash: md5
@@ -115,20 +115,20 @@ stages:
       size: 6189
     - path: out/parte2/graficos/bfs_x_dfs.png
       hash: md5
-      md5: d11d5d28b333efad4dbfd452b82ec690
-      size: 103881
+      md5: 6fc1c3431d440d4613bf32404ee7bbaf
+      size: 102330
     - path: out/parte2/graficos/caminhos_dijkstra.png
       hash: md5
-      md5: 9ca13516831c6ce1012286e19ea4b20e
-      size: 104061
+      md5: 87a44c1e86dce440fd98843168cbdf22
+      size: 104400
     - path: out/parte2/graficos/tempo_por_algoritmo.png
       hash: md5
-      md5: 4230cae2ebf808446bfa2673acd642d7
-      size: 78284
+      md5: e8965072508cc1aecf1cdc82407280e8
+      size: 80563
     - path: out/parte2/graficos/tempo_por_tamanho.png
       hash: md5
-      md5: 1a304236e650270ce0789aec0c45a0f0
-      size: 211715
+      md5: b6a02394b792c0260090020f5499d8e5
+      size: 211017
     - path: out/parte2/parte2_report.json
       hash: md5
       md5: 2ede3d15f03b4040a37d27203831812e

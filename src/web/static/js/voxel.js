@@ -2118,6 +2118,10 @@
       emissiveMap: built.emissiveTexture, emissiveIntensity: 1 }));
     var pile = new THREE.Mesh(built.geometries.pile, mat); pile.castShadow = true; pile.receiveShadow = true;
     pile.rotation.y = 0.35;
+    // [IA] Claude – bônus esgotado: o monte fica no lugar, cinza e transparente (repassar custa 1, não −4)
+    var ghostMat = bag.add(new THREE.MeshLambertMaterial({ map: built.colorTexture, color: 0x8A8A8A,
+      transparent: true, opacity: 0.3, depthWrite: false }));
+    function esgotado(v) { pile.material = v ? ghostMat : mat; pile.castShadow = !v; }
     holder.add(pile);
 
     var haloGeo = bag.add(new THREE.PlaneGeometry(0.8, 0.8));
@@ -2163,8 +2167,10 @@
     function setConsumed(v) {
       anim.finish();
       st.consumed = !!v;
-      holder.visible = !v; halo.visible = !v; leftover.visible = !!v;
-      if (!v) { holder.scale.setScalar(1); holder.position.y = 0; haloMat.opacity = 0.32; }
+      holder.visible = true; halo.visible = !v; leftover.visible = false;
+      holder.scale.setScalar(1); holder.position.y = 0; esgotado(!!v);
+      glints.forEach(function (g) { g.material.opacity = 0; });
+      if (!v) haloMat.opacity = 0.32;
     }
 
     function collect() {
@@ -2181,7 +2187,7 @@
           sparks.burst([0, 0.2, 0], [G.base, G.hi, G.white, G.lo], 30,
             { speed: 1.6, up: 1.4, gravity: 4.5, life: 0.75, size: 0.05, drag: 1.6, floor: 0.02 });
         }
-        if (p >= 1) { st.consumed = true; holder.visible = false; halo.visible = false; leftover.visible = true; }
+        if (p >= 1) { st.consumed = true; halo.visible = false; holder.scale.setScalar(1); holder.position.y = 0; esgotado(true); glints.forEach(function (g) { g.material.opacity = 0; }); }
       }, 'collect');
     }
 
@@ -2194,9 +2200,9 @@
   }
 
   function createFountain() {
-    var G = GOLDC;
+    var G = { lo: '#6A44C2', base: '#9A74F0', hi: '#C9B6FF', white: '#F3EEFF' };   // água mágica violeta (o ouro fica só no bônus)
     var stone = '#6E6458', stoneHi = '#918574', stoneLo = '#4E463E', stoneDk = '#35302A';
-    var water = '#FFD24A', waterDeep = '#D99A28';
+    var water = '#9A74F0', waterDeep = '#6A44C2';
     var bag = new Bag(), anim = new Anim();
     var group = new THREE.Group(); group.name = 'fonte';
 
@@ -2232,7 +2238,7 @@
     var basin = new THREE.Mesh(built.geometries.fonte, mat); basin.castShadow = true; basin.receiveShadow = true;
     group.add(basin);
 
-    // espelho d'água dourada no tanque
+    // espelho d'água violeta no tanque
     var surfGeo = bag.add(new THREE.PlaneGeometry(10 * U, 10 * U));
     var surfMat = bag.add(new THREE.MeshBasicMaterial({ color: waterDeep, toneMapped: false }));
     var surf = new THREE.Mesh(surfGeo, surfMat); surf.rotation.x = -Math.PI / 2; surf.position.y = 2.2 * U; group.add(surf);

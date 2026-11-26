@@ -463,6 +463,26 @@ h2 { font-size: 48px; line-height: 1; }
 }
 .alg:hover { color: var(--luar); background: var(--noite-2); }
 .alg[aria-checked="true"] { background: var(--luar); color: var(--noite); }
+/* interruptor da fonte consumível (variante do Bellman-Ford) */
+.fonte-tg {
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 34px; padding: 0 12px; margin-left: 6px;
+  font: 500 14px/1 var(--f-texto); color: var(--luar-fraco); white-space: nowrap;
+}
+.fonte-tg[hidden] { display: none; }
+.fonte-tg:hover { color: var(--luar); background: var(--noite-2); }
+.fonte-tg__trilho {
+  position: relative; width: 30px; height: 16px; flex: none;
+  background: var(--noite-3); box-shadow: inset 0 0 0 2px var(--noite-3);
+}
+.fonte-tg__bola {
+  position: absolute; top: 2px; left: 2px; width: 12px; height: 12px;
+  background: var(--luar-fraco); transition: transform .15s steps(3);
+}
+.fonte-tg[aria-checked="true"] { color: var(--luar); }
+.fonte-tg[aria-checked="true"] .fonte-tg__trilho { background: var(--cesar); box-shadow: none; }
+.fonte-tg[aria-checked="true"] .fonte-tg__bola { transform: translateX(14px); background: var(--luar); }
+@media (prefers-reduced-motion: reduce) { .fonte-tg__bola { transition: none; } }
 .barra__metricas {
   margin-left: auto; height: 36px; padding: 0 10px; margin-right: -10px;
   font: 500 14px/1 var(--f-texto); color: var(--luar-fraco);

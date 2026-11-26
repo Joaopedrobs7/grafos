@@ -315,7 +315,8 @@
 
   function listaPassos(passos) {
     return '<ol class="p2-passos">' + passos.map(function (p, k) {
-      return '<li class="p2-passo"><span class="p2-passo__n">' + (k + 1) + '</span>' +
+      var dicaPasso = textoTroca(p.de, p.para, p.peso).replace(/<[^>]+>/g, "");
+      return '<li class="p2-passo" title="' + esc(dicaPasso) + '"><span class="p2-passo__n">' + (k + 1) + '</span>' +
         '<span class="p2-passo__arco">' + esc(nomeNo(p.de)) + " <span>→</span> " + esc(nomeNo(p.para)) + "</span>" +
         '<span class="p2-passo__peso ' + classeSinal(p.peso) + '">' + fmtSinal(p.peso, 2) + " pts</span>" +
         '<span class="p2-passo__acum">acumulado ' + fmtSinal(p.acumulado, 2) + " pts</span></li>";
@@ -858,6 +859,10 @@
       });
     }
 
+    // [IA] Claude – arcos do destaque que aceitam hover (dica com a explicação da troca)
+    estado.arcosVis = arcosCaminho.map(function (p, k) { return { de: p.de, para: p.para, peso: p.peso, n: k + 1 }; })
+      .concat(h && h.passosAcesso ? h.passosAcesso.map(function (p) { return { de: p.de, para: p.para, peso: p.peso, n: null }; }) : []);
+
     // arcos do destaque, numerados
     var rotulosPasso = [];
     arcosCaminho.forEach(function (p, k) {
@@ -967,6 +972,46 @@
     return melhor;
   }
 
+  /* [IA] Claude – arco do destaque sob o mouse (distância até a curva quadrática desenhada) */
+  function arcoEm(ev) {
+    var arcos = estado.arcosVis || [];
+    if (!arcos.length || !estado.layout) return null;
+    var r = tela.getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top, melhor = null, md = 8;
+    arcos.forEach(function (a) {
+      var c = curva(a.de, a.para);
+      for (var t = 0; t <= 1.0001; t += 0.04) {
+        var u = 1 - t, px = u * u * c.sx + 2 * u * t * c.cx + t * t * c.ex, py = u * u * c.sy + 2 * u * t * c.cy + t * t * c.ey;
+        var dd = Math.hypot(px - x, py - y);
+        if (dd < md) { md = dd; melhor = a; }
+      }
+    });
+    return melhor;
+  }
+  // texto da troca: arco X → Y = Y entrou no lugar de X; peso = variação do saldo a cada 12 min
+  function textoTroca(de, para, peso) {
+    var d = estado.dados, k = d.chaveArco[de + ">" + para], n = k !== undefined ? d.arcos[k][3] : null;
+    return "<b>" + esc(nomeNo(para)) + "</b> entrou no lugar de <b>" + esc(nomeNo(de)) + "</b>. " +
+      "Depois dessa troca, o saldo do time (pontos feitos menos pontos sofridos) a cada 12 min ficou, em média, " +
+      "<b>" + fmt(Math.abs(peso), 2) + " pontos " + (peso >= 0 ? "melhor" : "pior") + "</b> do que antes" +
+      (n ? " (média de " + vezes(n) + " que essa troca aconteceu na temporada)." : ".");
+  }
+  function mostrarDicaArco(a, ev) {
+    var chave = "a" + a.de + ">" + a.para;
+    if (dicaDe !== chave) {
+      dicaDe = chave;
+      dica.innerHTML = '<div class="p2-dica__cab"><div><strong>' + (a.n ? "Passo " + a.n + ": " : "") + "troca</strong>" +
+        '<span class="p2-dica__imp">peso do arco <b class="' + classeSinal(a.peso) + '">' + fmtSinal(a.peso, 2) +
+        "</b> pts/12 min</span></div></div>" + '<p class="p2-dica__pe">' + textoTroca(a.de, a.para, a.peso) + "</p>";
+    }
+    dica.hidden = false;
+    var r = area.getBoundingClientRect();
+    var x = ev.clientX - r.left + 16, y = ev.clientY - r.top + 16;
+    if (x + dica.offsetWidth > r.width - 8) x = ev.clientX - r.left - dica.offsetWidth - 16;
+    if (y + dica.offsetHeight > r.height - 8) y = ev.clientY - r.top - dica.offsetHeight - 16;
+    dica.style.left = Math.max(8, x) + "px";
+    dica.style.top = Math.max(8, y) + "px";
+  }
+
   /* [IA] Claude – dica compacta ao passar o mouse: foto, nome e impacto médio */
   var dicaDe = null;
   // [IA] Claude – o que o próximo clique faz (o 1º escolhe a origem, o 2º o destino)
@@ -997,9 +1042,9 @@
   }
 
   tela.addEventListener("mousemove", function (ev) {
-    var i = noEm(ev);
+    var i = noEm(ev), arco = i === null ? arcoEm(ev) : null;
     tela.classList.toggle("is-sobre", i !== null);
-    mostrarDica(i, ev);
+    if (arco) mostrarDicaArco(arco, ev); else mostrarDica(i, ev);
     if (i !== estado.sobre) { estado.sobre = i; desenhar(); }
   });
   tela.addEventListener("mouseleave", function () {
@@ -1126,7 +1171,7 @@
       var anos = {};
       d.jogadores.forEach(function (p) { anos[p[2]] = 1; });
       var lista = Object.keys(anos).map(Number).sort();
-      gTemp.innerHTML = '<option value="todas">todas (2020-21 a 2025-26)</option>' + lista.slice().reverse().map(function (a) {
+      gTemp.innerHTML = '<option value="todas">todas (2020 a 2026)</option>' + lista.slice().reverse().map(function (a) {
         return '<option value="' + a + '">' + rotuloTemporada(a) + "</option>";
       }).join("");
       gTemp.value = String(lista[lista.length - 1]);
@@ -1283,7 +1328,7 @@
   function montarBarras() {
     var chave = gTemp.value === "todas" ? "todas" : gTemp.value, lin = graf.dados.times[chave] || [];
     var n = lin.length, maxAbs = Math.max.apply(null, lin.map(function (t) { return Math.abs(t[1]); }).concat([0.1]));
-    var periodo = chave === "todas" ? "de 2020-21 a 2025-26" : "em " + rotuloTemporada(+chave);
+    var periodo = chave === "todas" ? "de 2020 a 2026" : "em " + rotuloTemporada(+chave);
     var topo = lin[lin.length - 1];
     $("gTimesNota").innerHTML = "Média das trocas de cada time " + periodo + ": quanto o saldo muda a cada 12 min depois da troca." +
       (topo ? " Ex.: <b>" + esc(topo[0]) + " " + fmtSinal(topo[1], 2) + "</b>." : "");

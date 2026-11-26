@@ -19,6 +19,7 @@
   var DPR = Math.min(window.devicePixelRatio || 1, 2);
   var MAPA_DESTAQUE = "m03_tres_chaves";
   var MAPA_GRANDE = "m08_grande";
+  var ALG_FONTE = "BELLMAN_FORD_FONTE_CONSUMIVEL";
   var ALG_ORDEM = ["BFS", "DIJKSTRA", "BELLMAN_FORD", "BELLMAN_FORD_FONTE_CONSUMIVEL"];
   var ALG_INFO = {
     BFS: { nome: "BFS", sub: "menos passos", completo: "BFS" },
@@ -763,7 +764,8 @@
   function montarAlgs() {
     var box = $("algs"), mapa = S.mapa;
     box.textContent = "";
-    algsDoMapa(mapa).forEach(function (k) {
+    // [IA] Claude – a fonte consumível é uma variante do Bellman-Ford: vira interruptor (#tgFonte), não aba
+    algsDoMapa(mapa).filter(function (k) { return k !== ALG_FONTE; }).forEach(function (k) {
       var r = mapa.algoritmos[k], inf = infoAlg(k);
       var b = el("button", "alg", inf.nome);
       b.type = "button";
@@ -775,6 +777,9 @@
       b.addEventListener("click", function () { selecionarAlg(k, { anunciar: true }); });
       box.appendChild(b);
     });
+    var tg = $("tgFonte"), v = mapa.algoritmos[ALG_FONTE];
+    tg.hidden = !v;
+    if (v) tg.setAttribute("aria-label", "Fonte consumível no Bellman-Ford. " + resumoAlg(v));
     marcarAlg();
   }
   function resumoAlg(r) {
@@ -785,10 +790,11 @@
   }
   function marcarAlg() {
     $$(".alg").forEach(function (b) {
-      var sel = b.dataset.alg === S.alg;
+      var sel = b.dataset.alg === S.alg || (b.dataset.alg === "BELLMAN_FORD" && S.alg === ALG_FONTE);
       b.setAttribute("aria-checked", sel ? "true" : "false");
       b.tabIndex = sel ? 0 : -1;
     });
+    $("tgFonte").setAttribute("aria-checked", S.alg === ALG_FONTE ? "true" : "false");
     $$(".algo").forEach(function (a) {
       var k = a.getAttribute("data-alg");
       a.classList.toggle("is-atual", S.alg === k || (k === "BELLMAN_FORD" && S.alg === "BELLMAN_FORD_FONTE_CONSUMIVEL"));
@@ -1329,7 +1335,7 @@
     CATALOGO.forEach(function (c) {
       var li = el("li", "casa");
       li.dataset.simbolo = c[0];
-      var tex = pix("tileTexture", c[0], 0);
+      var tex = pix("legendIcon", c[0]) || pix("tileTexture", c[0], 0);
       var cv;
       if (tex) { cv = canvasNovo(tex.width, tex.height); cv.getContext("2d").drawImage(tex, 0, 0); }
       else { cv = canvasNovo(16, 16); var ctx = cv.getContext("2d"); ctx.fillStyle = PALETA_RESERVA.tiles.chao; ctx.fillRect(0, 0, 16, 16); }
@@ -1607,6 +1613,10 @@
     });
     $("minimapa").addEventListener("click", cliqueMinimapa);
     radiogroupTeclado($("algs"), ".alg", function (b) { selecionarAlg(b.dataset.alg, { anunciar: true }); });
+    // ligado: Bellman-Ford com a fonte consumível; desligado: Bellman-Ford normal (de qualquer aba, liga já no Bellman-Ford)
+    $("tgFonte").addEventListener("click", function () {
+      selecionarAlg(S.alg === ALG_FONTE ? "BELLMAN_FORD" : ALG_FONTE, { anunciar: true });
+    });
     $$("[data-ver]").forEach(function (b) {
       b.addEventListener("click", function () {
         var k = b.getAttribute("data-ver");
