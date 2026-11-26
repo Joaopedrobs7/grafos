@@ -117,18 +117,6 @@
 
 /* coluna de destaque */
 .p2-lado { display: grid; gap: 12px; }
-.p2-modos { display: grid; gap: 8px; }
-.p2-modo {
-  display: grid; gap: 3px; justify-items: start;
-  padding: 10px 14px 11px;
-  text-align: left;
-  background: var(--noite-2);
-  box-shadow: inset 0 0 0 2px var(--noite-3);
-}
-.p2-modo:hover { box-shadow: inset 0 0 0 2px var(--noite-4); }
-.p2-modo[aria-pressed="true"] { background: var(--noite-3); box-shadow: inset 0 0 0 2px var(--cesar); }
-.p2-modo__nome { font: 600 16px/1.1 var(--f-pixel); }
-.p2-modo__alg { font-size: 13px; color: var(--luar-fraco); }
 
 .p2-detalhe { display: grid; gap: 10px; font-size: 14px; }
 .p2-detalhe:empty { display: none; }
@@ -262,8 +250,6 @@
 
 /* [IA] Claude – ficha do jogador, fotos (CDN da NBA, com iniciais por baixo), dica com foto, legenda das direções */
 .p2-quadro canvas:focus-visible { outline: 2px solid var(--cesar); outline-offset: -2px; }
-.p2-lado.tem-ficha .p2-lado__titulo { margin-top: 10px; }
-.p2-detalhe--modo:empty { display: none; }
 
 /* foto: círculo com as iniciais; a imagem cobre as iniciais quando carrega */
 .p2-foto {

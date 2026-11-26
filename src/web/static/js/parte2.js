@@ -11,7 +11,7 @@
   var LIMITE_COR = 20; // |peso| a partir do qual a cor fica saturada (a legenda mostra −20 e +20)
 
   var estado = {
-    indice: null, dados: null, modo: null, selecionado: null, sobre: null,
+    indice: null, dados: null, selecionado: null, sobre: null,
     ordem: { chave: "minutos", desc: true }, layout: null, bench: null,
     // [IA] Claude – caminho entre dois jogadores: a = origem, b = destino (índices), resultado da API e algoritmo exibido
     par: { a: null, b: null }, alg: "BFS", grafoPar: "completo", rota: null, rotaErro: null, anim: Infinity
@@ -179,9 +179,6 @@
     limparPar(true);
     $("contagem").innerHTML = "<b>" + d.nos.length + "</b> jogadores, <b>" + fmtInt(d.arcos.length) +
       "</b> trocas diferentes (arcos), <b>" + fmtInt(d.arcos_negativos) + "</b> delas com peso negativo";
-    var btnDij = document.querySelector('[data-modo="dijkstra"]');
-    btnDij.hidden = !d.dijkstra;
-    if (estado.modo === "dijkstra" && !d.dijkstra) estado.modo = null;
     $("tela").setAttribute("aria-label", "Grafo de rotação de " + d.time + " na temporada " + rotuloTemporada(d.temporada) +
       ": " + d.nos.length + " jogadores e " + d.arcos.length + " arcos. Os mesmos dados estão na tabela de jogadores.");
     renderizarLado();
@@ -236,18 +233,7 @@
   }
   function vezes(n) { return fmtInt(n) + (n === 1 ? " vez" : " vezes"); }
 
-  /* ------------------------------------------------------------ destaques */
-  var botoesModo = Array.prototype.slice.call(document.querySelectorAll("[data-modo]"));
-  botoesModo.forEach(function (b) {
-    b.addEventListener("click", function () {
-      var m = b.getAttribute("data-modo");
-      estado.modo = estado.modo === m ? null : m;
-      if (estado.modo) { estado.selecionado = null; estado.realce = null; limparPar(true); marcarLinha(); }
-      renderizarLado();
-      desenhar();
-    });
-  });
-
+  /* [IA] Claude – sem os "Exemplos prontos": o destaque do grafo é só o caminho entre os dois jogadores escolhidos */
   function destaqueAtual() {
     var d = estado.dados;
     if (!d) return null;
@@ -256,10 +242,6 @@
       return { fonte: estado.par.a, destino: estado.par.b, caminho: r.caminho, ciclo: r.ciclo, passos: r.passos,
                passosAcesso: (r.passos_acesso || []).concat(r.passos_saida || []) };
     }
-    if (!estado.modo) return null;
-    if (estado.modo === "ciclo") return d.bellman_ford && d.bellman_ford.ciclo ? d.bellman_ford : null;
-    if (estado.modo === "sem_ciclo") return d.sem_ciclo || null;
-    if (estado.modo === "dijkstra") return d.dijkstra || null;
     return null;
   }
 
@@ -268,12 +250,8 @@
   /* [IA] Claude – coluna ao lado do grafo: ficha do jogador escolhido (ou o convite para escolher) em cima,
      botões de destaque e o detalhe do destaque embaixo; a legenda do grafo acompanha a seleção */
   function renderizarLado() {
-    botoesModo.forEach(function (b) {
-      b.setAttribute("aria-pressed", b.getAttribute("data-modo") === estado.modo ? "true" : "false");
-    });
     var d = estado.dados, sel = estado.selecionado;
-    $("detalhe").innerHTML = !d ? "" : sel !== null ? htmlFicha(sel) : estado.modo ? "" : htmlPar();
-    $("detalheModo").innerHTML = d ? htmlModo() : "";
+    $("detalhe").innerHTML = !d ? "" : sel !== null ? htmlFicha(sel) : htmlPar();
     $("lado").classList.toggle("tem-ficha", sel !== null);
   }
 
@@ -333,32 +311,6 @@
       '<h4 class="p2-lista__titulo" id="lista_' + lado + '">' + traco + "<span>" + titulo + "</span>" +
       '<span class="p2-lista__n">' + ks.length + "</span></h4>" +
       '<p class="p2-lista__sub">' + sub + "</p>" + corpo + "</section>";
-  }
-
-  function htmlModo() {
-    var html = "", h = destaqueAtual();
-    if (estado.modo === "ciclo") {
-      if (h) {
-        html += '<p class="p2-detalhe__texto">Ciclo negativo devolvido pelo Bellman-Ford do grupo a partir de <b>' +
-          esc(nomeNo(h.fonte)) + "</b> (jogador com mais minutos), no subgrafo do time-temporada. " +
-          (h.passos.length) + " arcos.</p>";
-        html += listaPassos(h.passos) + total("Custo do ciclo", h.custo);
-      } else {
-        html += '<p class="p2-detalhe__texto">O Bellman-Ford não encontrou ciclo negativo a partir da fonte neste time-temporada.</p>';
-      }
-    } else if (estado.modo === "sem_ciclo" && h) {
-      html += '<p class="p2-detalhe__texto">Recorte só com arcos de quem tem mais minutos para quem tem menos (' +
-        fmtInt(h.arcos_recorte) + " arcos, sem ciclo). Caminho do Bellman-Ford de <b>" + esc(nomeNo(h.fonte)) +
-        "</b> até o nó de menor distância, <b>" + esc(nomeNo(h.destino)) + "</b>.</p>";
-      html += listaPassos(h.passos) + total("Custo do caminho", h.custo);
-    } else if (estado.modo === "dijkstra" && h) {
-      html += '<p class="p2-detalhe__texto">Dijkstra do grupo no recorte sem ciclo com pesos reponderados (Johnson): ' +
-        "custo transformado " + fmt(h.custo_transformado, 2) + ", reconvertido " + fmt(h.custo_reconvertido, 2) +
-        ", Bellman-Ford " + fmt(h.custo_bellman_ford, 2) + ". Caminho igual ao do Bellman-Ford: " +
-        (h.caminho_igual ? "sim" : "não") + ".</p>";
-      html += listaPassos(h.passos) + total("Custo original", h.custo_reconvertido);
-    }
-    return html;
   }
 
   function listaPassos(passos) {
@@ -449,7 +401,6 @@
   }
   function escolherNoPar(i) {
     var p = estado.par;
-    estado.modo = null;
     if (estado.selecionado !== null) { estado.selecionado = null; marcarLinha(); }
     if (p.a !== null && p.b === null && i === p.a) { limparPar(); return; }
     if (p.a === null || p.b !== null) {
@@ -473,7 +424,6 @@
     var outro = lado === "a" ? "b" : "a";
     if (p[outro] === i) p[outro] = null;
     estado.selecionado = null;
-    estado.modo = null;
     marcarLinha();
     buscarRota();
   }
@@ -593,7 +543,6 @@
     estado.selecionado = i;
     estado.realce = null;
     estado.verTodos = { sai: false, chega: false };
-    if (i !== null && estado.modo) estado.modo = null;
     renderizarLado();
     marcarLinha();
     desenhar();
