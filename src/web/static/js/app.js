@@ -2055,7 +2055,7 @@
         .catch(function (err) {
           mostrarErro(err && err.message && !/Failed to fetch|NetworkError/i.test(err.message) ? err.message : "Sem conexão com o servidor. Tente de novo.");
         })
-        .then(function () { btn.disabled = false; btn.textContent = "Resolver no servidor"; });
+        .then(function () { btn.disabled = false; btn.textContent = "Resolver"; });
     });
   }
 

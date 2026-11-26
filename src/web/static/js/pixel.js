@@ -57,7 +57,7 @@
       lama: '#6E4622',
       agua: '#126FAD',
       aguaClara: '#7FCBF2',
-      bonus: '#E9AE3C',
+      bonus: '#3FCF8E',
       fonte: '#9A74F0',
       esteira: '#17181A',
       inicio: '#FF6002',
@@ -760,6 +760,41 @@
     '................'
   ];
 
+  const ICON_LOCK = [
+    '................',
+    '.....kkkkkk.....',
+    '....kSSSSSSk....',
+    '....kSkkkkSk....',
+    '...kSk....kSk...',
+    '...kSk....kSk...',
+    '..kkkkkkkkkkkk..',
+    '..kwllllllllmk..',
+    '..klmmkkkkmmdk..',
+    '..klmmkkkkmmdk..',
+    '..klmmmkkmmmdk..',
+    '..klmmmkkmmmdk..',
+    '..kddddddddddk..',
+    '..kkkkkkkkkkkk..',
+    '................',
+    '................'
+  ];
+
+  /** Cadeado 16×16 com fundo transparente, na cor da chave (marca flutuante sobre a porta no 3D). */
+  function padlockIcon(letter) {
+    const L = String(letter || 'A').toLowerCase();
+    return cached('padlock:' + L, () => canvas(TILE, TILE, (ctx) => {
+      const r = keyRamp(L);
+      draw(ctx, ICON_LOCK, { k: '#1C1612', S: IRON.rivet, w: r.w, l: r.l, m: r.m, d: r.d });
+    }));
+  }
+  /** Baú 16×16 com fundo transparente (marca flutuante sobre a saída no 3D). */
+  function chestIcon() {
+    return cached('chestIcon', () => canvas(TILE, TILE, (ctx) => {
+      draw(ctx, ICON_CHEST, { k: '#1C1612', h: WOOD.hi, W: WOOD.base, w: WOOD.dark, Y: GOLD.base, L: GOLD.hi });
+      px(ctx, 3, 4, GOLD.white);
+    }));
+  }
+
   /** Ícone 16×16 da legenda: bônus (+ verde), porta (madeira com cadeado na cor da chave) e baú. */
   function legendIcon(ch) {
     ch = String(ch || '.');
@@ -1314,6 +1349,8 @@
     canvas,
     tileTexture,
     legendIcon,
+    padlockIcon,
+    chestIcon,
     wallTexture,
     doorTexture,
     waterFrames,

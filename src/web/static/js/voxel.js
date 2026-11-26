@@ -1951,6 +1951,16 @@
       var g = new THREE.Sprite(lockGlowMat); g.scale.set(0.42, 0.42, 1); g.position.set(0, 0, 0.05); l.group.add(g); return g;
     });
 
+    // [IA] Claude – cadeado flutuante (sempre de frente para a câmera): a porta fica legível vista de cima
+    var marca = null, MARCA_Y = H + 0.38;
+    try {
+      if (lib && typeof lib.padlockIcon === 'function') {
+        var marcaMat = bag.add(new THREE.SpriteMaterial({ map: bag.add(pixelTexture(lib.padlockIcon(letter))), transparent: true, toneMapped: false }));
+        marca = new THREE.Sprite(marcaMat); marca.scale.set(0.5, 0.5, 1); marca.position.set(0, MARCA_Y, 0); marca.renderOrder = 5;
+        group.add(marca);
+      }
+    } catch (e) { marca = null; }
+
     var dust = bag.add(new Particles(inner, { max: 90 }));
     var api = { group: group, isOpen: false };
     var pushSide = 1;   // +1: folhas abrem para −z (aluno veio do lado +z)
@@ -1960,6 +1970,7 @@
     }
     function applyClosed() {
       setLeaves(0);
+      if (marca) marca.visible = true;
       locks.forEach(function (l) {
         l.group.visible = true;
         l.group.position.set(0, LOCK_Y, l.side * (T / 2 + 1.5 * U));
@@ -1970,6 +1981,7 @@
     }
     function applyOpen() {
       setLeaves(OPEN);
+      if (marca) marca.visible = false;
       locks.forEach(function (l) { l.group.visible = false; });
     }
 
@@ -1994,6 +2006,7 @@
       anim.finish();
       if (from && from.isVector3) { group.updateWorldMatrix(true, true); pushSide = sideOf(from); }
       applyClosed();
+      if (marca) marca.visible = false;
       var dust1 = false, dust2 = false;
       return anim.play(0.78, function (p) {
         var shake = p < 0.24 ? Math.sin(p * 90) * 0.2 * (1 - seg(p, 0.1, 0.24)) : 0;
@@ -2046,6 +2059,7 @@
       if (!api.isOpen && !anim.busy()) {
         lockMat.emissiveIntensity = 0.28 + 0.14 * Math.sin(t0 * 3);
         lockGlowMat.opacity = 0.28 + 0.1 * Math.sin(t0 * 3);
+        if (marca) marca.position.y = MARCA_Y + 0.04 * Math.sin(t0 * 2);
       }
     };
     api.dispose = function () { anim.finish(); detach(group); bag.dispose(); };
@@ -2095,29 +2109,23 @@
     var model = new VoxelModel();
     model.part('pile', [0, 0, 0]);
     var cs = coinSkin();
-    // base do monte: moedas espalhadas (camada de baixo)
-    var coins = [
-      // [x, z, h(empilhadas)]
-      [-6, -3, 1], [1, -6, 1], [5, -2, 1], [-2, 4, 1], [-7, 2, 1], [3, 5, 1], [6, 3, 1], [-4, 5, 1],
-      [-3, -2, 4], [1, -2, 6], [4, 1, 3], [-1, 2, 3], [-5, 0, 2], [2, -5, 2], [-2, -5, 2]
-    ];
-    coins.forEach(function (c) {
-      for (var k = 0; k < c[2]; k++) {
-        var j = (k % 2) ? 0.3 : -0.2;
-        model.box('pile', c[0] - 2 + j, k, c[1] - 2 - j * 0.5, 4, 1, 4, cs);
-      }
-    });
-    // rubi no topo
-    model.box('pile', -1.5, 6, -2.5, 2.5, 2.5, 2.5, {
-      all: function (p, w, h) { p.fill('#B3243A'); p.px(0, 0, '#FF6A7E'); p.glow(0, 0, w, h, '#4A0812'); },
-      py: function (p) { p.fill('#E0445C'); p.px(0, 0, '#FFC2CC'); p.glow(0, 0, 2, 2, '#601020'); }
-    });
+    // [IA] Claude – bônus = "+" verde grosso, deitado e flutuando (igual ao ícone da legenda; legível de cima)
+    var PV = { k: '#0E3B26', d: '#1E8A55', m: '#3FCF8E', l: '#8FF0BF', w: '#E6FFF2' };
+    function plusTop(p, w, h) {
+      p.fill(PV.m); p.rect(0, 0, w, 1, PV.l); p.rect(0, 0, 1, h, PV.l);
+      p.rect(0, h - 1, w, 1, PV.d); p.rect(w - 1, 0, 1, h, PV.d); p.px(1, 1, PV.w);
+      p.glow(0, 0, w, h, darken(PV.m, 0.55));
+    }
+    function plusSide(p, w, h) { p.fill(PV.d); p.rect(0, 0, w, 1, PV.m); p.rect(0, h - 1, w, 1, PV.k); p.glow(0, 0, w, h, darken(PV.d, 0.6)); }
+    var plusSkin = { py: plusTop, ny: PV.k, all: plusSide };
+    model.box('pile', -7, 4, -2, 14, 3, 4, plusSkin);
+    model.box('pile', -2, 4, -7, 4, 3, 5, plusSkin);
+    model.box('pile', -2, 4, 2, 4, 3, 5, plusSkin);
     var built = model.build();
     bag.add(built.colorTexture); bag.add(built.emissiveTexture); bag.add(built.geometries.pile);
     var mat = bag.add(new THREE.MeshLambertMaterial({ map: built.colorTexture, emissive: 0xffffff,
       emissiveMap: built.emissiveTexture, emissiveIntensity: 1 }));
     var pile = new THREE.Mesh(built.geometries.pile, mat); pile.castShadow = true; pile.receiveShadow = true;
-    pile.rotation.y = 0.35;
     // [IA] Claude – bônus esgotado: o monte fica no lugar, cinza e transparente (repassar custa 1, não −4)
     var ghostMat = bag.add(new THREE.MeshLambertMaterial({ map: built.colorTexture, color: 0x8A8A8A,
       transparent: true, opacity: 0.3, depthWrite: false }));
@@ -2125,7 +2133,7 @@
     holder.add(pile);
 
     var haloGeo = bag.add(new THREE.PlaneGeometry(0.8, 0.8));
-    var haloMat = bag.add(new THREE.MeshBasicMaterial({ map: glowTexture(), color: G.base, transparent: true,
+    var haloMat = bag.add(new THREE.MeshBasicMaterial({ map: glowTexture(), color: PV.m, transparent: true,
       blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.32, toneMapped: false }));
     var halo = new THREE.Mesh(haloGeo, haloMat); halo.rotation.x = -Math.PI / 2; halo.position.y = 0.012; group.add(halo);
 
@@ -2154,6 +2162,7 @@
       if (!st.consumed && !anim.busy()) {
         mat.emissiveIntensity = 0.9 + Math.sin(st.t * 3.2) * 0.2;
         haloMat.opacity = 0.26 + Math.sin(st.t * 3.2) * 0.06;
+        holder.position.y = 0.03 * Math.sin(st.t * 2);
         glints.forEach(function (g, i) {
           var k = (st.t * 0.7 + i * 0.5) % 1.6;                 // pisca ~0,25 s a cada 1,6 s
           var spot = glintSpots[Math.floor(st.t * 0.7 / 1.6 + i * 3) % glintSpots.length];
@@ -2184,7 +2193,7 @@
         haloMat.opacity = 0.32 * (1 - p);
         if (!burst && p >= 0.25) {
           burst = true;
-          sparks.burst([0, 0.2, 0], [G.base, G.hi, G.white, G.lo], 30,
+          sparks.burst([0, 0.2, 0], [PV.m, PV.l, PV.w, PV.d], 30,
             { speed: 1.6, up: 1.4, gravity: 4.5, life: 0.75, size: 0.05, drag: 1.6, floor: 0.02 });
         }
         if (p >= 1) { st.consumed = true; halo.visible = false; holder.scale.setScalar(1); holder.position.y = 0; esgotado(true); glints.forEach(function (g) { g.material.opacity = 0; }); }
@@ -2466,6 +2475,7 @@
       anim.update(dt);
       st.hl = approach(st.hl, st.highlight ? 1 : 0, dt * 2);
       st.energy = Math.max(0, st.energy - dt * 0.4);
+      if (marcaB && marcaB.visible) marcaB.position.y = MARCAB_Y + 0.05 * Math.sin(st.t * 2);
       if (!anim.busy()) {
         if (st.open) {
           // aberto: brilho contínuo saindo de dentro + moedinhas faiscando
@@ -2500,9 +2510,21 @@
       sparks.update(dt);
     }
 
+    // [IA] Claude – ícone de baú flutuando sobre a saída (legível vista de cima); some quando o baú abre
+    var marcaB = null, MARCAB_Y = (y0 + BH + LH) * U + 0.42;
+    try {
+      var libB = pixelLib();
+      if (libB && typeof libB.chestIcon === 'function') {
+        var marcaBMat = bag.add(new THREE.SpriteMaterial({ map: bag.add(pixelTexture(libB.chestIcon())), transparent: true, toneMapped: false }));
+        marcaB = new THREE.Sprite(marcaBMat); marcaB.scale.set(0.6, 0.6, 1); marcaB.position.set(0, MARCAB_Y, 0); marcaB.renderOrder = 5;
+        group.add(marcaB);
+      }
+    } catch (e) { marcaB = null; }
+
     api.open = function () {
       if (st.open) return Promise.resolve();
       anim.finish();
+      if (marcaB) marcaB.visible = false;
       var burst1 = false, burst2 = false;
       beam.visible = true; burstS.visible = true;
       return anim.play(1.05, function (p) {
@@ -2543,6 +2565,7 @@
       sparks.clear();
       st.open = !!open; st.energy = 0;
       setLid(open ? OPEN_ANGLE : 0);
+      if (marcaB) marcaB.visible = !open;
       chestG.rotation.z = 0; chestG.position.y = 0;
       beam.visible = !!open; burstS.visible = false; burstMat.opacity = 0;
       beam.scale.set(1, 1, 1);
